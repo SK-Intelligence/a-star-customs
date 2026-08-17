@@ -37,6 +37,9 @@ def test_webhook_durably_updates_order_and_deduplicates(
                 "object": {
                     "id": "cs_test_paid",
                     "payment_status": "paid",
+                    "amount_total": 4999,
+                    "currency": "gbp",
+                    "mode": "payment",
                     "metadata": {"order_reference": "asc_test_order"},
                 }
             },
@@ -85,6 +88,9 @@ def test_webhook_durably_updates_order_and_deduplicates(
         stripe_session_id="cs_test_paid",
         order_reference="asc_test_order",
         new_status="unpaid",
+        amount_total=4999,
+        currency="gbp",
+        mode="payment",
     )
     with sqlite3.connect(database_path) as connection:
         final_status = connection.execute(
@@ -92,3 +98,154 @@ def test_webhook_durably_updates_order_and_deduplicates(
             ("cs_test_paid",),
         ).fetchone()
     assert final_status == ("paid",)
+
+
+def test_completed_unpaid_stays_pending_until_async_failure(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    database_path = tmp_path / "orders.db"
+    create_pending_order(
+        database_path,
+        order_reference="asc_delayed_order",
+        cart_reference="cart_delayed",
+        amount_total=4999,
+    )
+    current_event = {
+        "id": "evt_delayed_completed",
+        "type": "checkout.session.completed",
+        "data": {
+            "object": {
+                "id": "cs_test_delayed",
+                "payment_status": "unpaid",
+                "amount_total": 4999,
+                "currency": "gbp",
+                "mode": "payment",
+                "metadata": {"order_reference": "asc_delayed_order"},
+            }
+        },
+    }
+
+    monkeypatch.setattr(
+        "app.main.stripe.Webhook.construct_event",
+        lambda **_: current_event,
+    )
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        stripe_webhook_secret="whsec_test",
+        orders_database_path=database_path,
+    )
+
+    completed = client.post(
+        "/api/stripe/webhook",
+        content=b"{}",
+        headers={"stripe-signature": "valid-test-signature"},
+    )
+    assert completed.status_code == 200
+    with sqlite3.connect(database_path) as connection:
+        assert connection.execute(
+            "SELECT status FROM orders WHERE order_reference = ?",
+            ("asc_delayed_order",),
+        ).fetchone() == ("pending",)
+
+    current_event["id"] = "evt_delayed_failed"
+    current_event["type"] = "checkout.session.async_payment_failed"
+    failed = client.post(
+        "/api/stripe/webhook",
+        content=b"{}",
+        headers={"stripe-signature": "valid-test-signature"},
+    )
+    assert failed.status_code == 200
+    with sqlite3.connect(database_path) as connection:
+        assert connection.execute(
+            "SELECT status FROM orders WHERE order_reference = ?",
+            ("asc_delayed_order",),
+        ).fetchone() == ("unpaid",)
+
+
+def test_handled_unknown_order_is_retryable_and_event_is_not_consumed(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    database_path = tmp_path / "orders.db"
+
+    monkeypatch.setattr(
+        "app.main.stripe.Webhook.construct_event",
+        lambda **_: {
+            "id": "evt_unknown_order",
+            "type": "checkout.session.completed",
+            "data": {
+                "object": {
+                    "id": "cs_test_unknown",
+                    "payment_status": "paid",
+                    "amount_total": 4999,
+                    "currency": "gbp",
+                    "mode": "payment",
+                    "metadata": {"order_reference": "asc_missing_order"},
+                }
+            },
+        },
+    )
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        stripe_webhook_secret="whsec_test",
+        orders_database_path=database_path,
+    )
+
+    response = client.post(
+        "/api/stripe/webhook",
+        content=b"{}",
+        headers={"stripe-signature": "valid-test-signature"},
+    )
+
+    assert response.status_code == 503
+    with sqlite3.connect(database_path) as connection:
+        assert connection.execute("SELECT COUNT(*) FROM stripe_events").fetchone() == (0,)
+
+
+def test_mismatched_total_is_retryable_and_does_not_mark_order_paid(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    database_path = tmp_path / "orders.db"
+    create_pending_order(
+        database_path,
+        order_reference="asc_total_check",
+        cart_reference="cart_total_check",
+        amount_total=4999,
+    )
+    monkeypatch.setattr(
+        "app.main.stripe.Webhook.construct_event",
+        lambda **_: {
+            "id": "evt_wrong_total",
+            "type": "checkout.session.completed",
+            "data": {
+                "object": {
+                    "id": "cs_test_wrong_total",
+                    "payment_status": "paid",
+                    "amount_total": 1,
+                    "currency": "gbp",
+                    "mode": "payment",
+                    "metadata": {"order_reference": "asc_total_check"},
+                }
+            },
+        },
+    )
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        stripe_webhook_secret="whsec_test",
+        orders_database_path=database_path,
+    )
+
+    response = client.post(
+        "/api/stripe/webhook",
+        content=b"{}",
+        headers={"stripe-signature": "valid-test-signature"},
+    )
+
+    assert response.status_code == 503
+    with sqlite3.connect(database_path) as connection:
+        order = connection.execute(
+            "SELECT stripe_session_id, status FROM orders WHERE order_reference = ?",
+            ("asc_total_check",),
+        ).fetchone()
+        event_count = connection.execute("SELECT COUNT(*) FROM stripe_events").fetchone()
+    assert order == (None, "pending")
+    assert event_count == (0,)

@@ -8,6 +8,7 @@ const footerLinks = [
   ['Custom kits', '/custom-kits'],
   ['Featured collabs', '/featured-collabs'],
   ['Refund policy', '/refund-policy'],
+  ['Privacy notice', '/privacy'],
 ] as const;
 
 export function Footer() {

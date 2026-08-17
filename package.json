@@ -10,6 +10,8 @@
     "dev": "npm --workspace frontend run dev",
     "check:catalog": "python scripts/check_catalog_sync.py",
     "test:backend": "cd backend && .venv/bin/pytest -q",
-    "verify": "npm run build && npm run check:catalog && npm run test:backend"
+    "test:e2e": "npm --workspace frontend run test:e2e",
+    "verify": "npm run build && npm run check:catalog && npm run test:backend",
+    "verify:full": "npm run verify && npm run test:e2e"
   }
 }

@@ -22,7 +22,7 @@ interface CheckoutStatus {
 export function CheckoutSuccessPage() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const clearCart = useCartStore((state) => state.clearCart);
+  const completeCheckout = useCartStore((state) => state.completeCheckout);
   const [verification, setVerification] = useState<VerificationState>('loading');
   const [orderReference, setOrderReference] = useState<string | null>(null);
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
@@ -43,11 +43,11 @@ export function CheckoutSuccessPage() {
       const payload = (await response.json()) as CheckoutStatus;
       setOrderReference(payload.orderReference);
       setVerification(payload.status);
-      if (payload.status === 'paid') clearCart();
+      if (payload.status === 'paid') completeCheckout(payload.orderReference);
     } catch {
       setVerification('error');
     }
-  }, [apiBaseUrl, clearCart, sessionId]);
+  }, [apiBaseUrl, completeCheckout, sessionId]);
 
   useEffect(() => {
     void verifyPayment();
@@ -86,8 +86,8 @@ export function CheckoutSuccessPage() {
           <p className="eyebrow">Secure verification</p>
           <h1>{verification === 'loading' ? 'Checking your payment…' : 'Your payment is processing.'}</h1>
           <p>
-            Keep this page open while Stripe confirms the result. Your bag will
-            only be cleared after payment is verified.
+            Keep this page open while Stripe confirms the result. Purchased
+            quantities are removed from your bag only after payment is verified.
           </p>
           {verification === 'pending' ? (
             <button className="button button--primary" type="button" onClick={() => void verifyPayment()}>

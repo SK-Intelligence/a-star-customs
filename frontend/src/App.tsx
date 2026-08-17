@@ -10,6 +10,7 @@ import { GalleryPage } from './pages/GalleryPage';
 import { HomePage } from './pages/HomePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ProductPage } from './pages/ProductPage';
+import { PrivacyPage } from './pages/PrivacyPage';
 import { RefundPolicyPage } from './pages/RefundPolicyPage';
 import { ServicesPage } from './pages/ServicesPage';
 import { ShopPage } from './pages/ShopPage';
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="/custom-kits" element={<CustomKitsPage />} />
           <Route path="/featured-collabs" element={<CollaborationsPage />} />
           <Route path="/refund-policy" element={<RefundPolicyPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/contact-us" element={<ContactPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
@@ -37,4 +39,3 @@ export default function App() {
     </>
   );
 }
-

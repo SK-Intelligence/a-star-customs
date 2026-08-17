@@ -12,6 +12,7 @@ export function CheckoutPage() {
   const lines = useCartStore((state) => state.lines);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
+  const recordCheckout = useCartStore((state) => state.recordCheckout);
   const subtotal = useCartStore(cartSubtotal);
   const [agreed, setAgreed] = useState(false);
   const [status, setStatus] = useState<CheckoutStatus>('idle');
@@ -38,14 +39,31 @@ export function CheckoutPage() {
         }),
       });
 
-      if (response.status === 503) {
+      const payload = (await response.json().catch(() => null)) as {
+        url?: unknown;
+        orderReference?: unknown;
+        detail?: { code?: unknown };
+      } | null;
+
+      if (
+        response.status === 503 &&
+        payload?.detail?.code === 'CHECKOUT_NOT_CONFIGURED'
+      ) {
         setStatus('unconfigured');
         return;
       }
       if (!response.ok) throw new Error('Checkout request failed');
 
-      const payload = (await response.json()) as { url?: string };
-      if (!payload.url) throw new Error('Checkout URL missing');
+      if (
+        typeof payload?.url !== 'string' ||
+        typeof payload.orderReference !== 'string'
+      ) {
+        throw new Error('Checkout response is incomplete');
+      }
+      recordCheckout(
+        payload.orderReference,
+        resolvedLines.map(({ line }) => line),
+      );
       window.location.assign(payload.url);
     } catch {
       setStatus('error');

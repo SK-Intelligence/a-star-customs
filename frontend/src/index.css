@@ -1949,6 +1949,162 @@ h3 {
   color: #fff;
 }
 
+.variant-picker button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.build-extras {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  padding: 1.15rem;
+  border: 1px solid rgb(163 66 255 / 32%);
+  background:
+    linear-gradient(135deg, rgb(163 66 255 / 10%), transparent 55%),
+    #111014;
+}
+
+.build-extras__heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.build-extras__heading .eyebrow {
+  margin-bottom: 0.35rem;
+}
+
+.build-extras__heading h2 {
+  font-size: 2.25rem;
+}
+
+.build-extras__heading > span {
+  flex: 0 0 auto;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--line);
+  color: var(--purple-bright);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.build-extras > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.build-extras__options {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.build-extra {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr) 2rem;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 0.65rem;
+  border: 1px solid var(--line);
+  background: rgb(255 255 255 / 2%);
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.build-extra:hover {
+  border-color: rgb(191 115 255 / 70%);
+  transform: translateY(-1px);
+}
+
+.build-extra.is-selected {
+  border-color: var(--purple);
+  background: rgb(163 66 255 / 13%);
+}
+
+.build-extra > img {
+  width: 62px;
+  height: 62px;
+  object-fit: cover;
+}
+
+.build-extra > span {
+  display: grid;
+  gap: 0.16rem;
+  min-width: 0;
+}
+
+.build-extra small {
+  color: #8d8792;
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.build-extra strong {
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+
+.build-extra em {
+  color: var(--purple-bright);
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.build-extra > i {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--muted);
+}
+
+.build-extra.is-selected > i {
+  border-color: var(--purple);
+  background: var(--purple);
+  color: #fff;
+}
+
+.build-extra > i svg {
+  width: 0.9rem;
+}
+
+.build-total {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+}
+
+.build-total > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.build-total > div:last-child {
+  margin-top: 0.25rem;
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.build-total dd {
+  margin: 0;
+}
+
 .buy-actions {
   display: grid;
   grid-template-columns: 130px minmax(0, 1fr);
@@ -2279,6 +2435,20 @@ h3 {
 .form-status a {
   color: var(--purple-bright);
   text-decoration: underline;
+}
+
+.form-privacy {
+  max-width: 42rem;
+  margin: 0;
+  color: #aaa4ad;
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+.form-privacy a {
+  color: var(--purple-bright);
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
 }
 
 /* Cart drawer */
@@ -2825,9 +2995,33 @@ h3 {
   align-items: start;
 }
 
-.policy-layout > .text-link {
+.policy-layout > aside {
   position: sticky;
-  top: 2rem;
+  top: 7rem;
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 3px solid var(--accent);
+  background: #fff;
+  box-shadow: 0 18px 50px rgb(16 15 18 / 8%);
+}
+
+.policy-layout > aside > svg {
+  width: 2rem;
+  height: 2rem;
+  color: var(--accent);
+}
+
+.policy-layout > aside h2 {
+  font-size: 2rem;
+}
+
+.policy-layout > aside p {
+  color: #5e5962;
+}
+
+.policy-layout > aside .text-link {
+  margin-top: 0.25rem;
   color: #100f12;
 }
 
@@ -2837,8 +3031,19 @@ h3 {
 }
 
 .policy-content article {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: 1.25rem;
   padding-bottom: 3.5rem;
   border-bottom: 1px solid rgb(16 15 18 / 13%);
+}
+
+.policy-content article > span {
+  padding-top: 0.4rem;
+  color: var(--accent);
+  font-family: var(--display);
+  font-size: 1.35rem;
+  letter-spacing: 0.08em;
 }
 
 .policy-content h2 {
@@ -2849,6 +3054,13 @@ h3 {
 .policy-content p,
 .policy-content li {
   color: #5e5962;
+}
+
+.policy-content a {
+  color: #5f1a9b;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
 }
 
 .policy-intro {
@@ -2890,6 +3102,13 @@ h3 {
   margin: 0.5rem 0 0;
   color: var(--muted);
   font-size: 0.78rem;
+}
+
+.cookie-banner p a,
+.cookie-modal p a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
 }
 
 .cookie-actions {
@@ -2968,7 +3187,14 @@ h3 {
   font-weight: 850;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease, visibility 180ms;
+}
+
+.whatsapp-button.is-obscured {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(calc(100% + 2rem));
 }
 
 .whatsapp-button:hover {
@@ -3270,8 +3496,13 @@ h3 {
     grid-template-columns: 1fr;
   }
 
-  .policy-layout > .text-link {
+  .policy-layout > aside {
     position: static;
+  }
+
+  .policy-content article {
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    gap: 0.75rem;
   }
 
   .cookie-banner {

@@ -23,6 +23,8 @@ from app.models import (
 )
 from app.orders import (
     OrderStatus,
+    StripeEventOrderMismatchError,
+    StripeEventOrderNotFoundError,
     attach_stripe_session,
     create_pending_order,
     get_order_by_session_id,
@@ -132,7 +134,7 @@ async def contact(
             detail="Contact form delivery failed. Please try again later.",
         ) from exc
 
-    if not provider_result.get("success"):
+    if not isinstance(provider_result, dict) or not provider_result.get("success"):
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Contact form delivery failed. Please try again later.",
@@ -188,6 +190,7 @@ async def create_checkout_session(
                     "unit_amount": variant.price,
                     "product_data": {
                         "name": product.title,
+                        "description": variant.title,
                         "metadata": {
                             "product_id": product.id,
                             "variant_id": variant.id,
@@ -203,7 +206,10 @@ async def create_checkout_session(
     if not settings.stripe_secret_key:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Checkout is not configured.",
+            detail={
+                "code": "CHECKOUT_NOT_CONFIGURED",
+                "message": "Checkout is not configured.",
+            },
         )
 
     order_reference = f"asc_{uuid4().hex}"
@@ -277,7 +283,7 @@ async def create_checkout_session(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="The checkout session could not be attached to its order.",
         )
-    return CheckoutResponse(url=session_url)
+    return CheckoutResponse(url=session_url, orderReference=order_reference)
 
 
 def _stripe_value(resource: Any, key: str) -> Any:
@@ -286,15 +292,15 @@ def _stripe_value(resource: Any, key: str) -> Any:
     return getattr(resource, key, None)
 
 
-def _verified_checkout_status(session: Any) -> OrderStatus:
+def _verified_checkout_status(session: Any, stored_status: OrderStatus) -> OrderStatus:
     session_status = _stripe_value(session, "status")
     payment_status = _stripe_value(session, "payment_status")
-    if session_status == "expired":
-        return "expired"
     if payment_status in {"paid", "no_payment_required"}:
         return "paid"
-    if payment_status == "unpaid":
-        return "unpaid"
+    if stored_status in {"paid", "unpaid", "expired"}:
+        return stored_status
+    if session_status == "expired":
+        return "expired"
     return "pending"
 
 
@@ -354,7 +360,7 @@ async def get_checkout_session_status(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found.")
     return CheckoutStatusResponse(
         orderReference=order.order_reference,
-        status=_verified_checkout_status(session),
+        status=_verified_checkout_status(session, order.status),
     )
 
 
@@ -418,13 +424,26 @@ async def stripe_webhook(
     new_status = status_by_event.get(event_type)
     if event_type == "checkout.session.completed":
         payment_status = _stripe_value(session, "payment_status")
-        new_status = "paid" if payment_status in {"paid", "no_payment_required"} else "unpaid"
+        new_status = "paid" if payment_status in {"paid", "no_payment_required"} else "pending"
     if not isinstance(stripe_session_id, str):
         stripe_session_id = None
     if new_status is not None and stripe_session_id is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Stripe checkout event is missing a session ID.",
+        )
+
+    amount_total = _stripe_value(session, "amount_total")
+    currency = _stripe_value(session, "currency")
+    mode = _stripe_value(session, "mode")
+    if new_status is not None and (
+        not isinstance(amount_total, int)
+        or not isinstance(currency, str)
+        or not isinstance(mode, str)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Stripe checkout event is missing trusted payment details.",
         )
 
     try:
@@ -436,7 +455,20 @@ async def stripe_webhook(
             stripe_session_id=stripe_session_id,
             order_reference=order_reference,
             new_status=new_status,
+            amount_total=amount_total if isinstance(amount_total, int) else None,
+            currency=currency if isinstance(currency, str) else None,
+            mode=mode if isinstance(mode, str) else None,
         )
+    except StripeEventOrderNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Stripe event is awaiting order reconciliation.",
+        ) from exc
+    except StripeEventOrderMismatchError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Stripe event did not match the trusted order.",
+        ) from exc
     except (OSError, sqlite3.Error) as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

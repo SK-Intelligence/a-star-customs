@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, MessageCircle, ShieldCheck, ShoppingBag, Sparkles, Wrench } from 'lucide-react';
+import { ArrowLeft, Check, MessageCircle, Plus, ShieldCheck, ShoppingBag, Sparkles, Wrench } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ImageLightbox } from '../components/ImageLightbox';
@@ -6,7 +6,7 @@ import { ProductCard } from '../components/ProductCard';
 import { QuantityControl } from '../components/QuantityControl';
 import { ReviewPanel } from '../components/ReviewPanel';
 import { Seo } from '../components/Seo';
-import { formatPrice, productBySlug, products } from '../data/catalog';
+import { formatPrice, getProductAddOns, productBySlug, products } from '../data/catalog';
 import { whatsappUrl } from '../data/site';
 import { useCartStore } from '../store/cart';
 import { NotFoundPage } from './NotFoundPage';
@@ -14,25 +14,31 @@ import { NotFoundPage } from './NotFoundPage';
 export function ProductPage() {
   const { slug = '' } = useParams();
   const product = productBySlug.get(slug);
-  const addItem = useCartStore((state) => state.addItem);
+  const addItems = useCartStore((state) => state.addItems);
   const [variantId, setVariantId] = useState(product?.variants[0]?.id ?? '');
   const [quantity, setQuantity] = useState(1);
+  const [selectedAddOnIds, setSelectedAddOnIds] = useState<string[]>([]);
   const [imageIndex, setImageIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   useEffect(() => {
     setVariantId(product?.variants[0]?.id ?? '');
     setQuantity(1);
+    setSelectedAddOnIds([]);
     setImageIndex(0);
   }, [product?.id, product?.variants]);
 
   const selectedVariant = product?.variants.find((variant) => variant.id === variantId) ?? product?.variants[0];
+  const addOns = useMemo(() => (product ? getProductAddOns(product) : []), [product]);
+  const selectedAddOns = addOns.filter((addOn) => selectedAddOnIds.includes(addOn.id));
   const related = useMemo(() => {
     if (!product) return [];
+    const addOnIds = new Set(getProductAddOns(product).map((addOn) => addOn.id));
     return products
       .filter(
         (candidate) =>
           candidate.id !== product.id &&
+          !addOnIds.has(candidate.id) &&
           candidate.collections.some((collection) => product.collections.includes(collection)),
       )
       .slice(0, 4);
@@ -42,6 +48,31 @@ export function ProductPage() {
 
   const activeImage = product.images[imageIndex] ?? product.images[0] ?? '/images/site/hero.jpg';
   const canBuy = product.purchasable && product.available && selectedVariant.available;
+  const addOnTotal = selectedAddOns.reduce(
+    (total, addOn) => total + (addOn.variants.find((variant) => variant.available)?.price ?? 0),
+    0,
+  );
+  const buildTotal = (selectedVariant.price + addOnTotal) * quantity;
+
+  const toggleAddOn = (addOnId: string) => {
+    setSelectedAddOnIds((current) =>
+      current.includes(addOnId)
+        ? current.filter((id) => id !== addOnId)
+        : [...current, addOnId],
+    );
+  };
+
+  const addBuildToBag = () => {
+    addItems([
+      { productId: product.id, variantId: selectedVariant.id, quantity },
+      ...selectedAddOns.flatMap((addOn) => {
+        const variant = addOn.variants.find((candidate) => candidate.available);
+        return variant
+          ? [{ productId: addOn.id, variantId: variant.id, quantity }]
+          : [];
+      }),
+    ]);
+  };
 
   return (
     <>
@@ -76,7 +107,7 @@ export function ProductPage() {
               ) : null}
             </div>
 
-            <div className="product-buybox">
+            <div className="product-buybox" data-floating-action-zone>
               <p className="eyebrow">{product.collections[0] ?? 'A Star Customs'}</p>
               <h1>{product.title}</h1>
               {product.subtitle ? <p className="product-buybox__subtitle">{product.subtitle}</p> : null}
@@ -94,6 +125,8 @@ export function ProductPage() {
                         key={variant.id}
                         className={variant.id === selectedVariant.id ? 'is-active' : undefined}
                         onClick={() => setVariantId(variant.id)}
+                        aria-pressed={variant.id === selectedVariant.id}
+                        disabled={!variant.available}
                       >
                         <span>{variant.title}</span>
                         <strong>{formatPrice(variant.price)}</strong>
@@ -103,15 +136,59 @@ export function ProductPage() {
                 </fieldset>
               ) : null}
 
+              {canBuy && addOns.length > 0 ? (
+                <section className="build-extras" aria-labelledby="build-extras-title">
+                  <div className="build-extras__heading">
+                    <div>
+                      <p className="eyebrow">Build your package</p>
+                      <h2 id="build-extras-title">Optional extras</h2>
+                    </div>
+                    <span>{addOns.length} available</span>
+                  </div>
+                  <p>Tap any extra to add or remove it. Each item stays separately editable in your bag.</p>
+                  <div className="build-extras__options">
+                    {addOns.map((addOn) => {
+                      const addOnVariant = addOn.variants.find((variant) => variant.available);
+                      const isSelected = selectedAddOnIds.includes(addOn.id);
+                      if (!addOnVariant) return null;
+
+                      return (
+                        <button
+                          type="button"
+                          key={addOn.id}
+                          className={isSelected ? 'build-extra is-selected' : 'build-extra'}
+                          aria-pressed={isSelected}
+                          onClick={() => toggleAddOn(addOn.id)}
+                        >
+                          <img src={addOn.images[0] ?? '/images/site/hero.jpg'} alt="" />
+                          <span>
+                            <small>Optional add-on</small>
+                            <strong>{addOn.title}</strong>
+                            <em>+{formatPrice(addOnVariant.price)} per build</em>
+                          </span>
+                          <i aria-hidden="true">{isSelected ? <Check /> : <Plus />}</i>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <dl className="build-total" aria-live="polite">
+                    <div><dt>Base package</dt><dd>{formatPrice(selectedVariant.price * quantity)}</dd></div>
+                    <div><dt>Extras ({selectedAddOns.length})</dt><dd>+{formatPrice(addOnTotal * quantity)}</dd></div>
+                    <div><dt>Build total</dt><dd>{formatPrice(buildTotal)}</dd></div>
+                  </dl>
+                </section>
+              ) : null}
+
               {canBuy ? (
                 <div className="buy-actions">
                   <QuantityControl value={quantity} onChange={setQuantity} />
                   <button
                     type="button"
                     className="button button--primary"
-                    onClick={() => addItem(product.id, selectedVariant.id, quantity)}
+                    onClick={addBuildToBag}
                   >
-                    <ShoppingBag aria-hidden="true" /> Add to bag
+                    <ShoppingBag aria-hidden="true" />
+                    {addOns.length > 0 ? `Add build to bag · ${formatPrice(buildTotal)}` : 'Add to bag'}
                   </button>
                 </div>
               ) : (

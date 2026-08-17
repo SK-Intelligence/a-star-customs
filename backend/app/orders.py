@@ -36,6 +36,16 @@ class StoredOrder:
     order_reference: str
     stripe_session_id: str | None
     status: OrderStatus
+    amount_total: int
+    currency: str
+
+
+class StripeEventOrderNotFoundError(RuntimeError):
+    """A handled Checkout event could not be reconciled to a local order."""
+
+
+class StripeEventOrderMismatchError(RuntimeError):
+    """A signed Checkout event does not match the local trusted order totals."""
 
 
 def _connect(database_path: Path) -> sqlite3.Connection:
@@ -144,7 +154,7 @@ def get_order_by_session_id(
     with _connect(database_path) as connection:
         row = connection.execute(
             """
-            SELECT order_reference, stripe_session_id, status
+            SELECT order_reference, stripe_session_id, status, amount_total, currency
             FROM orders
             WHERE stripe_session_id = ?
             """,
@@ -156,6 +166,8 @@ def get_order_by_session_id(
         order_reference=row["order_reference"],
         stripe_session_id=row["stripe_session_id"],
         status=row["status"],
+        amount_total=row["amount_total"],
+        currency=row["currency"],
     )
 
 
@@ -167,6 +179,9 @@ def process_stripe_event(
     stripe_session_id: str | None,
     order_reference: str | None,
     new_status: OrderStatus | None,
+    amount_total: int | None = None,
+    currency: str | None = None,
+    mode: str | None = None,
 ) -> bool:
     """Record, attach, and apply an event atomically; return True for duplicates."""
 
@@ -193,22 +208,43 @@ def process_stripe_event(
                 (stripe_session_id, order_reference, stripe_session_id),
             )
 
+        order = connection.execute(
+            """
+            SELECT order_reference, status, amount_total, currency
+            FROM orders
+            WHERE stripe_session_id = ?
+            """,
+            (stripe_session_id,),
+        ).fetchone()
+        if order is None:
+            raise StripeEventOrderNotFoundError(
+                f"No order matches Checkout Session {stripe_session_id}."
+            )
+        if order_reference and order["order_reference"] != order_reference:
+            raise StripeEventOrderMismatchError("Stripe order reference does not match.")
+        if (
+            mode != "payment"
+            or currency != order["currency"]
+            or amount_total != order["amount_total"]
+        ):
+            raise StripeEventOrderMismatchError("Stripe order amount or currency does not match.")
+
         if new_status == "paid":
             connection.execute(
                 """
                 UPDATE orders
                 SET status = 'paid', updated_at = CURRENT_TIMESTAMP
-                WHERE stripe_session_id = ?
+                WHERE order_reference = ?
                 """,
-                (stripe_session_id,),
+                (order["order_reference"],),
             )
-        else:
+        elif order["status"] != "paid":
             connection.execute(
                 """
                 UPDATE orders
                 SET status = ?, updated_at = CURRENT_TIMESTAMP
-                WHERE stripe_session_id = ? AND status != 'paid'
+                WHERE order_reference = ?
                 """,
-                (new_status, stripe_session_id),
+                (new_status, order["order_reference"]),
             )
     return duplicate

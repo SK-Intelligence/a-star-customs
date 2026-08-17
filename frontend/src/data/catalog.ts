@@ -30,6 +30,25 @@ export const productBySlug: ReadonlyMap<string, Product> = new Map(
   products.map((product) => [product.slug, product]),
 );
 
+const addOnSlugsByProductSlug: Readonly<Record<string, readonly string[]>> = {
+  'luxury-car-interior': [
+    '-4x-speaker-lights-optional-add-on',
+    'premium-pack-add-on-25-animations-and-start-up-effects',
+  ],
+  'ambient-lighting-package-': [
+    '-4x-speaker-lights-optional-add-on',
+    'premium-pack-add-on-25-animations-and-start-up-effects',
+  ],
+};
+
+/** Returns only catalog-backed, currently purchasable extras for a base product. */
+export function getProductAddOns(product: Product): readonly Product[] {
+  return (addOnSlugsByProductSlug[product.slug] ?? []).flatMap((slug) => {
+    const addOn = productBySlug.get(slug);
+    return addOn?.purchasable && addOn.available ? [addOn] : [];
+  });
+}
+
 export const categories: readonly string[] = Array.from(
   new Set(products.flatMap((product) => product.collections)),
 ).sort((left, right) => left.localeCompare(right));

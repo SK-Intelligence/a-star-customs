@@ -1,5 +1,6 @@
 import { Clock3, Mail, MapPin, MessageCircle, Phone, Send } from 'lucide-react';
 import { FormEvent, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { PageHero } from '../components/PageHero';
 import { ConsentGate } from '../components/CookieConsent';
 import { Seo } from '../components/Seo';
@@ -138,6 +139,10 @@ export function ContactPage() {
                 />
               </label>
             </div>
+            <p className="form-privacy">
+              We use these details to answer your enquiry. Delivery is handled by Web3Forms.{' '}
+              <Link to="/privacy">Read our privacy notice</Link>.
+            </p>
             <button className="button button--primary" type="submit" disabled={status === 'sending'}>
               <Send aria-hidden="true" /> {status === 'sending' ? 'Sending…' : 'Send enquiry'}
             </button>

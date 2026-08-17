@@ -65,13 +65,21 @@ def test_checkout_uses_all_trusted_catalog_prices(monkeypatch, tmp_path: Path) -
     )
 
     assert response.status_code == 200
-    assert response.json() == {"url": "https://checkout.stripe.com/c/pay/test"}
+    response_payload = response.json()
+    assert response_payload["url"] == "https://checkout.stripe.com/c/pay/test"
+    assert response_payload["orderReference"].startswith("asc_")
     line_items = captured["line_items"]  # type: ignore[assignment]
     assert len(line_items) == 2
     assert line_items[0]["price_data"]["currency"] == "gbp"
     assert line_items[0]["price_data"]["unit_amount"] == 4999
+    assert line_items[0]["price_data"]["product_data"]["description"] == (
+        "Wireless Carplay Adapter"
+    )
     assert line_items[0]["quantity"] == 2
     assert line_items[1]["price_data"]["unit_amount"] == 4999
+    assert line_items[1]["price_data"]["product_data"]["description"] == (
+        "Premium Pack: 25+ Animations & Start-Up Effects (Add-On)"
+    )
     assert line_items[1]["quantity"] == 1
     assert captured["cancel_url"] == "http://localhost:5173/checkout"
     assert str(captured["idempotency_key"]).startswith("asc_")

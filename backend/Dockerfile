@@ -7,11 +7,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY backend/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+COPY backend/requirements-runtime.txt ./requirements-runtime.txt
+RUN pip install --no-cache-dir -r requirements-runtime.txt \
+    && useradd --uid 10001 --create-home --shell /usr/sbin/nologin appuser
 
-COPY backend/app ./app
-RUN mkdir -p /data
+COPY --chown=appuser:appuser backend/app ./app
+RUN mkdir -p /data && chown appuser:appuser /data
+
+USER appuser
 
 EXPOSE 8000
 

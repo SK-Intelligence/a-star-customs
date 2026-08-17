@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Star, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useDialogFocus } from '../hooks/useDialogFocus';
 
 interface Review {
@@ -162,6 +163,10 @@ export function ReviewPanel({ productId }: ReviewPanelProps) {
                   <span>Review</span>
                   <textarea name="review-comment" required minLength={10} maxLength={1200} rows={5} value={comment} onChange={(event) => setComment(event.target.value)} />
                 </label>
+                <p className="form-privacy">
+                  Your name, rating and comment are held for moderation and published only if approved.{' '}
+                  <Link to="/privacy">Read our privacy notice</Link>.
+                </p>
                 <button className="button button--primary" type="submit" disabled={status === 'sending'}>
                   {status === 'sending' ? 'Submitting…' : 'Submit for moderation'}
                 </button>

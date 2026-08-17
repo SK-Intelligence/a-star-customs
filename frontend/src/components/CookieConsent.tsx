@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ShieldCheck, SlidersHorizontal, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useDialogFocus } from '../hooks/useDialogFocus';
 
 const STORAGE_KEY = 'astar-cookie-preferences';
@@ -10,17 +11,33 @@ export interface CookiePreferences {
   marketing: boolean;
 }
 
+function isCookiePreferences(value: unknown): value is CookiePreferences {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'analytics' in value &&
+    typeof value.analytics === 'boolean' &&
+    'marketing' in value &&
+    typeof value.marketing === 'boolean'
+  );
+}
+
 function readPreferences(): CookiePreferences | null {
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    return saved ? (JSON.parse(saved) as CookiePreferences) : null;
+    const parsed: unknown = saved ? JSON.parse(saved) : null;
+    return isCookiePreferences(parsed) ? parsed : null;
   } catch {
     return null;
   }
 }
 
 function savePreferences(preferences: CookiePreferences) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
+  } catch {
+    // Consent still applies for this tab when storage is unavailable.
+  }
   window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: preferences }));
 }
 
@@ -31,8 +48,8 @@ export function useMarketingConsent() {
 
   useEffect(() => {
     const handleChange = (event: Event) => {
-      const detail = (event as CustomEvent<CookiePreferences>).detail;
-      setAllowed(detail.marketing);
+      const detail: unknown = (event as CustomEvent<unknown>).detail;
+      if (isCookiePreferences(detail)) setAllowed(detail.marketing);
     };
 
     window.addEventListener(EVENT_NAME, handleChange);
@@ -136,6 +153,7 @@ export function CookieConsent() {
           <p>
             Essential storage keeps your bag and preferences working. Optional
             cookies only load analytics and social embeds when you allow them.
+            {' '}See our <Link to="/privacy">privacy notice</Link>.
           </p>
         </div>
 

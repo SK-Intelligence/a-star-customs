@@ -48,6 +48,7 @@ class CheckoutRequest(BaseModel):
 
 class CheckoutResponse(BaseModel):
     url: str
+    orderReference: str
 
 
 class CheckoutStatusResponse(BaseModel):

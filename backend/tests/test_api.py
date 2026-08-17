@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from typing import Any
+
+import httpx
+import pytest
 from fastapi.testclient import TestClient
 
 from app.config import Settings, get_settings
@@ -19,6 +23,29 @@ def unconfigured_settings() -> Settings:
 
 def teardown_function() -> None:
     app.dependency_overrides.clear()
+
+
+class StubAsyncClient:
+    response: httpx.Response
+    captured_payload: dict[str, Any] | None = None
+
+    def __init__(self, **_: object) -> None:
+        pass
+
+    async def __aenter__(self) -> "StubAsyncClient":
+        return self
+
+    async def __aexit__(self, *_: object) -> None:
+        return None
+
+    async def post(self, url: str, *, json: dict[str, Any]) -> httpx.Response:
+        assert url == "https://api.web3forms.com/submit"
+        type(self).captured_payload = json
+        return type(self).response
+
+
+def configured_contact_settings() -> Settings:
+    return Settings(web3forms_access_key="test_web3forms_key")
 
 
 def test_health() -> None:
@@ -69,6 +96,88 @@ def test_contact_validates_input_before_configuration() -> None:
     assert response.status_code == 422
 
 
+def test_contact_forwards_valid_payload(monkeypatch) -> None:
+    StubAsyncClient.response = httpx.Response(
+        200,
+        json={"success": True},
+        request=httpx.Request("POST", "https://api.web3forms.com/submit"),
+    )
+    StubAsyncClient.captured_payload = None
+    monkeypatch.setattr("app.main.httpx.AsyncClient", StubAsyncClient)
+    app.dependency_overrides[get_settings] = configured_contact_settings
+
+    response = client.post(
+        "/api/contact",
+        json={
+            "name": "Test Customer",
+            "email": "customer@example.com",
+            "phone": "+44 7700 900000",
+            "message": "Please contact me about an installation.",
+        },
+    )
+
+    assert response.status_code == 202
+    assert response.json() == {"status": "accepted"}
+    assert StubAsyncClient.captured_payload == {
+        "access_key": "test_web3forms_key",
+        "subject": "New A Star Customs website enquiry",
+        "from_name": "A Star Customs Website",
+        "name": "Test Customer",
+        "email": "customer@example.com",
+        "phone": "+44 7700 900000",
+        "message": "Please contact me about an installation.",
+    }
+
+
+@pytest.mark.parametrize(
+    "provider_response",
+    [
+        httpx.Response(
+            500,
+            json={"success": False},
+            request=httpx.Request("POST", "https://api.web3forms.com/submit"),
+        ),
+        httpx.Response(
+            200,
+            content=b"not-json",
+            headers={"Content-Type": "application/json"},
+            request=httpx.Request("POST", "https://api.web3forms.com/submit"),
+        ),
+        httpx.Response(
+            200,
+            json=[],
+            request=httpx.Request("POST", "https://api.web3forms.com/submit"),
+        ),
+        httpx.Response(
+            200,
+            json={"success": False},
+            request=httpx.Request("POST", "https://api.web3forms.com/submit"),
+        ),
+    ],
+)
+def test_contact_handles_provider_failures(
+    monkeypatch,
+    provider_response: httpx.Response,
+) -> None:
+    StubAsyncClient.response = provider_response
+    monkeypatch.setattr("app.main.httpx.AsyncClient", StubAsyncClient)
+    app.dependency_overrides[get_settings] = configured_contact_settings
+
+    response = client.post(
+        "/api/contact",
+        json={
+            "name": "Test Customer",
+            "email": "customer@example.com",
+            "message": "Please contact me about an installation.",
+        },
+    )
+
+    assert response.status_code == 502
+    assert response.json() == {
+        "detail": "Contact form delivery failed. Please try again later."
+    }
+
+
 def test_checkout_requires_stripe_configuration_for_valid_catalog_item() -> None:
     app.dependency_overrides[get_settings] = unconfigured_settings
 
@@ -86,7 +195,12 @@ def test_checkout_requires_stripe_configuration_for_valid_catalog_item() -> None
     )
 
     assert response.status_code == 503
-    assert response.json() == {"detail": "Checkout is not configured."}
+    assert response.json() == {
+        "detail": {
+            "code": "CHECKOUT_NOT_CONFIGURED",
+            "message": "Checkout is not configured.",
+        }
+    }
 
 
 def test_checkout_rejects_unknown_product() -> None:
