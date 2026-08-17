@@ -47,6 +47,7 @@ SITE_ASSETS = {
     "gallery-screen-03.webp": "img_0223heic-d95Zy6N2nacPoxO6.webp",
     "gallery-stars-01.jpg": "img-20251124-wa0008-VuMdwR6sJNCIeJTT.jpg",
     "gallery-stars-02.jpg": "img-20251124-wa0016-6seBWH5Mshm4tBrY.jpg",
+    "gallery-stars-07.jpg": "whatsapp-image-2025-12-16-at-12.02.48_90c20eb5-GxFo0tvHgMss6tUO.jpg",
     "gallery-stars-03.jpg": "img-20250909-wa0055-A0xv2x8B0Mf11yrP.jpg",
     "gallery-stars-04.webp": "img_7650-high-mjE40DWJRxHDGgEY.webp",
     "gallery-stars-05.jpg": "img-20250909-wa0058-AVLxGXVRV9sqZK3l.jpg",
@@ -59,6 +60,11 @@ SITE_ASSETS = {
     "gallery-dashcam-01.jpg": "img-20250909-wa0006-AGBz7jRbrNiVGkGX.jpg",
     "gallery-dashcam-02.jpg": "img-20250909-wa0004-YX4jG96nQohZNJj5.jpg",
     "gallery-dashcam-03.jpg": "img-20250909-wa0008-AoP4z1Ow41Hp9J3p.jpg",
+    "gallery-dashcam-04.jpg": "img-20250909-wa0007-dJoP8012lzTRQE54.jpg",
+    "gallery-dashcam-05.webp": "img_0248heic-YD0Ea5q8DocWnPKo.webp",
+    "gallery-dashcam-06.jpg": "img-20251124-wa0009-3huwsH3A3sDJw2SP.jpg",
+    "gallery-dashcam-07.jpg": "whatsapp-image-2025-12-10-at-11.54.38_61469a70-lPzCy7UvXy1JyZ3N.jpg",
+    "gallery-dashcam-08.jpg": "whatsapp-image-2025-12-10-at-11.54.38_0176645a-yW3stc7hTsmtpoEl.jpg",
 }
 
 ALLOWED_HTML_TAGS = {"p", "strong", "em", "ul", "ol", "li", "h2", "h3", "br"}

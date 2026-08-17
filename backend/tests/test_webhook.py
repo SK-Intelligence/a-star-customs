@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 
 from app.config import Settings, get_settings
 from app.main import app
-from app.orders import create_pending_order, process_stripe_event
+from app.orders import attach_stripe_session, create_pending_order, process_stripe_event
 
 
 client = TestClient(app)
@@ -25,7 +25,6 @@ def test_webhook_durably_updates_order_and_deduplicates(
     create_pending_order(
         database_path,
         order_reference="asc_test_order",
-        stripe_session_id="cs_test_paid",
         cart_reference="cart_test",
         amount_total=4999,
     )
@@ -38,6 +37,7 @@ def test_webhook_durably_updates_order_and_deduplicates(
                 "object": {
                     "id": "cs_test_paid",
                     "payment_status": "paid",
+                    "metadata": {"order_reference": "asc_test_order"},
                 }
             },
         }
@@ -65,18 +65,25 @@ def test_webhook_durably_updates_order_and_deduplicates(
     assert second.json() == {"received": True, "duplicate": True}
     with sqlite3.connect(database_path) as connection:
         order_status = connection.execute(
-            "SELECT status FROM orders WHERE stripe_session_id = ?",
-            ("cs_test_paid",),
+            "SELECT stripe_session_id, status FROM orders WHERE order_reference = ?",
+            ("asc_test_order",),
         ).fetchone()
         event_count = connection.execute("SELECT COUNT(*) FROM stripe_events").fetchone()
-    assert order_status == ("paid",)
+    assert order_status == ("cs_test_paid", "paid")
     assert event_count == (1,)
+
+    assert attach_stripe_session(
+        database_path,
+        order_reference="asc_test_order",
+        stripe_session_id="cs_test_paid",
+    )
 
     process_stripe_event(
         database_path,
         event_id="evt_late_failure",
         event_type="checkout.session.async_payment_failed",
         stripe_session_id="cs_test_paid",
+        order_reference="asc_test_order",
         new_status="unpaid",
     )
     with sqlite3.connect(database_path) as connection:

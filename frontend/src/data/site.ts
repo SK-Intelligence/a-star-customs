@@ -111,6 +111,7 @@ export const galleryGroups: readonly GalleryGroup[] = [
     images: [
       "/images/site/gallery-stars-01.jpg",
       "/images/site/gallery-stars-02.jpg",
+      "/images/site/gallery-stars-07.jpg",
       "/images/site/gallery-stars-03.jpg",
       "/images/site/gallery-stars-04.webp",
       "/images/site/gallery-stars-05.jpg",
@@ -158,6 +159,11 @@ export const galleryGroups: readonly GalleryGroup[] = [
       "/images/site/gallery-dashcam-01.jpg",
       "/images/site/gallery-dashcam-02.jpg",
       "/images/site/gallery-dashcam-03.jpg",
+      "/images/site/gallery-dashcam-04.jpg",
+      "/images/site/gallery-dashcam-05.webp",
+      "/images/site/gallery-dashcam-06.jpg",
+      "/images/site/gallery-dashcam-07.jpg",
+      "/images/site/gallery-dashcam-08.jpg",
     ],
   },
 ] as const;

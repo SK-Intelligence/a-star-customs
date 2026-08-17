@@ -105,6 +105,7 @@ export function Header() {
               to={href}
               end={href === '/'}
               tabIndex={menuOpen ? 0 : -1}
+              className={({ isActive }) => (isActive ? 'is-active' : undefined)}
               style={{ '--menu-index': index } as React.CSSProperties}
             >
               <span>{String(index + 1).padStart(2, '0')}</span>
@@ -115,13 +116,13 @@ export function Header() {
         <div className="mobile-menu__footer">
           <p>Follow the latest builds</p>
           <div className="social-links">
-            <a href="https://www.facebook.com/AStrCustoms" aria-label="Facebook" tabIndex={menuOpen ? 0 : -1}>
+            <a href="https://www.facebook.com/AStrCustoms" target="_blank" rel="noreferrer" aria-label="Facebook" tabIndex={menuOpen ? 0 : -1}>
               <Facebook aria-hidden="true" />
             </a>
-            <a href="https://www.instagram.com/A_Starcustoms" aria-label="Instagram" tabIndex={menuOpen ? 0 : -1}>
+            <a href="https://www.instagram.com/A_Starcustoms" target="_blank" rel="noreferrer" aria-label="Instagram" tabIndex={menuOpen ? 0 : -1}>
               <Instagram aria-hidden="true" />
             </a>
-            <a href="https://www.tiktok.com/@a.starcustoms" aria-label="TikTok" tabIndex={menuOpen ? 0 : -1}>
+            <a href="https://www.tiktok.com/@a.starcustoms" target="_blank" rel="noreferrer" aria-label="TikTok" tabIndex={menuOpen ? 0 : -1}>
               <Music2 aria-hidden="true" />
             </a>
           </div>

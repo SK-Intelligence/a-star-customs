@@ -4,6 +4,7 @@ import sqlite3
 from pathlib import Path
 from types import SimpleNamespace
 
+import stripe
 from fastapi.testclient import TestClient
 
 from app.config import Settings, get_settings
@@ -15,6 +16,18 @@ client = TestClient(app)
 
 def teardown_function() -> None:
     app.dependency_overrides.clear()
+
+
+def single_item_cart() -> dict[str, object]:
+    return {
+        "items": [
+            {
+                "productId": "prod_01KFVHY3MK70RA36DKE21WFPNM",
+                "variantId": "variant_01KFVHY3PGHQ09EW3812HRKBBZ",
+                "quantity": 1,
+            }
+        ]
+    }
 
 
 def test_checkout_uses_all_trusted_catalog_prices(monkeypatch, tmp_path: Path) -> None:
@@ -77,3 +90,88 @@ def test_checkout_uses_all_trusted_catalog_prices(monkeypatch, tmp_path: Path) -
             """
         ).fetchone()
     assert order == ("cs_test_created", "pending", 14997, "gbp")
+
+
+def test_order_initialization_failure_prevents_stripe_session_creation(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    def fail_order_creation(*_: object, **__: object) -> None:
+        raise sqlite3.OperationalError("database unavailable")
+
+    def unexpected_stripe_call(**_: object) -> None:
+        raise AssertionError("Stripe must not be called before the order exists")
+
+    monkeypatch.setattr("app.main.create_pending_order", fail_order_creation)
+    monkeypatch.setattr("app.main.stripe.checkout.Session.create", unexpected_stripe_call)
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        stripe_secret_key="sk_test_placeholder",
+        orders_database_path=tmp_path / "orders.db",
+    )
+
+    response = client.post("/api/checkout/session", json=single_item_cart())
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "detail": "The order could not be initialized. Please try again later."
+    }
+
+
+def test_session_attach_failure_keeps_recoverable_order_reference(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    database_path = tmp_path / "orders.db"
+    captured: dict[str, object] = {}
+
+    def fake_create(**kwargs: object) -> SimpleNamespace:
+        captured.update(kwargs)
+        return SimpleNamespace(
+            id="cs_test_attach_failure",
+            url="https://checkout.stripe.com/c/pay/recoverable",
+        )
+
+    def fail_attach(*_: object, **__: object) -> None:
+        raise sqlite3.OperationalError("database locked")
+
+    monkeypatch.setattr("app.main.stripe.checkout.Session.create", fake_create)
+    monkeypatch.setattr("app.main.attach_stripe_session", fail_attach)
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        stripe_secret_key="sk_test_placeholder",
+        orders_database_path=database_path,
+    )
+
+    response = client.post("/api/checkout/session", json=single_item_cart())
+
+    assert response.status_code == 503
+    with sqlite3.connect(database_path) as connection:
+        order = connection.execute(
+            "SELECT order_reference, stripe_session_id, status FROM orders"
+        ).fetchone()
+    metadata = captured["metadata"]  # type: ignore[assignment]
+    assert order == (metadata["order_reference"], None, "pending")
+
+
+def test_stripe_creation_failure_leaves_durable_draft_without_session(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    database_path = tmp_path / "orders.db"
+
+    def fail_stripe_create(**_: object) -> None:
+        raise stripe.APIConnectionError("provider unavailable")
+
+    monkeypatch.setattr("app.main.stripe.checkout.Session.create", fail_stripe_create)
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        stripe_secret_key="sk_test_placeholder",
+        orders_database_path=database_path,
+    )
+
+    response = client.post("/api/checkout/session", json=single_item_cart())
+
+    assert response.status_code == 502
+    with sqlite3.connect(database_path) as connection:
+        order = connection.execute(
+            "SELECT stripe_session_id, status FROM orders"
+        ).fetchone()
+    assert order == (None, "pending")

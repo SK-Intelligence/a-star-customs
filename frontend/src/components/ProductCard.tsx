@@ -1,4 +1,4 @@
-import { ArrowRight, MessageCircle, ShoppingBag } from 'lucide-react';
+import { ArrowRight, MessageCircle, ShoppingBag, SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatPrice, type Product } from '../data/catalog';
 import { whatsappUrl } from '../data/site';
@@ -31,7 +31,16 @@ export function ProductCard({ product }: ProductCardProps) {
             {minimumPrice > 0 ? `${hasPriceRange ? 'From ' : ''}${formatPrice(minimumPrice)}` : 'Custom quote'}
           </p>
         </div>
-        {product.purchasable && product.available && firstVariant ? (
+        {product.purchasable && product.available && firstVariant && product.variants.length > 1 ? (
+          <Link
+            className="product-card__action"
+            to={`/${product.slug}`}
+            aria-label={`Choose an option for ${product.title}`}
+          >
+            <SlidersHorizontal aria-hidden="true" />
+            <span>Choose options</span>
+          </Link>
+        ) : product.purchasable && product.available && firstVariant ? (
           <button
             type="button"
             className="product-card__action"

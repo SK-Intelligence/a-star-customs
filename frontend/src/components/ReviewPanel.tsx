@@ -15,6 +15,7 @@ interface ReviewPanelProps {
 
 export function ReviewPanel({ productId }: ReviewPanelProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [fetchStatus, setFetchStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [rating, setRating] = useState(5);
@@ -38,12 +39,22 @@ export function ReviewPanel({ productId }: ReviewPanelProps) {
 
   useEffect(() => {
     const controller = new AbortController();
+    setFetchStatus('loading');
     void fetch(`${apiBaseUrl}/api/reviews/${encodeURIComponent(productId)}`, {
       signal: controller.signal,
     })
-      .then(async (response) => (response.ok ? ((await response.json()) as { reviews: Review[] }) : { reviews: [] }))
-      .then((payload) => setReviews(payload.reviews))
-      .catch(() => undefined);
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Reviews unavailable');
+        return (await response.json()) as { reviews: Review[] };
+      })
+      .then((payload) => {
+        setReviews(payload.reviews);
+        setFetchStatus('ready');
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        setFetchStatus('error');
+      });
     return () => controller.abort();
   }, [apiBaseUrl, productId]);
 
@@ -71,14 +82,24 @@ export function ReviewPanel({ productId }: ReviewPanelProps) {
       <div className="review-panel__heading">
         <div>
           <p className="eyebrow">Customer feedback</p>
-          <h2>{reviews.length > 0 ? `${reviews.length} customer reviews` : 'Be the first to review'}</h2>
+          <h2>
+            {fetchStatus === 'loading'
+              ? 'Loading customer reviews…'
+              : reviews.length > 0
+                ? `${reviews.length} customer reviews`
+                : 'Be the first to review'}
+          </h2>
         </div>
         <button className="button button--ghost" type="button" onClick={() => setOpen(true)}>
           Leave a review
         </button>
       </div>
 
-      {reviews.length > 0 ? (
+      {fetchStatus === 'error' ? (
+        <p className="review-panel__empty">
+          Customer reviews are temporarily unavailable. You can still submit a new review.
+        </p>
+      ) : reviews.length > 0 ? (
         <div className="review-grid">
           {reviews.map((review) => (
             <article key={`${review.createdAt}:${review.name}:${review.comment}`}>

@@ -28,6 +28,20 @@ def test_health() -> None:
     assert response.json() == {"status": "ok"}
 
 
+def test_cors_does_not_allow_browser_credentials() -> None:
+    response = client.options(
+        "/api/health",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
+    assert "access-control-allow-credentials" not in response.headers
+
+
 def test_contact_requires_provider_configuration() -> None:
     app.dependency_overrides[get_settings] = unconfigured_settings
 

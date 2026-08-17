@@ -553,7 +553,7 @@ h3 {
 }
 
 .mobile-menu nav a:hover,
-.mobile-menu nav a.active {
+.mobile-menu nav a.is-active {
   color: var(--purple-bright);
 }
 

@@ -23,6 +23,7 @@ from app.models import (
 )
 from app.orders import (
     OrderStatus,
+    attach_stripe_session,
     create_pending_order,
     get_order_by_session_id,
     process_stripe_event,
@@ -38,7 +39,7 @@ _startup_settings = get_settings()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_startup_settings.allowed_origins,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Stripe-Signature"],
 )
@@ -208,6 +209,20 @@ async def create_checkout_session(
     order_reference = f"asc_{uuid4().hex}"
     cart_reference = hashlib.sha256("|".join(cart_identity_parts).encode()).hexdigest()[:20]
     try:
+        await asyncio.to_thread(
+            create_pending_order,
+            settings.orders_database_path,
+            order_reference=order_reference,
+            cart_reference=cart_reference,
+            amount_total=amount_total,
+        )
+    except (OSError, sqlite3.Error) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The order could not be initialized. Please try again later.",
+        ) from exc
+
+    try:
         session = await asyncio.to_thread(
             stripe.checkout.Session.create,
             api_key=settings.stripe_secret_key,
@@ -246,19 +261,22 @@ async def create_checkout_session(
             detail="Checkout provider returned an invalid session.",
         )
     try:
-        await asyncio.to_thread(
-            create_pending_order,
+        attached = await asyncio.to_thread(
+            attach_stripe_session,
             settings.orders_database_path,
             order_reference=order_reference,
             stripe_session_id=session_id,
-            cart_reference=cart_reference,
-            amount_total=amount_total,
         )
     except (OSError, sqlite3.Error) as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="The order could not be recorded. Please contact support before retrying.",
         ) from exc
+    if not attached:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The checkout session could not be attached to its order.",
+        )
     return CheckoutResponse(url=session_url)
 
 
@@ -388,6 +406,10 @@ async def stripe_webhook(
     event_data = _stripe_value(event, "data")
     session = _stripe_value(event_data, "object") if event_data is not None else None
     stripe_session_id = _stripe_value(session, "id")
+    session_metadata = _stripe_value(session, "metadata")
+    order_reference = _stripe_value(session_metadata, "order_reference")
+    if not isinstance(order_reference, str):
+        order_reference = None
     status_by_event: dict[str, OrderStatus] = {
         "checkout.session.async_payment_succeeded": "paid",
         "checkout.session.async_payment_failed": "unpaid",
@@ -412,6 +434,7 @@ async def stripe_webhook(
             event_id=event_id,
             event_type=event_type,
             stripe_session_id=stripe_session_id,
+            order_reference=order_reference,
             new_status=new_status,
         )
     except (OSError, sqlite3.Error) as exc:

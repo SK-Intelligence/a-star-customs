@@ -2,12 +2,16 @@ node_modules/
 dist/
 .vite/
 .venv/
+frontend/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
 __pycache__/
 .pytest_cache/
 backend/data/
 output/
 .playwright-cli/
 *.py[cod]
+*.tsbuildinfo
 .env
 .env.*
 !.env.example

@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 
 from app.config import Settings, get_settings
 from app.main import app
-from app.orders import create_pending_order
+from app.orders import attach_stripe_session, create_pending_order
 
 
 client = TestClient(app)
@@ -61,9 +61,13 @@ def test_checkout_status_is_verified_with_stripe(
     create_pending_order(
         database_path,
         order_reference="asc_verified_order",
-        stripe_session_id="cs_test_verified",
         cart_reference="cart_test",
         amount_total=4999,
+    )
+    assert attach_stripe_session(
+        database_path,
+        order_reference="asc_verified_order",
+        stripe_session_id="cs_test_verified",
     )
 
     def fake_retrieve(session_id: str, **_: object) -> SimpleNamespace:
