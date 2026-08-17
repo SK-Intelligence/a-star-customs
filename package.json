@@ -1,0 +1,15 @@
+{
+  "name": "astar-customs",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "build": "npm --workspace frontend run build",
+    "dev": "npm --workspace frontend run dev",
+    "check:catalog": "python scripts/check_catalog_sync.py",
+    "test:backend": "cd backend && .venv/bin/pytest -q",
+    "verify": "npm run build && npm run check:catalog && npm run test:backend"
+  }
+}

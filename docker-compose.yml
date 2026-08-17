@@ -1,0 +1,36 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      WEB3FORMS_ACCESS_KEY: ${WEB3FORMS_ACCESS_KEY:-}
+      ORDERS_DATABASE_PATH: /data/orders.db
+      REVIEWS_DATABASE_PATH: /data/reviews.db
+      CHECKOUT_SUCCESS_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}/checkout/success?session_id={CHECKOUT_SESSION_ID}
+      CHECKOUT_CANCEL_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}/checkout
+      CORS_ORIGINS: ${PUBLIC_BASE_URL:-http://localhost:8080}
+    volumes:
+      - astar-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=2)"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+volumes:
+  astar-data:

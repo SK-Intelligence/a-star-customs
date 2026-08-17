@@ -1,0 +1,89 @@
+from __future__ import annotations
+
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+from fastapi.testclient import TestClient
+
+from app.config import Settings, get_settings
+from app.main import app
+from app.orders import create_pending_order
+
+
+client = TestClient(app)
+
+
+def teardown_function() -> None:
+    app.dependency_overrides.clear()
+
+
+def test_checkout_status_requires_server_configuration(tmp_path: Path) -> None:
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        stripe_secret_key=None,
+        orders_database_path=tmp_path / "orders.db",
+    )
+
+    response = client.get("/api/checkout/session/cs_test_direct")
+
+    assert response.status_code == 503
+
+
+def test_checkout_status_rejects_invalid_session_id_without_provider_call(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    def unexpected_retrieve(*_: object, **__: object) -> None:
+        raise AssertionError("Stripe must not be called for an invalid session ID")
+
+    monkeypatch.setattr("app.main.stripe.checkout.Session.retrieve", unexpected_retrieve)
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        stripe_secret_key="sk_test_placeholder",
+        orders_database_path=tmp_path / "orders.db",
+    )
+
+    response = client.get("/api/checkout/session/not-a-session")
+
+    assert response.status_code == 400
+
+
+@pytest.mark.parametrize(
+    ("payment_status", "expected_status"),
+    [("unpaid", "unpaid"), ("paid", "paid")],
+)
+def test_checkout_status_is_verified_with_stripe(
+    monkeypatch,
+    tmp_path: Path,
+    payment_status: str,
+    expected_status: str,
+) -> None:
+    database_path = tmp_path / "orders.db"
+    create_pending_order(
+        database_path,
+        order_reference="asc_verified_order",
+        stripe_session_id="cs_test_verified",
+        cart_reference="cart_test",
+        amount_total=4999,
+    )
+
+    def fake_retrieve(session_id: str, **_: object) -> SimpleNamespace:
+        assert session_id == "cs_test_verified"
+        return SimpleNamespace(
+            id="cs_test_verified",
+            status="complete",
+            payment_status=payment_status,
+        )
+
+    monkeypatch.setattr("app.main.stripe.checkout.Session.retrieve", fake_retrieve)
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        stripe_secret_key="sk_test_placeholder",
+        orders_database_path=database_path,
+    )
+
+    response = client.get("/api/checkout/session/cs_test_verified")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "orderReference": "asc_verified_order",
+        "status": expected_status,
+    }
