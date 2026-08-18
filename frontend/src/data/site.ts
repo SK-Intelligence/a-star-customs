@@ -263,12 +263,14 @@ export const contactDetails: ContactDetails = {
 };
 
 export const socialLinks: readonly SocialLink[] = [
+  { label: "Facebook", href: "https://www.facebook.com/AStrCustoms" },
   { label: "Instagram", href: "https://www.instagram.com/a_starcustoms/" },
   { label: "TikTok", href: "https://www.tiktok.com/@a.starcustoms" },
-  { label: "Facebook", href: "https://www.facebook.com/AStrCustoms" },
 ] as const;
 
 const whatsappMessage =
   "Welcome to A Star Customs 💫🚘 Please tell us what you'd like done to your car, including its make, model and year. Add photos if you have them and we'll reply within 24 working hours.";
 
-export const whatsappUrl = `https://wa.me/447960405187?text=${encodeURIComponent(whatsappMessage)}`;
+const whatsappPhone = contactDetails.phone.replace(/^\+/, "");
+
+export const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}`;

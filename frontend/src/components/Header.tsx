@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useDialogFocus } from '../hooks/useDialogFocus';
+import { socialLinks } from '../data/site';
 import { cartItemCount, useCartStore } from '../store/cart';
 
 const navigation = [
@@ -116,15 +117,18 @@ export function Header() {
         <div className="mobile-menu__footer">
           <p>Follow the latest builds</p>
           <div className="social-links">
-            <a href="https://www.facebook.com/AStrCustoms" target="_blank" rel="noreferrer" aria-label="Facebook" tabIndex={menuOpen ? 0 : -1}>
-              <Facebook aria-hidden="true" />
-            </a>
-            <a href="https://www.instagram.com/A_Starcustoms" target="_blank" rel="noreferrer" aria-label="Instagram" tabIndex={menuOpen ? 0 : -1}>
-              <Instagram aria-hidden="true" />
-            </a>
-            <a href="https://www.tiktok.com/@a.starcustoms" target="_blank" rel="noreferrer" aria-label="TikTok" tabIndex={menuOpen ? 0 : -1}>
-              <Music2 aria-hidden="true" />
-            </a>
+            {socialLinks.map(({ label, href }) => {
+              const Icon = label === 'Facebook'
+                ? Facebook
+                : label === 'Instagram'
+                  ? Instagram
+                  : Music2;
+              return (
+                <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={label} tabIndex={menuOpen ? 0 : -1}>
+                  <Icon aria-hidden="true" />
+                </a>
+              );
+            })}
           </div>
         </div>
       </div>

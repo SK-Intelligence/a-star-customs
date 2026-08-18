@@ -72,10 +72,43 @@ test('homepage uses the original direct service headline', async ({ page }) => {
   );
   await expect(
     page.getByText(
-      'Here at A Star Customs, we always provide a 5-star service. Come take a look at what we can do for your car.',
+      'Here at A Star Customs we always provide a 5 star service...come take a look',
       { exact: true },
     ),
   ).toBeVisible();
+});
+
+test('homepage keeps the original service, gallery and shop routes prominent', async ({ page }) => {
+  await page.goto('/');
+
+  const main = page.locator('main');
+  await expect(main.getByRole('link', { name: /shop/i }).first()).toHaveAttribute(
+    'href',
+    '/shop',
+  );
+  await expect(main.getByRole('link', { name: /services/i }).first()).toHaveAttribute(
+    'href',
+    '/services',
+  );
+  await expect(main.getByRole('link', { name: /work|gallery/i }).first()).toHaveAttribute(
+    'href',
+    '/gallery',
+  );
+  await expect(main.getByText('400+', { exact: true })).toBeVisible();
+  await expect(main.getByText('5', { exact: true })).toBeVisible();
+});
+
+test('tablet navigation keeps every destination reachable', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await page.goto('/');
+  await page.getByRole('button', { name: /^menu$/i }).click();
+
+  const menu = page.getByRole('dialog', { name: 'Mobile navigation menu' });
+  const contact = menu.getByRole('link', { name: 'Contact' });
+  await contact.scrollIntoViewIfNeeded();
+  await expect(contact).toBeInViewport();
+  await contact.click();
+  await expect(page).toHaveURL(/\/contact-us$/);
 });
 
 test('unknown routes render the not-found page', async ({ page }) => {

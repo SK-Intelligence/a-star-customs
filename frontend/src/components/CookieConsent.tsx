@@ -148,12 +148,12 @@ export function CookieConsent() {
           </button>
         ) : null}
         <div>
-          <p className="eyebrow">Your privacy, your choice</p>
-          <h2 id="cookie-preferences-title">{isManaging ? 'Cookie preferences' : 'Cookie choices'}</h2>
+          {isManaging ? <p className="eyebrow">Your privacy, your choice</p> : null}
+          <h2 id="cookie-preferences-title">{isManaging ? 'Cookie preferences' : 'We use cookies'}</h2>
           <p>
-            Essential storage keeps your bag and preferences working. Optional
-            cookies only load analytics and social embeds when you allow them.
-            {' '}See our <Link to="/privacy">privacy notice</Link>.
+            Essential cookies keep the site and shopping bag working. Optional
+            analytics and social media cookies only load with your permission.
+            {' '}Read our <Link to="/privacy">privacy notice</Link>.
           </p>
         </div>
 

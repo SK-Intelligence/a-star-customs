@@ -1,5 +1,6 @@
 import { Facebook, Instagram, Mail, MapPin, Music2, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { contactDetails, socialLinks } from '../data/site';
 
 const footerLinks = [
   ['Services', '/services'],
@@ -22,15 +23,18 @@ export function Footer() {
             London.
           </p>
           <div className="social-links" aria-label="Social media">
-            <a href="https://www.facebook.com/AStrCustoms" target="_blank" rel="noreferrer" aria-label="Facebook">
-              <Facebook aria-hidden="true" />
-            </a>
-            <a href="https://www.instagram.com/A_Starcustoms" target="_blank" rel="noreferrer" aria-label="Instagram">
-              <Instagram aria-hidden="true" />
-            </a>
-            <a href="https://www.tiktok.com/@a.starcustoms" target="_blank" rel="noreferrer" aria-label="TikTok">
-              <Music2 aria-hidden="true" />
-            </a>
+            {socialLinks.map(({ label, href }) => {
+              const Icon = label === 'Facebook'
+                ? Facebook
+                : label === 'Instagram'
+                  ? Instagram
+                  : Music2;
+              return (
+                <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={label}>
+                  <Icon aria-hidden="true" />
+                </a>
+              );
+            })}
           </div>
         </div>
 
@@ -46,20 +50,20 @@ export function Footer() {
         <div className="footer-contact">
           <p className="eyebrow">Visit the workshop</p>
           <a
-            href="https://www.google.com/maps/search/?api=1&query=160-164+Brabazon+Road+Hounslow"
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contactDetails.mapQuery)}`}
             target="_blank"
             rel="noreferrer"
           >
             <MapPin aria-hidden="true" />
-            <span>160–164 Brabazon Road, Hounslow, London</span>
+            <span>{contactDetails.address.slice(0, 2).join(', ')}</span>
           </a>
-          <a href="tel:+447960405187">
+          <a href={`tel:${contactDetails.phone}`}>
             <Phone aria-hidden="true" />
-            <span>07960 405187</span>
+            <span>{contactDetails.phoneDisplay}</span>
           </a>
-          <a href="mailto:astarenquires@gmail.com">
+          <a href={`mailto:${contactDetails.email}`}>
             <Mail aria-hidden="true" />
-            <span>astarenquires@gmail.com</span>
+            <span>{contactDetails.email}</span>
           </a>
         </div>
       </div>
