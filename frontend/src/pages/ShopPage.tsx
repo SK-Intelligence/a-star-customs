@@ -11,8 +11,8 @@ export function ShopPage() {
         description="Shop A Star Customs lighting, starlight, screen, dashcam, wheel and interior upgrade packages with secure Stripe-ready checkout."
       />
       <PageHero
-        eyebrow="37 proven upgrades"
-        title="Find the right detail for your build."
+        eyebrow="Products & fitted packages"
+        title="Shop car upgrades."
         description="Shop ready-to-order products and fitted packages. Products marked custom quote must be discussed with the workshop before ordering."
         image="/images/site/gallery-stars-01.jpg"
       />
@@ -24,4 +24,3 @@ export function ShopPage() {
     </>
   );
 }
-

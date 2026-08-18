@@ -44,7 +44,7 @@ async function seedCart(
 }
 
 const primaryRoutes = [
-  ['/', /Premium Automotive Customisation/],
+  ['/', /Car Upgrades & Customisation/],
   ['/services', /Automotive Customisation Services/],
   ['/gallery', /Automotive Customisation Gallery/],
   ['/shop', /Shop Automotive Upgrades/],
@@ -64,11 +64,25 @@ for (const [route, title] of primaryRoutes) {
   });
 }
 
+test('homepage uses the original direct service headline', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Car needs an upgrade?',
+  );
+  await expect(
+    page.getByText(
+      'Here at A Star Customs, we always provide a 5-star service. Come take a look at what we can do for your car.',
+      { exact: true },
+    ),
+  ).toBeVisible();
+});
+
 test('unknown routes render the not-found page', async ({ page }) => {
   await page.goto('/not-a-real-route');
 
   await expect(page).toHaveTitle(/Page Not Found/);
-  await expect(page.getByRole('heading', { name: 'This route isn’t in the build.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'We couldn’t find that page.' })).toBeVisible();
 });
 
 test('catalog category query filters the product count', async ({ page }) => {

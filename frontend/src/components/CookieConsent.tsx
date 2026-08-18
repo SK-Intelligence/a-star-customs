@@ -149,7 +149,7 @@ export function CookieConsent() {
         ) : null}
         <div>
           <p className="eyebrow">Your privacy, your choice</p>
-          <h2 id="cookie-preferences-title">{isManaging ? 'Cookie preferences' : 'A cleaner kind of cookie banner'}</h2>
+          <h2 id="cookie-preferences-title">{isManaging ? 'Cookie preferences' : 'Cookie choices'}</h2>
           <p>
             Essential storage keeps your bag and preferences working. Optional
             cookies only load analytics and social embeds when you allow them.

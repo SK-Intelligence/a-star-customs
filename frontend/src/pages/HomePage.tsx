@@ -3,32 +3,28 @@ import { Link } from 'react-router-dom';
 import { Seo } from '../components/Seo';
 
 const aboutPoints = [
-  'Collaborative design from concept to handover',
-  'Transparent planning and progress updates',
-  'Rigorous quality control on every build',
+  'We discuss the job with you before work starts',
+  'Clear pricing and progress updates',
+  'Every installation checked before handover',
 ];
 
 export function HomePage() {
   return (
     <>
       <Seo
-        title="Premium Automotive Customisation"
-        description="Transform your car with ambient lighting, starlight headliners, screen upgrades and bespoke finishes from A Star Customs in Hounslow."
+        title="Car Upgrades & Customisation"
+        description="Car lighting, starlight headliners, screen upgrades, dashcams, steering wheels, rims and calipers fitted by A Star Customs in Hounslow."
       />
 
       <section className="home-hero">
         <div className="home-hero__media" aria-hidden="true" />
         <div className="home-hero__shade" aria-hidden="true" />
         <div className="container home-hero__content">
-          <p className="eyebrow">London · Built around your car</p>
-          <h1>
-            Your car.
-            <span>Your vision.</span>
-            Our craft.
-          </h1>
+          <p className="eyebrow">Car customisation in Hounslow</p>
+          <h1>Car needs an upgrade?</h1>
           <p className="home-hero__lead">
-            Premium lighting, technology and interior upgrades installed with
-            precision — and backed by a one-year workmanship warranty.
+            Here at A Star Customs, we always provide a 5-star service. Come
+            take a look at what we can do for your car.
           </p>
           <div className="button-row">
             <Link className="button button--primary" to="/shop">
@@ -63,7 +59,7 @@ export function HomePage() {
           </div>
           <div>
             <strong>5★</strong>
-            <span>service mindset</span>
+            <span>customer service</span>
           </div>
         </div>
       </section>
@@ -73,10 +69,10 @@ export function HomePage() {
           <div className="section-heading section-heading--split">
             <div>
               <p className="eyebrow">Start with what your car needs</p>
-              <h2>From subtle upgrade to full transformation.</h2>
+              <h2>Choose the right upgrade for your car.</h2>
             </div>
             <p>
-              Explore our fitted services or browse proven kits and accessories
+              Explore our fitted services or browse kits and accessories
               for your own build.
             </p>
           </div>
@@ -88,7 +84,7 @@ export function HomePage() {
               <div>
                 <p className="eyebrow">Supplied & fitted</p>
                 <h3>Explore services</h3>
-                <p>Lighting, screens, rims, cameras and bespoke steering.</p>
+                <p>Lighting, screens, wheels, dashcams and steering wheels.</p>
                 <span className="feature-panel__link">
                   View services <ArrowRight aria-hidden="true" />
                 </span>
@@ -98,8 +94,8 @@ export function HomePage() {
               <img src="/images/site/gallery-stars-02.jpg" alt="Detailed starlight headliner installation" />
               <span className="feature-panel__number">02</span>
               <div>
-                <p className="eyebrow">Recent transformations</p>
-                <h3>See the finish</h3>
+                <p className="eyebrow">Recent work</p>
+                <h3>View our work</h3>
                 <p>Real customer cars, photographed at the workshop.</p>
                 <span className="feature-panel__link">
                   Open gallery <ArrowRight aria-hidden="true" />
@@ -121,23 +117,22 @@ export function HomePage() {
             <img
               className="about-collage__detail"
               src="/images/site/gallery-steering-01.webp"
-              alt="Bespoke custom steering wheel"
+              alt="Custom steering wheel"
             />
             <span className="about-collage__badge">
-              <Sparkles aria-hidden="true" /> Built differently
+              <Sparkles aria-hidden="true" /> Hounslow workshop
             </span>
           </div>
           <div className="about-copy">
             <p className="eyebrow">About A Star Customs</p>
-            <h2>We make ordinary interiors feel one of one.</h2>
+            <h2>Car upgrades fitted in Hounslow.</h2>
             <p>
-              We specialise in bespoke customisation across all makes and models,
-              bringing together careful craftsmanship, modern materials and the
-              latest automotive technology.
+              We fit ambient lighting, starlights, screens, dashcams, steering
+              wheels, rims and calipers for a wide range of makes and models.
             </p>
             <p>
-              From a single detail to a complete interior concept, every project
-              is shaped around your vision — never a one-size-fits-all template.
+              Tell us what you drive and what you want changed. We will confirm
+              compatibility, options, price and fitting time before you book.
             </p>
             <ul className="check-list">
               {aboutPoints.map((point) => (
@@ -158,26 +153,26 @@ export function HomePage() {
         <div className="container">
           <div className="section-heading">
             <p className="eyebrow">How a custom build works</p>
-            <h2>Clear from first message to final reveal.</h2>
+            <h2>From enquiry to collection.</h2>
           </div>
           <div className="process-grid">
             <article>
               <span>01</span>
               <Sparkles aria-hidden="true" />
-              <h3>Share the vision</h3>
-              <p>Send your make, model, year, reference images and must-haves.</p>
+              <h3>Tell us about your car</h3>
+              <p>Send the make, model, year and details of the work you want.</p>
             </article>
             <article>
               <span>02</span>
               <Wrench aria-hidden="true" />
-              <h3>Approve the plan</h3>
-              <p>We confirm the design, materials, price and workshop schedule.</p>
+              <h3>Confirm the job</h3>
+              <p>We agree the parts, finish, price and workshop date with you.</p>
             </article>
             <article>
               <span>03</span>
               <ShieldCheck aria-hidden="true" />
-              <h3>Collect with confidence</h3>
-              <p>Every build is checked, demonstrated and warranty-backed.</p>
+              <h3>Collect your car</h3>
+              <p>We check the installation, show you how it works and explain the warranty.</p>
             </article>
           </div>
         </div>
@@ -186,8 +181,8 @@ export function HomePage() {
       <section className="section cta-section">
         <div className="container cta-panel">
           <div>
-            <p className="eyebrow">Ready when you are</p>
-            <h2>Make the cabin feel like yours.</h2>
+            <p className="eyebrow">Thinking about an upgrade?</p>
+            <h2>Tell us what you have in mind.</h2>
           </div>
           <div className="button-row">
             <Link className="button button--primary" to="/contact-us">

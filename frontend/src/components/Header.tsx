@@ -42,8 +42,8 @@ export function Header() {
   return (
     <header className="site-header">
       <div className="announcement-bar">
-        <span>Transform your ride with custom services</span>
-        <Link to="/contact-us">Book a consultation</Link>
+        <span>Car upgrades and custom fitting in Hounslow</span>
+        <Link to="/contact-us">Get a quote</Link>
       </div>
       <div className="site-header__main">
         <div className="container site-header__inner">

@@ -195,7 +195,7 @@ export function ProductPage() {
                 <div className="custom-quote-box">
                   <Sparkles aria-hidden="true" />
                   <div>
-                    <h2>Built around your exact car.</h2>
+                    <h2>Contact us before ordering.</h2>
                     <p>Contact the workshop before ordering so we can confirm specification and price.</p>
                   </div>
                   <a className="button button--primary" href={whatsappUrl} target="_blank" rel="noreferrer">
@@ -223,8 +223,8 @@ export function ProductPage() {
           {related.length > 0 ? (
             <section className="related-products">
               <div className="section-heading">
-                <p className="eyebrow">Complete the build</p>
-                <h2>Your car could look even better.</h2>
+                <p className="eyebrow">You may also need</p>
+                <h2>Other products for your car.</h2>
               </div>
               <div className="product-grid">
                 {related.map((item) => <ProductCard product={item} key={item.id} />)}

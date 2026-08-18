@@ -15,12 +15,12 @@ export function CollaborationsPage() {
     <>
       <Seo
         title="Featured Collaborations"
-        description="Discover recognisable creator cars transformed by A Star Customs, including bespoke ambient lighting, starlights and technology upgrades."
+        description="See creator cars fitted by A Star Customs with ambient lighting, starlights and technology upgrades."
       />
       <PageHero
-        eyebrow="Featured builds"
-        title="Cars you may have seen on your feed."
-        description="Creators trust us with cars their audiences know. Every collaboration still gets the same workshop detail as every customer build."
+        eyebrow="Creator cars"
+        title="Featured collaborations."
+        description="A selection of cars we have worked on for creators and public figures."
         image="/images/site/gallery-ambient-01.jpeg"
       />
 
@@ -29,7 +29,7 @@ export function CollaborationsPage() {
           <div className="section-heading section-heading--split">
             <div>
               <p className="eyebrow">Who we’ve supplied</p>
-              <h2>Recognisable names. Individual results.</h2>
+              <h2>Cars we’ve worked on.</h2>
             </div>
             <p>
               The brief changes with every car; the standard of finish does not.
@@ -55,8 +55,8 @@ export function CollaborationsPage() {
       <section className="section section--carbon social-builds">
         <div className="container">
           <div className="section-heading">
-            <p className="eyebrow">See the transformations in motion</p>
-            <h2>From workshop to reveal.</h2>
+            <p className="eyebrow">Watch the work</p>
+            <h2>Build videos from the workshop.</h2>
           </div>
           <ConsentGate title="TikTok build videos">
             <div className="tiktok-grid">
@@ -84,4 +84,3 @@ export function CollaborationsPage() {
     </>
   );
 }
-

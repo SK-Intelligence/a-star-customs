@@ -45,7 +45,7 @@ export const serviceCards: readonly ServiceCard[] = [
     id: "ambient-lighting",
     title: "Ambient lighting",
     description:
-      "Enhance your interior with a subtle, customisable glow for a modern, premium feel.",
+      "Choose colours and lighting zones to add a customisable glow to your interior.",
     image: "/images/site/service-ambient.jpg",
     href: "/shop?category=Ambients",
   },
@@ -53,7 +53,7 @@ export const serviceCards: readonly ServiceCard[] = [
     id: "starlights",
     title: "Starlights",
     description:
-      "Transform your roof lining with a stunning starlight effect for a luxury finish.",
+      "Add a standard, twinkle or shooting-star effect to your roof lining.",
     image: "/images/site/service-starlights.jpg",
     href: "/shop?category=Standard%20Starlights",
   },
@@ -69,7 +69,7 @@ export const serviceCards: readonly ServiceCard[] = [
     id: "rims-calipers",
     title: "Rims & calipers",
     description:
-      "Redefine your car's style with custom colours, two-tone finishes and standout calipers.",
+      "Refresh your wheels or calipers with custom colours and two-tone finishes.",
     image: "/images/site/service-rims.jpg",
     href: "/shop?category=Rims%20%26%20Caliper",
   },
@@ -85,7 +85,7 @@ export const serviceCards: readonly ServiceCard[] = [
     id: "dashcams",
     title: "Dashcams",
     description:
-      "Drive with confidence using a discreet, professionally fitted dashcam installation.",
+      "Add a discreet dashcam with hidden wiring and professional fitting.",
     image: "/images/site/service-dashcam.jpg",
     href: "/shop?category=Dashcams",
   },
@@ -122,7 +122,7 @@ export const galleryGroups: readonly GalleryGroup[] = [
     id: "steering-wheels",
     title: "Custom steering wheels",
     description:
-      "Bespoke materials and details create a more comfortable, personal driving experience.",
+      "Choose the materials, stitching and finish for a custom steering wheel.",
     images: [
       "/images/site/gallery-steering-01.webp",
       "/images/site/gallery-steering-02.webp",
@@ -133,7 +133,7 @@ export const galleryGroups: readonly GalleryGroup[] = [
     id: "rims-calipers",
     title: "Rims & calipers",
     description:
-      "Colour changes and precision detailing give wheels and brakes a fresh, distinctive finish.",
+      "See recent wheel colour changes, caliper finishes and detailing work.",
     images: [
       "/images/site/gallery-rims-01.jpg",
       "/images/site/gallery-rims-02.webp",

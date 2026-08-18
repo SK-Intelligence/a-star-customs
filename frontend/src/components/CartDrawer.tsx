@@ -57,7 +57,7 @@ export function CartDrawer() {
           <div className="empty-cart">
             <span><ShoppingBag aria-hidden="true" /></span>
             <h3>Your bag is waiting.</h3>
-            <p>Browse ready-to-order kits or message us about a bespoke build.</p>
+            <p>Browse ready-to-order kits or ask us about a custom job.</p>
             <Link className="button button--primary" to="/shop" onClick={closeCart}>
               Explore the shop <ArrowRight aria-hidden="true" />
             </Link>

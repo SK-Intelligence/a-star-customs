@@ -15,12 +15,12 @@ export function ServicesPage() {
     <>
       <Seo
         title="Automotive Customisation Services"
-        description="Explore ambient lighting, starlight headliners, screen upgrades, rims, calipers, dashcams and bespoke steering wheel services."
+        description="Ambient lighting, starlight headliners, screen upgrades, rims, calipers, dashcams and custom steering wheel fitting in Hounslow."
       />
       <PageHero
-        eyebrow="Supplied, fitted, finished properly"
-        title="Customisation that belongs in the car."
-        description="Modern technology and dramatic finishes, integrated with the restraint and attention of an OEM install."
+        eyebrow="Car customisation in Hounslow"
+        title="Our services."
+        description="We supply and fit lighting, technology and interior upgrades for a wide range of cars."
         image="/images/site/service-ambient.jpg"
       />
 
@@ -29,11 +29,11 @@ export function ServicesPage() {
           <div className="section-heading section-heading--split">
             <div>
               <p className="eyebrow">Explore our services</p>
-              <h2>Choose the upgrade. We’ll shape the details.</h2>
+              <h2>Choose a service.</h2>
             </div>
             <p>
               Every vehicle is checked for compatibility before we confirm a
-              fitted booking. For bespoke pricing, message the workshop first.
+              booking. For custom pricing, message the workshop first.
             </p>
           </div>
 
@@ -61,7 +61,7 @@ export function ServicesPage() {
         <div className="container">
           <div className="section-heading">
             <p className="eyebrow">A straightforward workshop process</p>
-            <h2>No guesswork. No hidden handover surprises.</h2>
+            <h2>How booking works.</h2>
           </div>
           <div className="service-process__grid">
             {process.map(([title, description], index) => (
@@ -87,4 +87,3 @@ export function ServicesPage() {
     </>
   );
 }
-

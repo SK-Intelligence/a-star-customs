@@ -21,7 +21,7 @@ export function PrivacyPage() {
         <div className="container policy-layout">
           <aside>
             <ShieldCheck aria-hidden="true" />
-            <h2>Your information stays purposeful.</h2>
+            <h2>How we use your information.</h2>
             <p>We do not sell customer information or use enquiry and review details for unrelated marketing.</p>
             <a className="text-link" href={`mailto:${contactDetails.email}`}>
               <Mail aria-hidden="true" /> Ask a privacy question

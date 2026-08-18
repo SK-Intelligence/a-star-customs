@@ -18,7 +18,7 @@ export function Footer() {
         <div className="footer-brand">
           <img src="/images/site/logo.png" alt="A Star Customs" />
           <p>
-            Bespoke automotive upgrades, installed with precision in Hounslow,
+            Car lighting, technology and interior upgrades fitted in Hounslow,
             London.
           </p>
           <div className="social-links" aria-label="Social media">
@@ -65,7 +65,7 @@ export function Footer() {
       </div>
       <div className="container footer-base">
         <span>© {new Date().getFullYear()} A Star Customs</span>
-        <span>Bespoke automotive customisation · Hounslow, London</span>
+        <span>Car upgrades and custom fitting · Hounslow, London</span>
       </div>
     </footer>
   );

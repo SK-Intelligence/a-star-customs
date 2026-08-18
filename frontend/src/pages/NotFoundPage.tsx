@@ -7,8 +7,8 @@ export function NotFoundPage() {
     <section className="not-found">
       <Seo title="Page Not Found" description="The page you requested could not be found." />
       <span>404</span>
-      <p className="eyebrow">Wrong turn</p>
-      <h1>This route isn’t in the build.</h1>
+      <p className="eyebrow">Page not found</p>
+      <h1>We couldn’t find that page.</h1>
       <p>The page may have moved, or the address may be incomplete.</p>
       <Link className="button button--primary" to="/"><ArrowLeft aria-hidden="true" /> Back home</Link>
     </section>

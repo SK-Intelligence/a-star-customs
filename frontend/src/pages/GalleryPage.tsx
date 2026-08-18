@@ -22,8 +22,8 @@ export function GalleryPage() {
       />
       <PageHero
         eyebrow="Real work. Real customer cars."
-        title="See what precision looks like after dark."
-        description="A closer look at the details, fit and finish behind recent A Star Customs transformations."
+        title="See our recent work."
+        description="Browse lighting, starlights, screens, wheels, steering wheels and dashcams fitted at our workshop."
         image="/images/site/gallery-stars-03.jpg"
       />
 
@@ -72,4 +72,3 @@ export function GalleryPage() {
     </>
   );
 }
-

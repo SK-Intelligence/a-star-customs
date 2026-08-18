@@ -15,16 +15,16 @@ export function CustomKitsPage() {
         description="Browse self-install and custom-fit ambient lighting, starlight and vehicle interior kits from A Star Customs."
       />
       <PageHero
-        eyebrow="Build it your way"
-        title="Custom kits for hands-on builds."
-        description="Purpose-selected components and complete kits for enthusiasts who want to handle the installation themselves."
+        eyebrow="DIY & self-install kits"
+        title="Kits for your own installation."
+        description="Browse components and complete kits if you plan to fit the upgrade yourself."
         image="/images/site/service-screen.webp"
       />
       <section className="section shop-section section--carbon">
         <div className="container">
           <div className="collection-intro">
             <p className="eyebrow">DIY & custom fittings</p>
-            <h2>Workshop-grade parts, ready for your project.</h2>
+            <h2>Parts and kits for your project.</h2>
             <p>Always confirm compatibility before ordering if your exact model is not listed.</p>
           </div>
           <CatalogBrowser
