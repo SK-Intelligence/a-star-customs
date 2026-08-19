@@ -100,16 +100,14 @@ export function Header() {
         tabIndex={-1}
       >
         <nav aria-label="Mobile navigation">
-          {navigation.map(([label, href], index) => (
+          {navigation.map(([label, href]) => (
             <NavLink
               key={href}
               to={href}
               end={href === '/'}
               tabIndex={menuOpen ? 0 : -1}
               className={({ isActive }) => (isActive ? 'is-active' : undefined)}
-              style={{ '--menu-index': index } as React.CSSProperties}
             >
-              <span>{String(index + 1).padStart(2, '0')}</span>
               {label}
             </NavLink>
           ))}
