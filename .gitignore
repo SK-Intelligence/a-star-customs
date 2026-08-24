@@ -10,6 +10,7 @@ __pycache__/
 backend/data/
 output/
 .playwright-cli/
+.omx/
 *.py[cod]
 *.tsbuildinfo
 .env

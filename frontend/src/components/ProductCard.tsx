@@ -1,6 +1,6 @@
 import { ArrowRight, MessageCircle, ShoppingBag, SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { formatPrice, type Product } from '../data/catalog';
+import { formatPrice, getActiveAddOnDefinition, type Product } from '../data/catalog';
 import { whatsappUrl } from '../data/site';
 import { useCartStore } from '../store/cart';
 
@@ -14,6 +14,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const prices = product.variants.map((variant) => variant.price).filter((price) => price > 0);
   const minimumPrice = prices.length > 0 ? Math.min(...prices) : 0;
   const hasPriceRange = new Set(prices).size > 1;
+  const isAddOnOnly = getActiveAddOnDefinition(product) !== undefined;
 
   return (
     <article className="product-card">
@@ -31,7 +32,16 @@ export function ProductCard({ product }: ProductCardProps) {
             {minimumPrice > 0 ? `${hasPriceRange ? 'From ' : ''}${formatPrice(minimumPrice)}` : 'Custom quote'}
           </p>
         </div>
-        {product.purchasable && product.available && firstVariant && product.variants.length > 1 ? (
+        {isAddOnOnly ? (
+          <Link
+            className="product-card__action"
+            to={`/${product.slug}`}
+            aria-label={`View add-on details for ${product.title}`}
+          >
+            <SlidersHorizontal aria-hidden="true" />
+            <span>View add-on</span>
+          </Link>
+        ) : product.purchasable && product.available && firstVariant && product.variants.length > 1 ? (
           <Link
             className="product-card__action"
             to={`/${product.slug}`}

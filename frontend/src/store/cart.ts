@@ -10,6 +10,8 @@ export interface CartLine {
   productId: string;
   variantId: string;
   quantity: number;
+  buildId?: string;
+  lineType: "standalone" | "base" | "addon";
 }
 
 export interface CheckoutSnapshot {
@@ -23,12 +25,9 @@ export interface CartState {
   isOpen: boolean;
   addItem: (productId: string, variantId: string, quantity?: number) => void;
   addItems: (lines: CartLine[]) => void;
-  updateQuantity: (
-    productId: string,
-    variantId: string,
-    quantity: number,
-  ) => void;
-  removeItem: (productId: string, variantId: string) => void;
+  addBuildAddOn: (buildId: string, productId: string, variantId: string) => void;
+  updateQuantity: (line: CartLine, quantity: number) => void;
+  removeItem: (line: CartLine) => void;
   recordCheckout: (orderReference: string, lines: CartLine[]) => void;
   completeCheckout: (orderReference: string) => void;
   clearCart: () => void;
@@ -37,8 +36,8 @@ export interface CartState {
   toggleCart: () => void;
 }
 
-function lineKey(line: Pick<CartLine, "productId" | "variantId">): string {
-  return `${line.productId}:${line.variantId}`;
+function lineKey(line: Pick<CartLine, "productId" | "variantId" | "buildId" | "lineType">): string {
+  return `${line.buildId ?? "standalone"}:${line.lineType}:${line.productId}:${line.variantId}`;
 }
 
 function clampQuantity(quantity: number): number {
@@ -85,10 +84,27 @@ function sanitiseLines(value: unknown): CartLine[] {
       continue;
     }
 
+    const requestedLineType =
+      "lineType" in candidate &&
+      (candidate.lineType === "base" ||
+        candidate.lineType === "addon" ||
+        candidate.lineType === "standalone")
+        ? candidate.lineType
+        : "standalone";
+    const buildId =
+      requestedLineType !== "standalone" &&
+      "buildId" in candidate &&
+      typeof candidate.buildId === "string" &&
+      candidate.buildId.length > 0
+        ? candidate.buildId
+        : undefined;
+    const lineType = buildId ? requestedLineType : "standalone";
     const line: CartLine = {
       productId: candidate.productId,
       variantId: candidate.variantId,
       quantity: clampQuantity(candidate.quantity),
+      lineType,
+      ...(buildId ? { buildId } : {}),
     };
     const key = lineKey(line);
     const existing = lines.get(key);
@@ -139,7 +155,9 @@ export const useCartStore = create<CartState>()(
       isOpen: false,
       addItem: (productId, variantId, quantity = 1) => {
         set((state) => ({
-          lines: mergeLines(state.lines, [{ productId, variantId, quantity }]),
+          lines: mergeLines(state.lines, [
+            { productId, variantId, quantity, lineType: "standalone" },
+          ]),
           isOpen: true,
         }));
       },
@@ -148,19 +166,58 @@ export const useCartStore = create<CartState>()(
           lines: mergeLines(state.lines, lines),
           isOpen: true,
         })),
-      updateQuantity: (productId, variantId, quantity) =>
+      addBuildAddOn: (buildId, productId, variantId) =>
+        set((state) => {
+          const base = state.lines.find(
+            (line) => line.buildId === buildId && line.lineType === "base",
+          );
+          if (!base) return state;
+
+          const addOn: CartLine = {
+            productId,
+            variantId,
+            quantity: base.quantity,
+            buildId,
+            lineType: "addon",
+          };
+          if (state.lines.some((line) => lineKey(line) === lineKey(addOn))) {
+            return state;
+          }
+
+          let insertionIndex = state.lines.length;
+          for (let index = state.lines.length - 1; index >= 0; index -= 1) {
+            if (state.lines[index]?.buildId === buildId) {
+              insertionIndex = index + 1;
+              break;
+            }
+          }
+
+          return {
+            lines: sanitiseLines([
+              ...state.lines.slice(0, insertionIndex),
+              addOn,
+              ...state.lines.slice(insertionIndex),
+            ]),
+          };
+        }),
+      updateQuantity: (target, quantity) =>
         set((state) => ({
           lines: state.lines.map((line) =>
-            line.productId === productId && line.variantId === variantId
+            lineKey(line) === lineKey(target) ||
+            (target.lineType === "base" &&
+              target.buildId !== undefined &&
+              line.buildId === target.buildId)
               ? { ...line, quantity: clampQuantity(quantity) }
               : line,
           ),
         })),
-      removeItem: (productId, variantId) =>
+      removeItem: (target) =>
         set((state) => ({
           lines: state.lines.filter(
             (line) =>
-              line.productId !== productId || line.variantId !== variantId,
+              target.lineType === "base" && target.buildId
+                ? line.buildId !== target.buildId
+                : lineKey(line) !== lineKey(target),
           ),
         })),
       recordCheckout: (orderReference, lines) => {

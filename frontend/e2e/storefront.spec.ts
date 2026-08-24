@@ -7,39 +7,48 @@ const premiumAddOnProductId = 'prod_01KCFRCKR5NV5VGCM7ZTKCZ5DE';
 const premiumAddOnVariantId = 'variant_01KCFRCKV84EMEE32KZB4QF9MK';
 const paidOrderReference = `asc_${'a'.repeat(32)}`;
 
-async function seedCart(
+type SeedCartLine = {
+  productId: string;
+  variantId: string;
+  quantity: number;
+  buildId?: string;
+  lineType?: 'standalone' | 'base' | 'addon';
+};
+
+type SeedCheckoutSnapshot = {
+  orderReference: string;
+  lines: SeedCartLine[];
+};
+
+async function seedCartState(
   page: Page,
-  quantity = 1,
-  checkoutSnapshots: Array<{
-    orderReference: string;
-    lines: Array<{ productId: string; variantId: string; quantity: number }>;
-  }> = [],
-  extraLines: Array<{ productId: string; variantId: string; quantity: number }> = [],
+  lines: SeedCartLine[],
+  checkoutSnapshots: SeedCheckoutSnapshot[] = [],
 ) {
   await page.addInitScript(
-    ({ key, product, variant, count, checkoutSnapshots: snapshots, extraLines: additions }) => {
+    ({ key, cartLines, snapshots }) => {
       window.localStorage.setItem(
         key,
         JSON.stringify({
-          state: {
-            lines: [
-              { productId: product, variantId: variant, quantity: count },
-              ...additions,
-            ],
-            checkoutSnapshots: snapshots,
-          },
+          state: { lines: cartLines, checkoutSnapshots: snapshots },
           version: 0,
         }),
       );
     },
-    {
-      key: cartStorageKey,
-      product: productId,
-      variant: firstVariantId,
-      count: quantity,
-      checkoutSnapshots,
-      extraLines,
-    },
+    { key: cartStorageKey, cartLines: lines, snapshots: checkoutSnapshots },
+  );
+}
+
+async function seedCart(
+  page: Page,
+  quantity = 1,
+  checkoutSnapshots: SeedCheckoutSnapshot[] = [],
+  extraLines: SeedCartLine[] = [],
+) {
+  await seedCartState(
+    page,
+    [{ productId, variantId: firstVariantId, quantity }, ...extraLines],
+    checkoutSnapshots,
   );
 }
 
@@ -192,6 +201,148 @@ test('optional extras update the build total and remain removable cart lines', a
   await expect(page.locator('.whatsapp-button')).toBeVisible();
 });
 
+test('installed starlight packages show disabled pricing placeholders while DIY stays unchanged', async ({ page }) => {
+  await page.goto('/standard-starlight-500-pieces');
+
+  for (const label of ['Shooting Stars', 'Colour-Change Starlights', 'Premium Headliner Material']) {
+    const option = page.getByRole('button', { name: new RegExp(label) });
+    await expect(option).toBeDisabled();
+  }
+  await expect(page.getByText('Pricing to be confirmed')).toHaveCount(3);
+
+  await page.goto('/shooting-stars-twinkle-starlight');
+  await expect(page.getByRole('button', { name: /Shooting Stars.*Pricing to be confirmed/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Colour-Change Starlights/ })).toBeDisabled();
+
+  await page.goto('/starlight-fiber-optic-kit');
+  await expect(page.getByRole('heading', { name: 'Optional extras' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Add to bag' })).toBeVisible();
+});
+
+test('configured add-ons can only be bought through a compatible package', async ({ page }) => {
+  await page.goto('/-4x-speaker-lights-optional-add-on');
+
+  await expect(
+    page.getByRole('heading', { name: 'Add this to a compatible package.' }),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: /Add to bag/ })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Browse compatible packages' })).toBeVisible();
+
+  await page.goto('/shop');
+  await page.getByRole('searchbox', { name: 'Search products' }).fill('4x Speaker Lights');
+  const productCard = page.getByRole('article').filter({ hasText: '4x Speaker Lights' });
+  await expect(productCard.getByRole('button', { name: /Add .* to bag/ })).toHaveCount(0);
+  await expect(productCard.getByRole('link', { name: /View add-on details/ })).toBeVisible();
+});
+
+test('a build keeps add-on quantity synced and supports child or whole-build removal', async ({ page }) => {
+  await page.goto('/luxury-car-interior');
+  await page.getByRole('button', { name: /4x Speaker Lights.*£39\.99/ }).click();
+  await page.getByRole('button', { name: 'Increase quantity' }).click();
+  await page.getByRole('button', { name: /Add build to bag/ }).click();
+
+  const drawer = page.getByRole('dialog', { name: 'Shopping bag' });
+  await expect(drawer.getByText('Qty 2 · matches build')).toBeVisible();
+  await drawer.getByRole('button', { name: 'Decrease quantity' }).click();
+  await expect(drawer.getByText('Qty 1 · matches build')).toBeVisible();
+
+  await drawer.getByRole('button', { name: /Remove.*Speaker Lights.*from bag/ }).click();
+  await expect(drawer.locator('.cart-line')).toHaveCount(1);
+  await drawer.getByRole('button', { name: 'Close shopping bag' }).click();
+  await page.getByRole('button', { name: /Add build to bag/ }).click();
+  await expect(drawer.locator('.cart-line--base')).toHaveCount(2);
+
+  await drawer.getByRole('button', { name: /Remove Ambient Lighting.*build from bag/ }).first().click();
+  await expect(drawer.locator('.cart-line--base')).toHaveCount(1);
+});
+
+test('checkout can add and remove a compatible add-on for one build', async ({ page }) => {
+  await page.goto('/luxury-car-interior');
+  await page.getByRole('button', { name: /Add build to bag/ }).click();
+  await page.getByRole('dialog', { name: 'Shopping bag' }).getByRole('link', { name: /Review & checkout/ }).click();
+
+  const extras = page.getByRole('region', { name: /Add-ons for Ambient Lighting/ });
+  const speakerLights = extras.getByRole('button', { name: /4x Speaker Lights/ });
+  await expect(speakerLights).toHaveAttribute('aria-pressed', 'false');
+  await speakerLights.click();
+  await expect(page.locator('.checkout-build-line--addon')).toHaveCount(1);
+  await expect(speakerLights).toHaveAttribute('aria-pressed', 'true');
+  await speakerLights.click();
+  await expect(page.locator('.checkout-build-line--addon')).toHaveCount(0);
+  await expect(page.getByLabel('Payment method availability')).toContainText(
+    'Stripe shows the methods available for each order.',
+  );
+});
+
+test('checkout inserts an add-on beside the selected build when identical builds are stacked', async ({ page }) => {
+  await page.goto('/luxury-car-interior');
+  await page.getByRole('button', { name: /Add build to bag/ }).click();
+  const drawer = page.getByRole('dialog', { name: 'Shopping bag' });
+  await drawer.getByRole('button', { name: 'Close shopping bag' }).click();
+  await page.getByRole('button', { name: /Add build to bag/ }).click();
+  await drawer.getByRole('link', { name: /Review & checkout/ }).click();
+
+  const firstBuildExtras = page
+    .getByRole('region', { name: /Add-ons for Ambient Lighting/ })
+    .first();
+  await firstBuildExtras.getByRole('button', { name: /4x Speaker Lights/ }).click();
+
+  await expect
+    .poll(() =>
+      page.locator('.checkout-build-line').evaluateAll((lines) =>
+        lines.map((line) =>
+          line.classList.contains('checkout-build-line--addon') ? 'addon' : 'base',
+        ),
+      ),
+    )
+    .toEqual(['base', 'addon', 'base']);
+});
+
+test('invalid build checkout keeps the cart and asks for review', async ({ page }) => {
+  let requestItems: unknown = null;
+  await page.route('**/api/checkout/session', async (route) => {
+    requestItems = route.request().postDataJSON().items;
+    await route.fulfill({
+      status: 409,
+      contentType: 'application/json',
+      body: JSON.stringify({ detail: { code: 'BUILD_INVALID' } }),
+    });
+  });
+  await page.goto('/luxury-car-interior');
+  await page.getByRole('button', { name: /4x Speaker Lights.*£39\.99/ }).click();
+  await page.getByRole('button', { name: /Add build to bag/ }).click();
+  await page.getByRole('dialog', { name: 'Shopping bag' }).getByRole('link', { name: /Review & checkout/ }).click();
+  await page.getByRole('checkbox').check();
+  await page.getByRole('button', { name: /Continue to secure payment/ }).click();
+
+  await expect(page.getByText(/This build needs a quick review/)).toBeVisible();
+  await expect.poll(() => requestItems).toEqual([
+    expect.objectContaining({ lineType: 'base', buildId: expect.any(String) }),
+    expect.objectContaining({ lineType: 'addon', buildId: expect.any(String) }),
+  ]);
+  await expect
+    .poll(() => page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? '{}').state?.lines?.length, cartStorageKey))
+    .toBe(2);
+});
+
+test('grouped builder actions remain reachable on mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/luxury-car-interior');
+
+  const speakerLights = page.getByRole('button', { name: /4x Speaker Lights.*£39\.99/ });
+  await speakerLights.scrollIntoViewIfNeeded();
+  await expect(speakerLights).toBeInViewport();
+  await speakerLights.click();
+  const addBuild = page.getByRole('button', { name: /Add build to bag/ });
+  await addBuild.scrollIntoViewIfNeeded();
+  await addBuild.click();
+
+  const drawer = page.getByRole('dialog', { name: 'Shopping bag' });
+  const checkout = drawer.getByRole('link', { name: /Review & checkout/ });
+  await checkout.scrollIntoViewIfNeeded();
+  await expect(checkout).toBeInViewport();
+});
+
 test('opening the success route directly does not clear the cart', async ({ page }) => {
   await seedCart(page, 2);
   await page.goto('/checkout/success');
@@ -239,13 +390,58 @@ test('a verified paid checkout removes only its purchased cart snapshot', async 
       page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? '{}').state?.lines, cartStorageKey),
     )
     .toEqual([
-      { productId, variantId: firstVariantId, quantity: 1 },
+      { productId, variantId: firstVariantId, quantity: 1, lineType: 'standalone' },
       {
         productId: premiumAddOnProductId,
         variantId: premiumAddOnVariantId,
         quantity: 1,
+        lineType: 'standalone',
       },
     ]);
+});
+
+test('a paid grouped build does not remove an identical product from another build', async ({ page }) => {
+  const base = {
+    productId: 'prod_01K6GY7W0PTTBFMH5DHF9Z75EN',
+    variantId: 'variant_01K6GY7W48DGBZ4D4D9JTD3E54',
+  };
+  const paidBuildLines: SeedCartLine[] = [
+    { ...base, quantity: 1, buildId: 'paid-build', lineType: 'base' },
+    {
+      productId: premiumAddOnProductId,
+      variantId: premiumAddOnVariantId,
+      quantity: 1,
+      buildId: 'paid-build',
+      lineType: 'addon',
+    },
+  ];
+  const retainedBuild: SeedCartLine = {
+    ...base,
+    quantity: 1,
+    buildId: 'retained-build',
+    lineType: 'base',
+  };
+  await seedCartState(
+    page,
+    [...paidBuildLines, retainedBuild],
+    [{ orderReference: paidOrderReference, lines: paidBuildLines }],
+  );
+  await page.route('**/api/checkout/session/cs_test_grouped_paid', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ orderReference: paidOrderReference, status: 'paid' }),
+    });
+  });
+
+  await page.goto('/checkout/success?session_id=cs_test_grouped_paid');
+
+  await expect(page.getByRole('heading', { name: 'Thank you — your order is in.' })).toBeVisible();
+  await expect
+    .poll(() =>
+      page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? '{}').state?.lines, cartStorageKey),
+    )
+    .toEqual([retainedBuild]);
 });
 
 test('route navigation moves focus to the new page heading', async ({ page }) => {

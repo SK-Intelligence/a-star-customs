@@ -6,7 +6,7 @@ import { ProductCard } from '../components/ProductCard';
 import { QuantityControl } from '../components/QuantityControl';
 import { ReviewPanel } from '../components/ReviewPanel';
 import { Seo } from '../components/Seo';
-import { formatPrice, getProductAddOns, productBySlug, products } from '../data/catalog';
+import { formatPrice, getActiveAddOnDefinition, getProductAddOns, getProductAddOnOptions, productBySlug, products, type AvailableProductAddOnOption } from '../data/catalog';
 import { whatsappUrl } from '../data/site';
 import { useCartStore } from '../store/cart';
 import { NotFoundPage } from './NotFoundPage';
@@ -29,8 +29,12 @@ export function ProductPage() {
   }, [product?.id, product?.variants]);
 
   const selectedVariant = product?.variants.find((variant) => variant.id === variantId) ?? product?.variants[0];
-  const addOns = useMemo(() => (product ? getProductAddOns(product) : []), [product]);
-  const selectedAddOns = addOns.filter((addOn) => selectedAddOnIds.includes(addOn.id));
+  const activeAddOnDefinition = product ? getActiveAddOnDefinition(product) : undefined;
+  const addOnOptions = useMemo(() => (product ? getProductAddOnOptions(product) : []), [product]);
+  const selectedAddOns = addOnOptions.filter(
+    (option): option is AvailableProductAddOnOption =>
+      option.isAvailable && selectedAddOnIds.includes(option.definition.id),
+  );
   const related = useMemo(() => {
     if (!product) return [];
     const addOnIds = new Set(getProductAddOns(product).map((addOn) => addOn.id));
@@ -47,9 +51,13 @@ export function ProductPage() {
   if (!product || !selectedVariant) return <NotFoundPage />;
 
   const activeImage = product.images[imageIndex] ?? product.images[0] ?? '/images/site/hero.jpg';
-  const canBuy = product.purchasable && product.available && selectedVariant.available;
+  const canBuy =
+    product.purchasable &&
+    product.available &&
+    selectedVariant.available &&
+    activeAddOnDefinition === undefined;
   const addOnTotal = selectedAddOns.reduce(
-    (total, addOn) => total + (addOn.variants.find((variant) => variant.available)?.price ?? 0),
+    (total, { variant }) => total + (variant?.price ?? 0),
     0,
   );
   const buildTotal = (selectedVariant.price + addOnTotal) * quantity;
@@ -63,12 +71,22 @@ export function ProductPage() {
   };
 
   const addBuildToBag = () => {
+    if (addOnOptions.length === 0) {
+      addItems([{
+        productId: product.id,
+        variantId: selectedVariant.id,
+        quantity,
+        lineType: 'standalone',
+      }]);
+      return;
+    }
+
+    const buildId = crypto.randomUUID();
     addItems([
-      { productId: product.id, variantId: selectedVariant.id, quantity },
-      ...selectedAddOns.flatMap((addOn) => {
-        const variant = addOn.variants.find((candidate) => candidate.available);
-        return variant
-          ? [{ productId: addOn.id, variantId: variant.id, quantity }]
+      { productId: product.id, variantId: selectedVariant.id, quantity, buildId, lineType: 'base' },
+      ...selectedAddOns.flatMap(({ product: addOn, variant }) => {
+        return addOn && variant
+          ? [{ productId: addOn.id, variantId: variant.id, quantity, buildId, lineType: 'addon' as const }]
           : [];
       }),
     ]);
@@ -136,37 +154,39 @@ export function ProductPage() {
                 </fieldset>
               ) : null}
 
-              {canBuy && addOns.length > 0 ? (
+              {canBuy && addOnOptions.length > 0 ? (
                 <section className="build-extras" aria-labelledby="build-extras-title">
                   <div className="build-extras__heading">
                     <div>
                       <p className="eyebrow">Build your package</p>
                       <h2 id="build-extras-title">Optional extras</h2>
                     </div>
-                    <span>{addOns.length} available</span>
+                    <span>{addOnOptions.filter(({ definition }) => definition.status === 'active').length} available</span>
                   </div>
-                  <p>Tap any extra to add or remove it. Each item stays separately editable in your bag.</p>
+                  <p>Tap any available extra to add or remove it. Each add-on remains removable in your bag.</p>
                   <div className="build-extras__options">
-                    {addOns.map((addOn) => {
-                      const addOnVariant = addOn.variants.find((variant) => variant.available);
-                      const isSelected = selectedAddOnIds.includes(addOn.id);
-                      if (!addOnVariant) return null;
+                    {addOnOptions.map((option) => {
+                      const { definition, product: addOn } = option;
+                      const isSelected = option.isAvailable && selectedAddOnIds.includes(definition.id);
+                      const AddOnIcon = isSelected ? Check : Plus;
 
                       return (
                         <button
                           type="button"
-                          key={addOn.id}
-                          className={isSelected ? 'build-extra is-selected' : 'build-extra'}
+                          key={definition.id}
+                          className={`${isSelected ? 'build-extra is-selected' : 'build-extra'}${option.isAvailable ? '' : ' is-disabled'}`}
                           aria-pressed={isSelected}
-                          onClick={() => toggleAddOn(addOn.id)}
+                          onClick={() => toggleAddOn(definition.id)}
+                          disabled={!option.isAvailable}
                         >
-                          <img src={addOn.images[0] ?? '/images/site/hero.jpg'} alt="" />
+                          {addOn ? <img src={addOn.images[0] ?? '/images/site/hero.jpg'} alt="" /> : <Sparkles aria-hidden="true" />}
                           <span>
-                            <small>Optional add-on</small>
-                            <strong>{addOn.title}</strong>
-                            <em>+{formatPrice(addOnVariant.price)} per build</em>
+                            <small>{option.isAvailable ? 'Optional add-on' : 'Coming soon'}</small>
+                            <strong>{definition.label}</strong>
+                            <span>{definition.description}</span>
+                            <em>{option.isAvailable ? `+${formatPrice(option.variant.price)} per build` : 'Pricing to be confirmed'}</em>
                           </span>
-                          <i aria-hidden="true">{isSelected ? <Check /> : <Plus />}</i>
+                          <i aria-hidden="true">{option.isAvailable ? <AddOnIcon /> : null}</i>
                         </button>
                       );
                     })}
@@ -188,8 +208,19 @@ export function ProductPage() {
                     onClick={addBuildToBag}
                   >
                     <ShoppingBag aria-hidden="true" />
-                    {addOns.length > 0 ? `Add build to bag · ${formatPrice(buildTotal)}` : 'Add to bag'}
+                    {addOnOptions.length > 0 ? `Add build to bag · ${formatPrice(buildTotal)}` : 'Add to bag'}
                   </button>
+                </div>
+              ) : activeAddOnDefinition ? (
+                <div className="custom-quote-box">
+                  <Plus aria-hidden="true" />
+                  <div>
+                    <h2>Add this to a compatible package.</h2>
+                    <p>Choose a compatible ambient lighting package, then select this extra from that product page.</p>
+                  </div>
+                  <Link className="button button--primary" to="/shop">
+                    Browse compatible packages
+                  </Link>
                 </div>
               ) : (
                 <div className="custom-quote-box">

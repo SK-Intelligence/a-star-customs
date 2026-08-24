@@ -31,6 +31,8 @@ class CheckoutLine(BaseModel):
     productId: str = Field(min_length=1, max_length=100)
     variantId: str = Field(min_length=1, max_length=100)
     quantity: int = Field(ge=1, le=10, strict=True)
+    buildId: str | None = Field(default=None, min_length=1, max_length=100)
+    lineType: Literal["standalone", "base", "addon"] = "standalone"
 
 
 class CheckoutRequest(BaseModel):
@@ -40,7 +42,11 @@ class CheckoutRequest(BaseModel):
 
     @model_validator(mode="after")
     def reject_duplicate_lines(self) -> "CheckoutRequest":
-        line_ids = [(item.productId, item.variantId) for item in self.items]
+        line_ids = [
+            (item.productId, item.variantId)
+            for item in self.items
+            if item.buildId is None and item.lineType == "standalone"
+        ]
         if len(set(line_ids)) != len(line_ids):
             raise ValueError("Duplicate cart lines are not allowed.")
         return self

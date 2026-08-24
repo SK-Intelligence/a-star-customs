@@ -203,6 +203,63 @@ def test_checkout_requires_stripe_configuration_for_valid_catalog_item() -> None
     }
 
 
+def test_checkout_requires_payment_method_configuration_with_secret_key() -> None:
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        stripe_secret_key="sk_test_placeholder",
+        stripe_payment_method_configuration_id=None,
+    )
+
+    response = client.post(
+        "/api/checkout/session",
+        json={
+            "items": [
+                {
+                    "productId": "prod_01KFVHY3MK70RA36DKE21WFPNM",
+                    "variantId": "variant_01KFVHY3PGHQ09EW3812HRKBBZ",
+                    "quantity": 1,
+                }
+            ]
+        },
+    )
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "detail": {
+            "code": "CHECKOUT_NOT_CONFIGURED",
+            "message": "Checkout is not configured.",
+        }
+    }
+
+
+def test_checkout_requires_webhook_configuration_before_taking_payment() -> None:
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        stripe_secret_key="sk_test_placeholder",
+        stripe_payment_method_configuration_id="pmc_test_checkout",
+        stripe_webhook_secret=None,
+    )
+
+    response = client.post(
+        "/api/checkout/session",
+        json={
+            "items": [
+                {
+                    "productId": "prod_01KFVHY3MK70RA36DKE21WFPNM",
+                    "variantId": "variant_01KFVHY3PGHQ09EW3812HRKBBZ",
+                    "quantity": 1,
+                }
+            ]
+        },
+    )
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "detail": {
+            "code": "CHECKOUT_NOT_CONFIGURED",
+            "message": "Checkout is not configured.",
+        }
+    }
+
+
 def test_checkout_rejects_unknown_product() -> None:
     app.dependency_overrides[get_settings] = unconfigured_settings
 

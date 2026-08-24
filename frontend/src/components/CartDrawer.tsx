@@ -66,24 +66,32 @@ export function CartDrawer() {
           <>
             <div className="cart-lines">
               {resolvedLines.map(({ line, product, variant }) => (
-                <article className="cart-line" key={`${line.productId}:${line.variantId}`}>
+                <article
+                  className={`cart-line cart-line--${line.lineType}`}
+                  key={`${line.buildId ?? 'standalone'}:${line.lineType}:${line.productId}:${line.variantId}`}
+                >
                   <Link to={`/${product.slug}`} onClick={closeCart}>
                     <img src={product.images[0] ?? '/images/site/hero.jpg'} alt={product.title} />
                   </Link>
                   <div className="cart-line__copy">
                     <Link to={`/${product.slug}`} onClick={closeCart}>{product.title}</Link>
+                    {line.lineType === 'addon' ? <small>Build add-on</small> : null}
                     {product.variants.length > 1 ? <small>{variant.title}</small> : null}
                     <strong>{formatPrice(variant.price)}</strong>
                     <div className="cart-line__actions">
-                      <QuantityControl
-                        compact
-                        value={line.quantity}
-                        onChange={(quantity) => updateQuantity(product.id, variant.id, quantity)}
-                      />
+                      {line.lineType === 'addon' ? (
+                        <span className="cart-line__synced-quantity">Qty {line.quantity} · matches build</span>
+                      ) : (
+                        <QuantityControl
+                          compact
+                          value={line.quantity}
+                          onChange={(quantity) => updateQuantity(line, quantity)}
+                        />
+                      )}
                       <button
                         type="button"
-                        aria-label={`Remove ${product.title} from bag`}
-                        onClick={() => removeItem(product.id, variant.id)}
+                        aria-label={line.lineType === 'base' ? `Remove ${product.title} build from bag` : `Remove ${product.title} from bag`}
+                        onClick={() => removeItem(line)}
                       >
                         <Trash2 aria-hidden="true" />
                       </button>

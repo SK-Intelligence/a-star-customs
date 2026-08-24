@@ -1,17 +1,18 @@
-import { ArrowLeft, ArrowRight, Check, CreditCard, LockKeyhole, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, CreditCard, LockKeyhole, Plus, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { QuantityControl } from '../components/QuantityControl';
 import { Seo } from '../components/Seo';
-import { formatPrice, products } from '../data/catalog';
+import { formatPrice, getProductAddOnOptions, products } from '../data/catalog';
 import { cartSubtotal, useCartStore } from '../store/cart';
 
-type CheckoutStatus = 'idle' | 'loading' | 'unconfigured' | 'error';
+type CheckoutStatus = 'idle' | 'loading' | 'unconfigured' | 'review' | 'error';
 
 export function CheckoutPage() {
   const lines = useCartStore((state) => state.lines);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
+  const addBuildAddOn = useCartStore((state) => state.addBuildAddOn);
   const recordCheckout = useCartStore((state) => state.recordCheckout);
   const subtotal = useCartStore(cartSubtotal);
   const [agreed, setAgreed] = useState(false);
@@ -35,6 +36,7 @@ export function CheckoutPage() {
             productId: line.productId,
             variantId: line.variantId,
             quantity: line.quantity,
+            ...(line.buildId ? { buildId: line.buildId, lineType: line.lineType } : {}),
           })),
         }),
       });
@@ -50,6 +52,10 @@ export function CheckoutPage() {
         payload?.detail?.code === 'CHECKOUT_NOT_CONFIGURED'
       ) {
         setStatus('unconfigured');
+        return;
+      }
+      if (response.status === 409 && payload?.detail?.code === 'BUILD_INVALID') {
+        setStatus('review');
         return;
       }
       if (!response.ok) throw new Error('Checkout request failed');
@@ -98,25 +104,85 @@ export function CheckoutPage() {
 
         <div className="checkout-layout">
           <div className="checkout-items">
-            {resolvedLines.map(({ line, product, variant }) => (
-              <article key={`${line.productId}:${line.variantId}`}>
-                <img src={product.images[0] ?? '/images/site/hero.jpg'} alt={product.title} />
-                <div>
-                  <Link to={`/${product.slug}`}><h2>{product.title}</h2></Link>
-                  {product.variants.length > 1 ? <p>{variant.title}</p> : null}
-                  <strong>{formatPrice(variant.price)}</strong>
-                  <div>
-                    <QuantityControl
-                      compact
-                      value={line.quantity}
-                      onChange={(quantity) => updateQuantity(product.id, variant.id, quantity)}
-                    />
-                    <button type="button" onClick={() => removeItem(product.id, variant.id)}>Remove</button>
-                  </div>
+            {resolvedLines.map(({ line, product, variant }) => {
+              const addOnOptions = line.lineType === 'base' ? getProductAddOnOptions(product) : [];
+              const buildId = line.buildId;
+              return (
+                <div className={`checkout-build-line checkout-build-line--${line.lineType}`} key={`${line.buildId ?? 'standalone'}:${line.lineType}:${line.productId}:${line.variantId}`}>
+                  <article>
+                    <img src={product.images[0] ?? '/images/site/hero.jpg'} alt={product.title} />
+                    <div>
+                      {line.lineType === 'addon' ? <p className="eyebrow">Build add-on</p> : null}
+                      <Link to={`/${product.slug}`}><h2>{product.title}</h2></Link>
+                      {product.variants.length > 1 ? <p>{variant.title}</p> : null}
+                      <strong>{formatPrice(variant.price)}</strong>
+                      <div>
+                        {line.lineType === 'addon' ? (
+                          <span>Qty {line.quantity} · matches build</span>
+                        ) : (
+                          <QuantityControl
+                            compact
+                            value={line.quantity}
+                            onChange={(quantity) => updateQuantity(line, quantity)}
+                          />
+                        )}
+                        <button type="button" onClick={() => removeItem(line)}>
+                          {line.lineType === 'base' ? 'Remove build' : 'Remove'}
+                        </button>
+                      </div>
+                    </div>
+                    <strong>{formatPrice(variant.price * line.quantity)}</strong>
+                  </article>
+                  {buildId && addOnOptions.length > 0 ? (
+                    <section className="checkout-build-extras" aria-label={`Add-ons for ${product.title}`}>
+                      <div>
+                        <strong>Complete this build</strong>
+                        <span>Add-ons automatically match the base quantity.</span>
+                      </div>
+                      <div className="checkout-build-extras__options">
+                        {addOnOptions.map((option) => {
+                          const { definition } = option;
+                          const selectedLine = resolvedLines.find(
+                            ({ line: candidate }) =>
+                              candidate.buildId === buildId &&
+                              candidate.lineType === 'addon' &&
+                              candidate.productId === definition.productId &&
+                              candidate.variantId === definition.variantId,
+                          )?.line;
+                          let actionLabel = 'Pricing to be confirmed';
+                          if (option.isAvailable) {
+                            actionLabel = selectedLine
+                              ? 'Remove'
+                              : `Add ${formatPrice(option.variant.price)} each`;
+                          }
+                          return (
+                            <button
+                              type="button"
+                              key={definition.id}
+                              disabled={!option.isAvailable}
+                              aria-pressed={selectedLine ? 'true' : 'false'}
+                              onClick={() => {
+                                if (selectedLine) removeItem(selectedLine);
+                                else if (option.isAvailable) {
+                                  addBuildAddOn(buildId, option.product.id, option.variant.id);
+                                }
+                              }}
+                            >
+                              <span>
+                                <strong>{definition.label}</strong>
+                                <small>{definition.description}</small>
+                              </span>
+                              <em>{actionLabel}</em>
+                              {option.isAvailable && !selectedLine ? <Plus aria-hidden="true" /> : null}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  ) : null}
                 </div>
-                <strong>{formatPrice(variant.price * line.quantity)}</strong>
-              </article>
-            ))}
+              );
+            })}
           </div>
 
           <aside className="order-summary">
@@ -146,12 +212,15 @@ export function CheckoutPage() {
             <div className="checkout-status" aria-live="polite">
               {status === 'unconfigured' ? (
                 <>
-                  <strong>Payment setup placeholder is ready.</strong>
-                  <p>Add the Stripe environment keys described in the project README to activate hosted checkout.</p>
+                  <strong>Secure checkout is temporarily unavailable.</strong>
+                  <p>Please try again later or contact the workshop.</p>
                 </>
               ) : null}
               {status === 'error' ? (
                 <p>Checkout could not start. Your bag is safe — please try again.</p>
+              ) : null}
+              {status === 'review' ? (
+                <p>This build needs a quick review. Your bag is safe — check the package and add-ons before trying again.</p>
               ) : null}
             </div>
 
@@ -160,6 +229,11 @@ export function CheckoutPage() {
               <li><CreditCard aria-hidden="true" /> Stripe-hosted payment page</li>
               <li><Check aria-hidden="true" /> No payment details stored here</li>
             </ul>
+            <p className="payment-method-note" aria-label="Payment method availability">
+              Stripe shows the methods available for each order. Depending on eligibility, these can include
+              card, Apple Pay, Google Pay, Link, Klarna, Clearpay, PayPal (including Pay in 3 where offered),
+              Amazon Pay, Revolut Pay and Pay by Bank.
+            </p>
           </aside>
         </div>
       </div>

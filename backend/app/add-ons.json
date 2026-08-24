@@ -1,0 +1,78 @@
+[
+  {
+    "id": "speaker-lights",
+    "status": "active",
+    "label": "4x Speaker Lights",
+    "description": "Add illuminated speaker accents to your ambient lighting installation.",
+    "compatibleProductIds": [
+      "prod_01K6GY7W0PTTBFMH5DHF9Z75EN",
+      "prod_01KRGYB92HFEDJ2669V89535NR"
+    ],
+    "productId": "prod_01KCFR1PBNK4HHMX64NN0BPCCK",
+    "variantId": "variant_01KCFR1PF6SSFRX0GSDM2FDNDH"
+  },
+  {
+    "id": "premium-animation-pack",
+    "status": "active",
+    "label": "Premium Pack: 25+ Animations & Start-Up Effects",
+    "description": "Add an expanded set of animations and start-up effects.",
+    "compatibleProductIds": [
+      "prod_01K6GY7W0PTTBFMH5DHF9Z75EN",
+      "prod_01KRGYB92HFEDJ2669V89535NR"
+    ],
+    "productId": "prod_01KCFRCKR5NV5VGCM7ZTKCZ5DE",
+    "variantId": "variant_01KCFRCKV84EMEE32KZB4QF9MK"
+  },
+  {
+    "id": "shooting-stars",
+    "status": "disabled",
+    "label": "Shooting Stars",
+    "description": "Add moving shooting-star effects to a standard or twinkle starlight installation.",
+    "compatibleProductIds": [
+      "prod_01KCFVQV2CB6Q1S1SY4NC1SEYC",
+      "prod_01KCFWQED262D2E51977QQ7S2B",
+      "prod_01KCFX7SNW29GS56QF45KP3KA8",
+      "prod_01KCFXTQX36J9HK1WCD0BEFFY4",
+      "prod_01KCFY15SN1YX6B855PJK95V46",
+      "prod_01KCFY6P0JEPNCDYV38H21M6XX"
+    ],
+    "productId": null,
+    "variantId": null
+  },
+  {
+    "id": "colour-change-starlights",
+    "status": "disabled",
+    "label": "Colour-Change Starlights",
+    "description": "Choose colour-changing fibre effects for your installed starlight package.",
+    "compatibleProductIds": [
+      "prod_01KCFVQV2CB6Q1S1SY4NC1SEYC",
+      "prod_01KCFWQED262D2E51977QQ7S2B",
+      "prod_01KCFX7SNW29GS56QF45KP3KA8",
+      "prod_01KCFXTQX36J9HK1WCD0BEFFY4",
+      "prod_01KCFY15SN1YX6B855PJK95V46",
+      "prod_01KCFY6P0JEPNCDYV38H21M6XX",
+      "prod_01KCFYD1MN8P4EKSTB989J0ZCG",
+      "prod_01KCFYNY97DJ0SBEYP5GG6XQ4B"
+    ],
+    "productId": null,
+    "variantId": null
+  },
+  {
+    "id": "premium-headliner-material",
+    "status": "disabled",
+    "label": "Premium Headliner Material",
+    "description": "Upgrade the headliner finish used for your installed starlight package.",
+    "compatibleProductIds": [
+      "prod_01KCFVQV2CB6Q1S1SY4NC1SEYC",
+      "prod_01KCFWQED262D2E51977QQ7S2B",
+      "prod_01KCFX7SNW29GS56QF45KP3KA8",
+      "prod_01KCFXTQX36J9HK1WCD0BEFFY4",
+      "prod_01KCFY15SN1YX6B855PJK95V46",
+      "prod_01KCFY6P0JEPNCDYV38H21M6XX",
+      "prod_01KCFYD1MN8P4EKSTB989J0ZCG",
+      "prod_01KCFYNY97DJ0SBEYP5GG6XQ4B"
+    ],
+    "productId": null,
+    "variantId": null
+  }
+]

@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import sqlite3
-from typing import Any
+from typing import Any, NoReturn
 from uuid import uuid4
 
 import httpx
@@ -11,9 +11,11 @@ import stripe
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.addons import AddOnConfigurationError, AddOnOption, load_add_ons
 from app.catalog import CatalogConfigurationError, load_catalog
 from app.config import Settings, get_settings
 from app.models import (
+    CheckoutLine,
     CheckoutRequest,
     CheckoutResponse,
     CheckoutStatusResponse,
@@ -34,6 +36,10 @@ from app.reviews import list_approved_reviews, submit_review
 
 
 WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit"
+BUILD_INVALID_DETAIL = {
+    "code": "BUILD_INVALID",
+    "message": "The configured product build is invalid.",
+}
 
 app = FastAPI(title="A Star Customs API", version="1.0.0")
 
@@ -142,6 +148,62 @@ async def contact(
     return {"status": "accepted"}
 
 
+def _raise_build_invalid() -> NoReturn:
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail=BUILD_INVALID_DETAIL,
+    )
+
+
+def _validate_builds(cart: CheckoutRequest, add_ons: list[AddOnOption]) -> None:
+    active_add_ons = {
+        (option.productId, option.variantId): option
+        for option in add_ons
+        if option.status == "active"
+    }
+    builds: dict[str, list[CheckoutLine]] = {}
+    for item in cart.items:
+        if item.lineType == "standalone":
+            if (
+                item.buildId is not None
+                or (item.productId, item.variantId) in active_add_ons
+            ):
+                _raise_build_invalid()
+            continue
+        if item.buildId is None:
+            _raise_build_invalid()
+        builds.setdefault(item.buildId, []).append(item)
+
+    configured_base_ids = {
+        product_id
+        for option in add_ons
+        for product_id in option.compatibleProductIds
+    }
+
+    for lines in builds.values():
+        base_lines = [line for line in lines if line.lineType == "base"]
+        add_on_lines = [line for line in lines if line.lineType == "addon"]
+        if len(base_lines) != 1:
+            _raise_build_invalid()
+        base = base_lines[0]
+        if base.productId not in configured_base_ids:
+            _raise_build_invalid()
+        add_on_ids = [
+            (add_on_line.productId, add_on_line.variantId)
+            for add_on_line in add_on_lines
+        ]
+        if len(set(add_on_ids)) != len(add_on_ids):
+            _raise_build_invalid()
+        for add_on_line in add_on_lines:
+            option = active_add_ons.get((add_on_line.productId, add_on_line.variantId))
+            if (
+                option is None
+                or base.productId not in option.compatibleProductIds
+                or add_on_line.quantity != base.quantity
+            ):
+                _raise_build_invalid()
+
+
 @app.post("/api/checkout/session", response_model=CheckoutResponse)
 async def create_checkout_session(
     cart: CheckoutRequest,
@@ -154,6 +216,15 @@ async def create_checkout_session(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="The product catalog is temporarily unavailable.",
         ) from exc
+
+    try:
+        add_ons = load_add_ons()
+    except AddOnConfigurationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The add-on configuration is temporarily unavailable.",
+        ) from exc
+    _validate_builds(cart, add_ons)
 
     stripe_line_items: list[dict[str, Any]] = []
     cart_identity_parts: list[str] = []
@@ -183,6 +254,13 @@ async def create_checkout_session(
                 detail=f"Item is not available for online purchase: {item.variantId}.",
             )
 
+        line_metadata = {
+            "product_id": product.id,
+            "variant_id": variant.id,
+            "line_type": item.lineType,
+        }
+        if item.buildId is not None:
+            line_metadata["build_id"] = item.buildId
         stripe_line_items.append(
             {
                 "price_data": {
@@ -191,19 +269,22 @@ async def create_checkout_session(
                     "product_data": {
                         "name": product.title,
                         "description": variant.title,
-                        "metadata": {
-                            "product_id": product.id,
-                            "variant_id": variant.id,
-                        },
+                        "metadata": line_metadata,
                     },
                 },
                 "quantity": item.quantity,
             }
         )
-        cart_identity_parts.append(f"{product.id}:{variant.id}:{item.quantity}")
+        cart_identity_parts.append(
+            f"{item.buildId or '-'}:{item.lineType}:{product.id}:{variant.id}:{item.quantity}"
+        )
         amount_total += variant.price * item.quantity
 
-    if not settings.stripe_secret_key:
+    if (
+        not settings.stripe_secret_key
+        or not settings.stripe_payment_method_configuration_id
+        or not settings.stripe_webhook_secret
+    ):
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail={
@@ -234,6 +315,9 @@ async def create_checkout_session(
             api_key=settings.stripe_secret_key,
             idempotency_key=order_reference,
             mode="payment",
+            payment_method_configuration=(
+                settings.stripe_payment_method_configuration_id
+            ),
             line_items=stripe_line_items,
             shipping_address_collection={"allowed_countries": ["GB"]},
             shipping_options=[
@@ -251,6 +335,9 @@ async def create_checkout_session(
                 "order_reference": order_reference,
                 "cart_reference": cart_reference,
                 "line_count": str(len(stripe_line_items)),
+                "build_count": str(
+                    len({item.buildId for item in cart.items if item.buildId is not None})
+                ),
             },
         )
     except stripe.StripeError as exc:

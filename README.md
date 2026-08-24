@@ -44,7 +44,8 @@ Copy `.env.example` to `backend/.env` for local work or to `.env` for Docker Com
 | Variable | Required for | Notes |
 | --- | --- | --- |
 | `STRIPE_SECRET_KEY` | Payments | Stripe server secret (`sk_test_…` in staging, `sk_live_…` in production). Never expose it as a `VITE_` variable. |
-| `STRIPE_WEBHOOK_SECRET` | Payment confirmation | Signing secret for `/api/stripe/webhook` (`whsec_…`). |
+| `STRIPE_PAYMENT_METHOD_CONFIGURATION_ID` | Payments | Stripe payment-method configuration (`pmc_…`) used by hosted Checkout. |
+| `STRIPE_WEBHOOK_SECRET` | Payment confirmation | Signing secret for `/api/stripe/webhook` (`whsec_…`). Checkout stays disabled until this, the Stripe secret, and the payment-method configuration are all set. |
 | `WEB3FORMS_ACCESS_KEY` | Contact form delivery | Server-side Web3Forms access key. |
 | `CHECKOUT_SUCCESS_URL` | Direct backend deployment | Must retain `?session_id={CHECKOUT_SESSION_ID}` so the result can be verified server-side. Docker Compose derives this from `PUBLIC_BASE_URL`. |
 | `CHECKOUT_CANCEL_URL` | Direct backend deployment | Returns customers to the checkout page. Docker Compose derives this from `PUBLIC_BASE_URL`. |
@@ -57,17 +58,22 @@ Copy `.env.example` to `backend/.env` for local work or to `.env` for Docker Com
 ### Activating Stripe
 
 1. Add `STRIPE_SECRET_KEY` to the backend environment.
-2. In Stripe Workbench, create a webhook endpoint at `https://YOUR_DOMAIN/api/stripe/webhook`.
-3. Subscribe it to:
+2. In Stripe Dashboard, create a payment-method configuration for this storefront. Enable card, Apple Pay, Google Pay, Link, Klarna, Afterpay/Clearpay, PayPal, Amazon Pay, Revolut Pay, and Pay by Bank where the A Star account is eligible. Add its `pmc_…` ID as `STRIPE_PAYMENT_METHOD_CONFIGURATION_ID`.
+3. In Stripe Workbench, create a webhook endpoint at `https://YOUR_DOMAIN/api/stripe/webhook`.
+4. Subscribe it to:
    - `checkout.session.completed`
    - `checkout.session.async_payment_succeeded`
    - `checkout.session.async_payment_failed`
    - `checkout.session.expired`
-4. Add the endpoint's signing secret as `STRIPE_WEBHOOK_SECRET`.
-5. Set production `CHECKOUT_SUCCESS_URL`, `CHECKOUT_CANCEL_URL`, and `CORS_ORIGINS`, or set `PUBLIC_BASE_URL` when using the included Docker Compose stack.
-6. Complete a Stripe test-mode payment and verify the order status before switching to live keys.
+5. Add the endpoint's signing secret as `STRIPE_WEBHOOK_SECRET`.
+6. Set production `CHECKOUT_SUCCESS_URL`, `CHECKOUT_CANCEL_URL`, and `CORS_ORIGINS`, or set `PUBLIC_BASE_URL` when using the included Docker Compose stack.
+7. Complete test-mode payments for the methods Stripe makes available to the test customer, then verify the order status before switching to live keys.
 
-Checkout prices are always loaded from the backend catalog. The browser cannot submit a price. Payment details are collected on Stripe's hosted page. A paid return removes only the quantities captured for that exact order, so items added later or from another build stay in the bag. Delayed payment methods remain in a processing state until Stripe sends an asynchronous success or failure event.
+Checkout will not create a Stripe session until the secret key, payment-method configuration, and webhook signing secret are all present. This prevents the site from accepting delayed payments without a verified status-update path.
+
+Checkout prices are always loaded from the backend catalog. The browser cannot submit a price. Payment details are collected on Stripe's hosted page. Stripe decides which configured methods to show for each customer, device, currency, basket, and account eligibility; the site does not promise every method on every order. Wallet domains, Klarna/Afterpay-Clearpay merchant approval, and PayPal connection are completed in Stripe rather than in this repository.
+
+A paid return removes only the quantities captured for that exact order, so items added later or from another build stay in the bag. Delayed payment methods remain in a processing state until Stripe sends an asynchronous success or failure event. Instalment terms, limits, eligibility, and repayment schedules are shown by the payment provider; the storefront does not calculate or advertise a fixed plan.
 
 For the initial single-server launch, **Stripe Dashboard is the operational source of truth** for customer contact and shipping details, receipts, refunds, payment disputes, and fulfilment lookup. The local SQLite order table is a reconciliation/status ledger, not a replacement order-management dashboard. Give the workshop team appropriate Stripe access, enable Stripe receipt emails, and use the `order_reference` metadata when matching enquiries to Checkout sessions.
 
@@ -105,10 +111,13 @@ The production app reads only local JSON and local image/font files. It does not
 
 - `frontend/src/data/catalog.json` drives the storefront.
 - `backend/app/catalog.json` is the server-authoritative pricing copy.
-- `python scripts/check_catalog_sync.py` proves both copies and all referenced product images are in sync.
+- `frontend/src/data/add-ons.json` and `backend/app/add-ons.json` mirror the add-on compatibility and availability rules used by the product builder and checkout validation.
+- `python scripts/check_catalog_sync.py` proves both catalog and add-on copies are in sync and all referenced product images exist.
 - `python scripts/import_hostinger_catalog.py --refresh-assets` refreshes the final source snapshot before Hostinger is retired. This is a migration utility, not a runtime dependency.
 
-After cutover, edit the catalog deliberately in source control and keep both copies identical. Run `npm run check:catalog` before every release.
+Active add-on products cannot be checked out on their own. Customers add them from a compatible base package, and the backend independently verifies the relationship and matching quantity. Disabled entries remain visible as “Pricing to be confirmed” until a trusted catalog product, variant, and price are supplied.
+
+After cutover, edit the catalog and add-on rules deliberately in source control and keep both frontend/backend copies identical. Run `npm run check:catalog` before every release.
 
 ## Review moderation
 

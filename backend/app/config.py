@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     web3forms_access_key: str | None = None
     stripe_secret_key: str | None = None
+    stripe_payment_method_configuration_id: str | None = None
     stripe_webhook_secret: str | None = None
     orders_database_path: Path = Path(__file__).resolve().parents[1] / "data" / "orders.db"
     reviews_database_path: Path = Path(__file__).resolve().parents[1] / "data" / "reviews.db"
