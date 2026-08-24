@@ -62,6 +62,7 @@ export function useDialogFocus<T extends HTMLElement>({
       ? document.activeElement
       : null;
     const focusInitialElement = () => {
+      if (container.contains(document.activeElement)) return;
       const preferred = initialFocusSelector
         ? container.querySelector<HTMLElement>(initialFocusSelector)
         : null;
@@ -69,6 +70,7 @@ export function useDialogFocus<T extends HTMLElement>({
       (preferred ?? firstFocusable ?? container).focus();
     };
     const animationFrame = window.requestAnimationFrame(focusInitialElement);
+    const focusRetry = window.setTimeout(focusInitialElement, 350);
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (activeDialogs[activeDialogs.length - 1] !== container) return;
@@ -113,6 +115,7 @@ export function useDialogFocus<T extends HTMLElement>({
 
     return () => {
       window.cancelAnimationFrame(animationFrame);
+      window.clearTimeout(focusRetry);
       document.removeEventListener('keydown', handleKeyDown, true);
       const dialogIndex = activeDialogs.lastIndexOf(container);
       if (dialogIndex >= 0) activeDialogs.splice(dialogIndex, 1);

@@ -533,8 +533,114 @@ test('mobile navigation opens and closes with Escape', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Menu' }).click();
 
-  await expect(page.getByRole('dialog', { name: 'Mobile navigation menu' })).toBeVisible();
+  const menu = page.getByRole('dialog', { name: 'Mobile navigation menu' });
+  await expect(menu).toBeVisible();
+  await expect(menu.getByRole('link', { name: 'Home', exact: true })).toBeFocused();
   await page.keyboard.press('Escape');
-  await expect(page.getByRole('dialog', { name: 'Mobile navigation menu' })).toHaveCount(0);
+  await expect(menu).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Menu' })).toBeFocused();
+});
+
+for (const width of [320, 360, 390, 430]) {
+  test(`shop remains usable without horizontal overflow at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/shop');
+
+    await expect
+      .poll(() =>
+        page.evaluate(() => ({
+          clientWidth: document.documentElement.clientWidth,
+          scrollWidth: document.documentElement.scrollWidth,
+        })),
+      )
+      .toEqual({ clientWidth: width, scrollWidth: width });
+    const firstProductAction = page.locator('.product-card__action').first();
+    await firstProductAction.scrollIntoViewIfNeeded();
+    await expect(firstProductAction).toBeInViewport();
+    const actionBox = await firstProductAction.boundingBox();
+    expect(actionBox?.width).toBeGreaterThanOrEqual(44);
+    expect(actionBox?.height).toBeGreaterThanOrEqual(44);
+  });
+}
+
+test('landscape phone navigation keeps every route visible without scrolling sideways', async ({ page }) => {
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      'astar-cookie-preferences',
+      JSON.stringify({ analytics: false, marketing: false }),
+    );
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Menu' }).click();
+
+  const menu = page.getByRole('dialog', { name: 'Mobile navigation menu' });
+  for (const name of [
+    'Home',
+    'Services',
+    'Gallery',
+    'Shop',
+    'Custom kits',
+    'Featured collabs',
+    'Refund policy',
+    'Contact',
+  ]) {
+    await expect(menu.getByRole('link', { name, exact: true })).toBeInViewport();
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(844);
+});
+
+test('mobile cart focuses its close control and keeps primary controls touch sized', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto('/starlight-fiber-optic-kit');
+
+  const increaseQuantity = page.getByRole('button', { name: 'Increase quantity' });
+  const productQuantityBox = await increaseQuantity.boundingBox();
+  expect(productQuantityBox?.width).toBeGreaterThanOrEqual(44);
+  expect(productQuantityBox?.height).toBeGreaterThanOrEqual(44);
+  await page.getByRole('button', { name: 'Add to bag' }).click();
+
+  const drawer = page.getByRole('dialog', { name: 'Shopping bag' });
+  const close = drawer.getByRole('button', { name: 'Close shopping bag' });
+  await expect(close).toBeFocused();
+
+  for (const control of [
+    drawer.getByRole('button', { name: 'Increase quantity' }),
+    drawer.getByRole('button', { name: /Remove .* from bag/ }),
+  ]) {
+    const box = await control.boundingBox();
+    expect(box?.width).toBeGreaterThanOrEqual(44);
+    expect(box?.height).toBeGreaterThanOrEqual(44);
+  }
+});
+
+test('mobile checkout opens at the top after leaving a deep product page', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      'astar-cookie-preferences',
+      JSON.stringify({ analytics: false, marketing: false }),
+    );
+  });
+  await page.goto('/luxury-car-interior');
+  await page.getByRole('button', { name: /Add build to bag/ }).click();
+  await page
+    .getByRole('dialog', { name: 'Shopping bag' })
+    .getByRole('link', { name: /Review & checkout/ })
+    .click();
+
+  await expect(page).toHaveURL(/\/checkout$/);
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  await expect(page.getByRole('heading', { name: 'Review your build.' })).toBeInViewport();
+});
+
+test('cookie choices remain fully reachable in short phone landscape', async ({ page }) => {
+  await page.setViewportSize({ width: 568, height: 320 });
+  await page.goto('/');
+
+  const banner = page.getByRole('region', { name: 'We use cookies' });
+  const box = await banner.boundingBox();
+  expect(box?.y).toBeGreaterThanOrEqual(0);
+  expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(320);
+  await expect(banner.getByRole('button', { name: 'Essentials only' })).toBeVisible();
 });

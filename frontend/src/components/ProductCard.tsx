@@ -20,7 +20,12 @@ export function ProductCard({ product }: ProductCardProps) {
     <article className="product-card">
       <Link className="product-card__media" to={`/${product.slug}`}>
         {product.ribbonText ? <span className="product-ribbon">{product.ribbonText}</span> : null}
-        <img src={product.images[0] ?? '/images/site/hero.jpg'} alt={product.title} loading="lazy" />
+        <img
+          src={product.images[0] ?? '/images/site/hero.jpg'}
+          alt={product.title}
+          loading="lazy"
+          decoding="async"
+        />
         <span className="product-card__view">
           View details <ArrowRight aria-hidden="true" />
         </span>

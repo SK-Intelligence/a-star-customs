@@ -110,7 +110,11 @@ export function CheckoutPage() {
               return (
                 <div className={`checkout-build-line checkout-build-line--${line.lineType}`} key={`${line.buildId ?? 'standalone'}:${line.lineType}:${line.productId}:${line.variantId}`}>
                   <article>
-                    <img src={product.images[0] ?? '/images/site/hero.jpg'} alt={product.title} />
+                    <img
+                      src={product.images[0] ?? '/images/site/hero.jpg'}
+                      alt={product.title}
+                      decoding="async"
+                    />
                     <div>
                       {line.lineType === 'addon' ? <p className="eyebrow">Build add-on</p> : null}
                       <Link to={`/${product.slug}`}><h2>{product.title}</h2></Link>

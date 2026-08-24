@@ -71,7 +71,12 @@ export function CartDrawer() {
                   key={`${line.buildId ?? 'standalone'}:${line.lineType}:${line.productId}:${line.variantId}`}
                 >
                   <Link to={`/${product.slug}`} onClick={closeCart}>
-                    <img src={product.images[0] ?? '/images/site/hero.jpg'} alt={product.title} />
+                    <img
+                      src={product.images[0] ?? '/images/site/hero.jpg'}
+                      alt={product.title}
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </Link>
                   <div className="cart-line__copy">
                     <Link to={`/${product.slug}`} onClick={closeCart}>{product.title}</Link>

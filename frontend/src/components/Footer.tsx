@@ -17,7 +17,7 @@ export function Footer() {
     <footer className="site-footer">
       <div className="container footer-grid">
         <div className="footer-brand">
-          <img src="/images/site/logo.png" alt="A Star Customs" />
+          <img src="/images/site/logo.png" alt="A Star Customs" loading="lazy" decoding="async" />
           <p>
             Car lighting, technology and interior upgrades fitted in Hounslow,
             London.

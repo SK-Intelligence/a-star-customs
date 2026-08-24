@@ -37,7 +37,12 @@ export function HomePage() {
         <div className="container">
           <div className="feature-duo">
             <Link className="feature-panel" to="/services">
-              <img src="/images/site/service-ambient.jpg" alt="Purple ambient lighting installed in a car" />
+              <img
+                src="/images/site/service-ambient.jpg"
+                alt="Purple ambient lighting installed in a car"
+                loading="lazy"
+                decoding="async"
+              />
               <div>
                 <h2>Services</h2>
                 <p>
@@ -50,7 +55,12 @@ export function HomePage() {
               </div>
             </Link>
             <Link className="feature-panel" to="/gallery">
-              <img src="/images/site/gallery-stars-02.jpg" alt="Detailed starlight headliner installation" />
+              <img
+                src="/images/site/gallery-stars-02.jpg"
+                alt="Detailed starlight headliner installation"
+                loading="lazy"
+                decoding="async"
+              />
               <div>
                 <h2>Gallery</h2>
                 <p>
@@ -72,6 +82,8 @@ export function HomePage() {
             className="about-media"
             src="/images/site/gallery-ambient-02.jpeg"
             alt="Blue and purple ambient lighting fitted at A Star Customs"
+            loading="lazy"
+            decoding="async"
           />
           <div className="about-copy">
             <h2>About us</h2>

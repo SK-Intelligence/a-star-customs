@@ -105,7 +105,7 @@ export function ProductPage() {
             <div className="product-gallery">
               <button className="product-gallery__main" type="button" onClick={() => setLightboxIndex(imageIndex)}>
                 {product.ribbonText ? <span className="product-ribbon">{product.ribbonText}</span> : null}
-                <img src={activeImage} alt={product.title} />
+                <img src={activeImage} alt={product.title} fetchPriority="high" decoding="async" />
                 <span>Click to expand</span>
               </button>
               {product.images.length > 1 ? (
@@ -118,7 +118,7 @@ export function ProductPage() {
                       onClick={() => setImageIndex(index)}
                       aria-label={`Show ${product.title} image ${index + 1}`}
                     >
-                      <img src={image} alt="" />
+                      <img src={image} alt="" loading="lazy" decoding="async" />
                     </button>
                   ))}
                 </div>
@@ -179,7 +179,14 @@ export function ProductPage() {
                           onClick={() => toggleAddOn(definition.id)}
                           disabled={!option.isAvailable}
                         >
-                          {addOn ? <img src={addOn.images[0] ?? '/images/site/hero.jpg'} alt="" /> : <Sparkles aria-hidden="true" />}
+                          {addOn ? (
+                            <img
+                              src={addOn.images[0] ?? '/images/site/hero.jpg'}
+                              alt=""
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          ) : <Sparkles aria-hidden="true" />}
                           <span>
                             <small>{option.isAvailable ? 'Optional add-on' : 'Coming soon'}</small>
                             <strong>{definition.label}</strong>
