@@ -58,20 +58,21 @@ Copy `.env.example` to `backend/.env` for local work or to `.env` for Docker Com
 ### Activating Stripe
 
 1. Add `STRIPE_SECRET_KEY` to the backend environment.
-2. In Stripe Dashboard, create a payment-method configuration for this storefront. Enable card, Apple Pay, Google Pay, Link, Klarna, Afterpay/Clearpay, PayPal, Amazon Pay, Revolut Pay, and Pay by Bank where the A Star account is eligible. Add its `pmc_…` ID as `STRIPE_PAYMENT_METHOD_CONFIGURATION_ID`.
-3. In Stripe Workbench, create a webhook endpoint at `https://YOUR_DOMAIN/api/stripe/webhook`.
-4. Subscribe it to:
+2. In Stripe Dashboard, create an active Dynamic Payment Methods configuration for this storefront. Enable card, Apple Pay, Google Pay, Link, Klarna, Afterpay/Clearpay, PayPal, Amazon Pay, Revolut Pay, Pay by Bank, and any additional mobile wallets Stripe offers to the A Star account for GBP payments. Connect the required provider account for methods such as PayPal. Add the configuration's `pmc_…` ID as `STRIPE_PAYMENT_METHOD_CONFIGURATION_ID`.
+3. Register the production domain and every checkout subdomain under Stripe's payment-method domains. Complete the equivalent test-mode registration when validating wallets before launch; local wallet testing requires an HTTPS domain or tunnel. Stripe handles Apple merchant validation, so this integration does not need a separate Apple Merchant ID or certificate.
+4. In Stripe Workbench, create a webhook endpoint at `https://YOUR_DOMAIN/api/stripe/webhook`.
+5. Subscribe it to:
    - `checkout.session.completed`
    - `checkout.session.async_payment_succeeded`
    - `checkout.session.async_payment_failed`
    - `checkout.session.expired`
-5. Add the endpoint's signing secret as `STRIPE_WEBHOOK_SECRET`.
-6. Set production `CHECKOUT_SUCCESS_URL`, `CHECKOUT_CANCEL_URL`, and `CORS_ORIGINS`, or set `PUBLIC_BASE_URL` when using the included Docker Compose stack.
-7. Complete test-mode payments for the methods Stripe makes available to the test customer, then verify the order status before switching to live keys.
+6. Add the endpoint's signing secret as `STRIPE_WEBHOOK_SECRET`.
+7. Set production `CHECKOUT_SUCCESS_URL`, `CHECKOUT_CANCEL_URL`, and `CORS_ORIGINS`, or set `PUBLIC_BASE_URL` when using the included Docker Compose stack.
+8. Complete test-mode payments on compatible iPhone/Safari and Android/Chrome devices, plus the other methods Stripe makes available to the test customer. Verify the order status before switching to live keys, then repeat a live-mode wallet check after domain registration and payment-method activation are complete.
 
 Checkout will not create a Stripe session until the secret key, payment-method configuration, and webhook signing secret are all present. This prevents the site from accepting delayed payments without a verified status-update path.
 
-Checkout prices are always loaded from the backend catalog. The browser cannot submit a price. Payment details are collected on Stripe's hosted page. Stripe decides which configured methods to show for each customer, device, currency, basket, and account eligibility; the site does not promise every method on every order. Wallet domains, Klarna/Afterpay-Clearpay merchant approval, and PayPal connection are completed in Stripe rather than in this repository.
+Checkout prices are always loaded from the backend catalog. The browser cannot submit a price. Payment details are collected on Stripe's hosted page. The backend passes the selected Payment Method Configuration and intentionally omits `payment_method_types`, allowing Stripe to decide which enabled methods to show for each customer, device, currency, basket, and account eligibility. The site does not promise every method on every order. Wallet domains, Klarna/Afterpay-Clearpay merchant approval, and PayPal connection are completed in Stripe rather than in this repository.
 
 A paid return removes only the quantities captured for that exact order, so items added later or from another build stay in the bag. Delayed payment methods remain in a processing state until Stripe sends an asynchronous success or failure event. Instalment terms, limits, eligibility, and repayment schedules are shown by the payment provider; the storefront does not calculate or advertise a fixed plan.
 
@@ -111,13 +112,13 @@ The production app reads only local JSON and local image/font files. It does not
 
 - `frontend/src/data/catalog.json` drives the storefront.
 - `backend/app/catalog.json` is the server-authoritative pricing copy.
-- `frontend/src/data/add-ons.json` and `backend/app/add-ons.json` mirror the add-on compatibility and availability rules used by the product builder and checkout validation.
-- `python scripts/check_catalog_sync.py` proves both catalog and add-on copies are in sync and all referenced product images exist.
+- `frontend/src/data/add-ons.json` and `backend/app/add-ons.json` mirror the add-on availability rules used by the product builder and checkout validation.
+- `python scripts/check_catalog_sync.py` proves both catalog and add-on copies are in sync, validates explicit classification and fitment metadata, and verifies every image against the reviewed SHA-256 media manifest in `scripts/media-review.json`.
 - `python scripts/import_hostinger_catalog.py --refresh-assets` refreshes the final source snapshot before Hostinger is retired. This is a migration utility, not a runtime dependency.
 
-Active add-on products cannot be checked out on their own. Customers add them from a compatible base package, and the backend independently verifies the relationship and matching quantity. Disabled entries remain visible as “Pricing to be confirmed” until a trusted catalog product, variant, and price are supplied.
+Catalogue behavior is controlled by the explicit `kind` field, never title wording. `addon` products are attachment-only, `upgrade` products are standalone and contain no nested upsells, and purchasable `main` products expose every active stackable add-on. The backend independently verifies the product kinds, base/add-on grouping, matching quantity and trusted prices. Disabled add-on definitions stay unavailable until a trusted catalog product, variant and price are supplied.
 
-After cutover, edit the catalog and add-on rules deliberately in source control and keep both frontend/backend copies identical. Run `npm run check:catalog` before every release.
+After cutover, edit the catalogue and add-on rules deliberately in source control and keep both frontend/backend copies identical. Any approved image or fitment change must update `scripts/media-review.json` in the same reviewed change. Both production Docker builds run the catalogue check automatically; run `npm run check:catalog` locally before every release as well.
 
 ## Review moderation
 

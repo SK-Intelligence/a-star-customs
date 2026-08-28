@@ -1,7 +1,7 @@
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { categories as allCategories, type Product } from '../data/catalog';
+import { productMinimumPrice, shopCategories, type Product } from '../data/catalog';
 import { ProductCard } from './ProductCard';
 
 type SortMode = 'price-asc' | 'price-desc' | 'recent';
@@ -14,11 +14,6 @@ interface CatalogBrowserProps {
 
 const PAGE_SIZE = 20;
 
-function minimumPrice(product: Product) {
-  const positivePrices = product.variants.map((variant) => variant.price).filter((price) => price > 0);
-  return positivePrices.length > 0 ? Math.min(...positivePrices) : 0;
-}
-
 export function CatalogBrowser({
   source,
   showCategories = true,
@@ -28,16 +23,16 @@ export function CatalogBrowser({
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortMode>('price-asc');
   const [page, setPage] = useState(1);
-  const activeCategory = searchParams.get('category') ?? 'All products';
-  const sourceCategories = allCategories.filter((category) =>
-    source.some((product) => product.collections.includes(category)),
-  );
+  const requestedCategory = searchParams.get('category');
+  const sourceCategories = shopCategories.filter((category) => source.some(category.matches));
+  const selectedCategory = sourceCategories.find(({ label }) => label === requestedCategory);
+  const activeCategory = selectedCategory?.label ?? 'All products';
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
     const items = source.filter((product) => {
       const categoryMatches =
-        activeCategory === 'All products' || product.collections.includes(activeCategory);
+        !selectedCategory || selectedCategory.matches(product);
       const queryMatches =
         !needle ||
         `${product.title} ${product.subtitle ?? ''} ${product.collections.join(' ')}`
@@ -47,13 +42,15 @@ export function CatalogBrowser({
     });
 
     return [...items].sort((left, right) => {
-      if (sort === 'price-desc') return minimumPrice(right) - minimumPrice(left);
+      if (sort === 'price-desc') return productMinimumPrice(right) - productMinimumPrice(left);
       if (sort === 'recent') {
         return new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime();
       }
-      return minimumPrice(left) - minimumPrice(right);
+      const leftPrice = productMinimumPrice(left) || Number.POSITIVE_INFINITY;
+      const rightPrice = productMinimumPrice(right) || Number.POSITIVE_INFINITY;
+      return leftPrice - rightPrice;
     });
-  }, [activeCategory, query, sort, source]);
+  }, [query, selectedCategory, sort, source]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, pageCount);
@@ -74,7 +71,7 @@ export function CatalogBrowser({
           <p className="eyebrow">Browse by</p>
           <h2>Categories</h2>
           <div>
-            {['All products', ...sourceCategories].map((category) => (
+            {['All products', ...sourceCategories.map(({ label }) => label)].map((category) => (
               <button
                 type="button"
                 key={category}
@@ -85,11 +82,25 @@ export function CatalogBrowser({
                 <span>
                   {category === 'All products'
                     ? source.length
-                    : source.filter((product) => product.collections.includes(category)).length}
+                    : source.filter(
+                        sourceCategories.find(({ label }) => label === category)?.matches ?? (() => false),
+                      ).length}
                 </span>
               </button>
             ))}
           </div>
+          <label className="catalog-category-select">
+            <SlidersHorizontal aria-hidden="true" />
+            <span className="sr-only">Choose a product category</span>
+            <select value={activeCategory} onChange={(event) => chooseCategory(event.target.value)}>
+              <option value="All products">All products ({source.length})</option>
+              {sourceCategories.map((category) => (
+                <option value={category.label} key={category.label}>
+                  {category.label} ({source.filter(category.matches).length})
+                </option>
+              ))}
+            </select>
+          </label>
         </aside>
       ) : null}
 
@@ -180,4 +191,3 @@ export function CatalogBrowser({
     </div>
   );
 }
-

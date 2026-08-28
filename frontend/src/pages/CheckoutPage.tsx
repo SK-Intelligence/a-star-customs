@@ -105,7 +105,9 @@ export function CheckoutPage() {
         <div className="checkout-layout">
           <div className="checkout-items">
             {resolvedLines.map(({ line, product, variant }) => {
-              const addOnOptions = line.lineType === 'base' ? getProductAddOnOptions(product) : [];
+              const addOnOptions = line.lineType === 'base'
+                ? getProductAddOnOptions(product).filter((option) => option.isAvailable)
+                : [];
               const buildId = line.buildId;
               return (
                 <div className={`checkout-build-line checkout-build-line--${line.lineType}`} key={`${line.buildId ?? 'standalone'}:${line.lineType}:${line.productId}:${line.variantId}`}>

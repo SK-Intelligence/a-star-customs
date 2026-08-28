@@ -12,7 +12,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.addons import AddOnConfigurationError, AddOnOption, load_add_ons
-from app.catalog import CatalogConfigurationError, load_catalog
+from app.catalog import CatalogConfigurationError, CatalogProduct, load_catalog
 from app.config import Settings, get_settings
 from app.models import (
     CheckoutLine,
@@ -155,7 +155,11 @@ def _raise_build_invalid() -> NoReturn:
     )
 
 
-def _validate_builds(cart: CheckoutRequest, add_ons: list[AddOnOption]) -> None:
+def _validate_builds(
+    cart: CheckoutRequest,
+    add_ons: list[AddOnOption],
+    catalog: dict[str, CatalogProduct],
+) -> None:
     active_add_ons = {
         (option.productId, option.variantId): option
         for option in add_ons
@@ -164,9 +168,11 @@ def _validate_builds(cart: CheckoutRequest, add_ons: list[AddOnOption]) -> None:
     builds: dict[str, list[CheckoutLine]] = {}
     for item in cart.items:
         if item.lineType == "standalone":
+            product = catalog.get(item.productId)
             if (
                 item.buildId is not None
                 or (item.productId, item.variantId) in active_add_ons
+                or (product is not None and product.kind == "addon")
             ):
                 _raise_build_invalid()
             continue
@@ -174,19 +180,14 @@ def _validate_builds(cart: CheckoutRequest, add_ons: list[AddOnOption]) -> None:
             _raise_build_invalid()
         builds.setdefault(item.buildId, []).append(item)
 
-    configured_base_ids = {
-        product_id
-        for option in add_ons
-        for product_id in option.compatibleProductIds
-    }
-
     for lines in builds.values():
         base_lines = [line for line in lines if line.lineType == "base"]
         add_on_lines = [line for line in lines if line.lineType == "addon"]
         if len(base_lines) != 1:
             _raise_build_invalid()
         base = base_lines[0]
-        if base.productId not in configured_base_ids:
+        base_product = catalog.get(base.productId)
+        if base_product is None or base_product.kind != "main":
             _raise_build_invalid()
         add_on_ids = [
             (add_on_line.productId, add_on_line.variantId)
@@ -198,7 +199,6 @@ def _validate_builds(cart: CheckoutRequest, add_ons: list[AddOnOption]) -> None:
             option = active_add_ons.get((add_on_line.productId, add_on_line.variantId))
             if (
                 option is None
-                or base.productId not in option.compatibleProductIds
                 or add_on_line.quantity != base.quantity
             ):
                 _raise_build_invalid()
@@ -224,7 +224,7 @@ async def create_checkout_session(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="The add-on configuration is temporarily unavailable.",
         ) from exc
-    _validate_builds(cart, add_ons)
+    _validate_builds(cart, add_ons, catalog)
 
     stripe_line_items: list[dict[str, Any]] = []
     cart_identity_parts: list[str] = []

@@ -22,8 +22,8 @@ export function HomePage() {
         <div className="container home-hero__content">
           <h1>Car needs an upgrade?</h1>
           <p className="home-hero__lead">
-            Here at A Star Customs we always provide a 5 star service...come
-            take a look
+            Explore professionally fitted upgrades backed by a five-star service
+            from first idea to final handover.
           </p>
           <div className="button-row">
             <Link className="button button--primary" to="/shop">
@@ -56,7 +56,7 @@ export function HomePage() {
             </Link>
             <Link className="feature-panel" to="/gallery">
               <img
-                src="/images/site/gallery-stars-02.jpg"
+                src="/images/site/gallery-stars-03.jpg"
                 alt="Detailed starlight headliner installation"
                 loading="lazy"
                 decoding="async"

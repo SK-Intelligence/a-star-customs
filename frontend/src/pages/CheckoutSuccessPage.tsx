@@ -74,8 +74,9 @@ export function CheckoutSuccessPage() {
           <p className="eyebrow">Payment confirmed</p>
           <h1>Thank you — your order is in.</h1>
           <p>
-            Stripe will email your receipt. The workshop will contact you if
-            compatibility or fitting details need to be confirmed.
+            We will email you your receipt shortly. Get ready for a 5 star
+            service. The workshop will contact you if compatibility or fitting
+            details need to be confirmed.
           </p>
           {orderReference ? <small>Order reference: {orderReference}</small> : null}
         </>

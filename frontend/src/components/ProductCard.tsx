@@ -1,20 +1,19 @@
-import { ArrowRight, MessageCircle, ShoppingBag, SlidersHorizontal } from 'lucide-react';
+import { ArrowRight, MessageCircle, SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { formatPrice, getActiveAddOnDefinition, type Product } from '../data/catalog';
+import { formatPrice, getProductAddOnOptions, isAddOnProduct, type Product } from '../data/catalog';
 import { whatsappUrl } from '../data/site';
-import { useCartStore } from '../store/cart';
 
 interface ProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const addItem = useCartStore((state) => state.addItem);
   const firstVariant = product.variants[0];
   const prices = product.variants.map((variant) => variant.price).filter((price) => price > 0);
   const minimumPrice = prices.length > 0 ? Math.min(...prices) : 0;
   const hasPriceRange = new Set(prices).size > 1;
-  const isAddOnOnly = getActiveAddOnDefinition(product) !== undefined;
+  const isAddOnOnly = isAddOnProduct(product);
+  const supportsAddOns = getProductAddOnOptions(product).some((option) => option.isAvailable);
 
   return (
     <article className="product-card">
@@ -46,25 +45,15 @@ export function ProductCard({ product }: ProductCardProps) {
             <SlidersHorizontal aria-hidden="true" />
             <span>View add-on</span>
           </Link>
-        ) : product.purchasable && product.available && firstVariant && product.variants.length > 1 ? (
+        ) : product.purchasable && product.available && firstVariant ? (
           <Link
             className="product-card__action"
             to={`/${product.slug}`}
-            aria-label={`Choose an option for ${product.title}`}
+            aria-label={`${product.kind === 'upgrade' ? 'View upgrade' : supportsAddOns ? 'View package options' : 'View product'} for ${product.title}`}
           >
             <SlidersHorizontal aria-hidden="true" />
-            <span>Choose options</span>
+            <span>{product.kind === 'upgrade' ? 'View upgrade' : supportsAddOns ? 'View package options' : 'View product'}</span>
           </Link>
-        ) : product.purchasable && product.available && firstVariant ? (
-          <button
-            type="button"
-            className="product-card__action"
-            onClick={() => addItem(product.id, firstVariant.id)}
-            aria-label={`Add ${product.title} to bag`}
-          >
-            <ShoppingBag aria-hidden="true" />
-            <span>Add to bag</span>
-          </button>
         ) : (
           <a
             className="product-card__action"

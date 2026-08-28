@@ -29,6 +29,10 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    environment:
+      BACKEND_HOST: backend
+      NGINX_RESOLVER: 127.0.0.11
+      NGINX_ENVSUBST_FILTER: BACKEND_HOST|NGINX_RESOLVER
     ports:
       - "8080:80"
     restart: unless-stopped

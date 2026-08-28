@@ -223,6 +223,106 @@ PREMIUM_ADD_ON = {
     "productId": "prod_01KCFRCKR5NV5VGCM7ZTKCZ5DE",
     "variantId": "variant_01KCFRCKV84EMEE32KZB4QF9MK",
 }
+PANORAMIC_BASE = {
+    "productId": "prod_01KD6GH4TK6C5TEX6AK8PBD4PV",
+    "variantId": "variant_01KD6GH4X2KGPC68E2VN6YH25Q",
+}
+
+
+def test_checkout_accepts_stacked_add_ons_on_a_compatible_listing(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_create(**kwargs: object) -> SimpleNamespace:
+        captured.update(kwargs)
+        return SimpleNamespace(
+            id="cs_test_panoramic_build",
+            url="https://checkout.stripe.com/c/pay/panoramic-build",
+        )
+
+    monkeypatch.setattr("app.main.stripe.checkout.Session.create", fake_create)
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        stripe_secret_key="sk_test_placeholder",
+        stripe_payment_method_configuration_id="pmc_test_checkout",
+        stripe_webhook_secret="whsec_test_checkout",
+        orders_database_path=tmp_path / "orders.db",
+    )
+
+    response = client.post(
+        "/api/checkout/session",
+        json={
+            "items": [
+                {
+                    **AMBIENT_BASE,
+                    "quantity": 1,
+                    "buildId": "panoramic-build",
+                    "lineType": "base",
+                },
+                {
+                    **SPEAKER_ADD_ON,
+                    "quantity": 1,
+                    "buildId": "panoramic-build",
+                    "lineType": "addon",
+                },
+                {
+                    **PREMIUM_ADD_ON,
+                    "quantity": 1,
+                    "buildId": "panoramic-build",
+                    "lineType": "addon",
+                },
+            ]
+        },
+    )
+
+    assert response.status_code == 200
+    line_items = captured["line_items"]  # type: ignore[assignment]
+    assert [
+        item["price_data"]["product_data"]["metadata"]["line_type"]
+        for item in line_items
+    ] == ["base", "addon", "addon"]
+
+
+def test_checkout_accepts_active_add_ons_on_any_main_listing(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    def fake_create(**_: object) -> SimpleNamespace:
+        return SimpleNamespace(
+            id="cs_test_universal_add_on",
+            url="https://checkout.stripe.com/c/pay/universal-add-on",
+        )
+
+    monkeypatch.setattr("app.main.stripe.checkout.Session.create", fake_create)
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        stripe_secret_key="sk_test_placeholder",
+        stripe_payment_method_configuration_id="pmc_test_checkout",
+        stripe_webhook_secret="whsec_test_checkout",
+        orders_database_path=tmp_path / "orders.db",
+    )
+    response = client.post(
+        "/api/checkout/session",
+        json={
+            "items": [
+                {
+                    **PANORAMIC_BASE,
+                    "quantity": 1,
+                    "buildId": "unrelated-build",
+                    "lineType": "base",
+                },
+                {
+                    **SPEAKER_ADD_ON,
+                    "quantity": 1,
+                    "buildId": "unrelated-build",
+                    "lineType": "addon",
+                },
+            ]
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["url"] == "https://checkout.stripe.com/c/pay/universal-add-on"
 
 
 def test_checkout_forwards_grouping_to_line_metadata_and_cart_hash(
@@ -384,21 +484,6 @@ def test_checkout_rejects_active_add_on_as_standalone() -> None:
                 **SPEAKER_ADD_ON,
                 "quantity": 1,
                 "buildId": "quantity-mismatch",
-                "lineType": "addon",
-            },
-        ],
-        [
-            {
-                "productId": "prod_01KCFVQV2CB6Q1S1SY4NC1SEYC",
-                "variantId": "variant_01KCFVQV5P348YYQ8ERHECVXF5",
-                "quantity": 1,
-                "buildId": "disabled-starlight",
-                "lineType": "base",
-            },
-            {
-                **SPEAKER_ADD_ON,
-                "quantity": 1,
-                "buildId": "disabled-starlight",
                 "lineType": "addon",
             },
         ],

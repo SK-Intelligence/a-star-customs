@@ -10,6 +10,16 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_valida
 
 ADD_ONS_PATH = Path(__file__).with_name("add-ons.json")
 
+ProductFamily = Literal[
+    "ambient-lighting",
+    "starlights",
+    "screen-upgrades",
+    "dashcams",
+    "steering-wheels",
+    "rims-calipers",
+    "general",
+]
+
 
 class AddOnOption(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
@@ -18,16 +28,12 @@ class AddOnOption(BaseModel):
     status: Literal["active", "disabled"]
     label: str = Field(min_length=1)
     description: str = Field(min_length=1)
-    compatibleProductIds: list[str] = Field(min_length=1)
+    appliesToFamilies: list[ProductFamily] = Field(min_length=1)
     productId: str | None
     variantId: str | None
 
     @model_validator(mode="after")
     def validate_availability(self) -> "AddOnOption":
-        if any(not product_id for product_id in self.compatibleProductIds):
-            raise ValueError("compatible product IDs cannot be empty")
-        if len(set(self.compatibleProductIds)) != len(self.compatibleProductIds):
-            raise ValueError("compatible product IDs must be unique")
         if self.status == "active" and (not self.productId or not self.variantId):
             raise ValueError("active add-ons require product and variant IDs")
         if self.status == "disabled" and (

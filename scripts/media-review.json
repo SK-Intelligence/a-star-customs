@@ -1,0 +1,948 @@
+[
+  {
+    "productId": "prod_01KD6J6R9BH67WN9R5VHP4SJEG",
+    "mediaKey": "custom-steering-wheels-please-contact-first",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/custom-steering-wheels-please-contact-first-01.jpeg",
+        "sha256": "b421f5b97af181c7132259a9372d925ef9ae858e0b71b9b8aa2a2e407ebb1524"
+      },
+      {
+        "path": "/images/products/custom-steering-wheels-please-contact-first-02.jpeg",
+        "sha256": "06b3be67529c71fbb737ed1978996562717792d435ae32fcc572b18953abb627"
+      },
+      {
+        "path": "/images/products/custom-steering-wheels-please-contact-first-03.jpeg",
+        "sha256": "ff9b981308578801b547febe8a452692dc4f005b95098796adb488e0e42e42c7"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KCRZ1AXP7H0VHJ04JTDN0D0J",
+    "mediaKey": "shooting-stars-twinkle-starlight-800-pieces",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/shooting-stars-twinkle-starlight-800-pieces-01.jpg",
+        "sha256": "040ad350b1269a60ff8e9246ab869cb64279b797bb3803c2abe0fb4e7cab4ca6"
+      },
+      {
+        "path": "/images/products/shooting-stars-twinkle-starlight-800-pieces-02.jpg",
+        "sha256": "4011be57307afd16224e6ca9e0c4e20eb6e22d8b53fed9bb0315367a6bd88a09"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KSD0914ZFT86256G4WN1AECM",
+    "mediaKey": "dual-car-air-vent-ambient-light-kit",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes C-Class, CLA or GLA (2012–2026); confirm vent shape and model year.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class",
+        "CLA",
+        "GLA"
+      ],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/dual-car-air-vent-ambient-light-kit-01.jpg",
+        "sha256": "bb91a9480770583750c477947abef56c318522ceac1de90e5f96f56083dee8dd"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KCFR1PBNK4HHMX64NN0BPCCK",
+    "mediaKey": "4x-speaker-lights-optional-add-on",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/4x-speaker-lights-optional-add-on-01.jpg",
+        "sha256": "ca84aba0c76cef1f2af34f38ca711fca4d6de5483da57de03ec485b2c7ea6a2a"
+      },
+      {
+        "path": "/images/products/4x-speaker-lights-optional-add-on-02.jpg",
+        "sha256": "93a3e1f153d6b70fe212f59f085585201cba58c04e8bb0aa0beaaf950a81e71b"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KFVHY3MK70RA36DKE21WFPNM",
+    "mediaKey": "wireless-carplay-adapter",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "universal",
+      "label": "Works with vehicles that support wired Apple CarPlay; confirm compatibility before ordering.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/wireless-carplay-adapter-01.jpg",
+        "sha256": "d5cdedf370d5ce3e81cff418567a1393f1b2260457822e3f35c23f32b0f2e99b"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KCFRCKR5NV5VGCM7ZTKCZ5DE",
+    "mediaKey": "premium-pack-add-on-25-animations-and-start-up-effects",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/premium-pack-add-on-25-animations-and-start-up-effects-01.jpg",
+        "sha256": "c44bdfdb7555bf7fd969c94efce65f17c25001aeb219aeff771274b3cd9c4be8"
+      },
+      {
+        "path": "/images/products/premium-pack-add-on-25-animations-and-start-up-effects-02.jpeg",
+        "sha256": "13ab32f88b6bb16c61dbeb0a7c03645ec25859c9b542663a71c26411e60b1945"
+      },
+      {
+        "path": "/images/products/premium-pack-add-on-25-animations-and-start-up-effects-03.jpeg",
+        "sha256": "835682c8174d94d50112da7d8256b8df38c019db1fe2ec06c0f32fb54a06bb5c"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KSD0MZNRDVJ434DNR8J67SDR",
+    "mediaKey": "car-speaker-cover-set-tweeters-cla-a-gla",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes A-Class, CLA or GLA; confirm speaker-cover shape before ordering.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "A-Class",
+        "CLA",
+        "GLA"
+      ],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/car-speaker-cover-set-tweeters-cla-a-gla-01.jpg",
+        "sha256": "be0bdae3c21269218009f078f5d6b5fcc508b5ac9b307d5186bca257b503c925"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KSATT1Q7YPMECVBJYMQE5DWG",
+    "mediaKey": "starlight-fiber-optic-kit",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "universal",
+      "label": "Universal product; installation suitability must still be confirmed.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/starlight-fiber-optic-kit-01.jpg",
+        "sha256": "07c53bf82ab747a507c7eae85d285433805a21d362bccace784c2cafff3ea203"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KSATZERPXX28BSB9ZKE5YKV1",
+    "mediaKey": "starlight-fiber-optic-kit-twinkle",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "universal",
+      "label": "Universal product; installation suitability must still be confirmed.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/starlight-fiber-optic-kit-twinkle-01.jpg",
+        "sha256": "eb00465a8d05a30c6addf847b6c886d9ed18f31c00bbd9a81bda1928e750f552"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KCFSNPEKN0KFPJYJ04Q4B4B2",
+    "mediaKey": "dashcams",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/dashcams-01.jpg",
+        "sha256": "36b71a53bc15270c10250f7cd7157da849ac2e02c59413b4a6e59da2f6d342b9"
+      },
+      {
+        "path": "/images/products/dashcams-02.jpg",
+        "sha256": "2b29ed50c6db751c52b8bf80ddd4fe12449234e172e5d2fdba53eb503bcadb37"
+      },
+      {
+        "path": "/images/products/dashcams-03.jpg",
+        "sha256": "a9a4b30405bd5565977ef23de63279a313445f0252c533ac04fff68aee54555f"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KSD071WXFF7FNXR8MZHQAPBJ",
+    "mediaKey": "mercedes-benz-led-air-vent-kit-vents-for-c-classclagla-2012-2026-front",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes C-Class, CLA or GLA (2012–2026); confirm vent shape and model year.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class",
+        "CLA",
+        "GLA"
+      ],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/mercedes-benz-led-air-vent-kit-vents-for-c-classclagla-2012-2026-front-01.jpg",
+        "sha256": "0275e65927041dfc4a82c98bd645c1e6146efcbca6107c199dcb8a63b63bbba1"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KSAV1YB915KKBBGJWXQCP9F3",
+    "mediaKey": "starlight-fiber-optic-kit-twinkle-shooting",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "universal",
+      "label": "Universal product; installation suitability must still be confirmed.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/starlight-fiber-optic-kit-twinkle-shooting-01.jpg",
+        "sha256": "07c53bf82ab747a507c7eae85d285433805a21d362bccace784c2cafff3ea203"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KD6GH4TK6C5TEX6AK8PBD4PV",
+    "mediaKey": "panoramic-lights",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/panoramic-lights-01.jpeg",
+        "sha256": "fab3f2a269743d54497196696cb4e919abab077be31816d27b549fc4607d1f89"
+      },
+      {
+        "path": "/images/products/panoramic-lights-02.jpeg",
+        "sha256": "02f29070cd4e3fc86238434db5791e5a44403d8b51c83de05d07c9bee6f41aad"
+      },
+      {
+        "path": "/images/products/panoramic-lights-03.jpeg",
+        "sha256": "f106b44fdddb3dd1503ca80cfd1b94f0d4eff8c6766e0e89e455dd2f9089c821"
+      },
+      {
+        "path": "/images/products/panoramic-lights-04.jpeg",
+        "sha256": "f3cfb3e209d66916aa1b31ef029424d606c08a39a483758fc8c464537fbbba0b"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KD61YEY0HMGATXME9EGEFCX9",
+    "mediaKey": "mercedes-a-class-oem-ambient-lighting-upgrade",
+    "reviewBasis": "SK Webminds gallery: A-Class OEM lighting images",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes A-Class; contact the workshop to confirm model year and trim before ordering.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "A-Class"
+      ],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/mercedes-a-class-oem-ambient-lighting-upgrade-01.jpeg",
+        "sha256": "012b8ab631ccf1832be0622e5c0f1abd75bd80a15ead46185bb7b518d25ef7e8"
+      },
+      {
+        "path": "/images/products/mercedes-a-class-oem-ambient-lighting-upgrade-02.jpeg",
+        "sha256": "66af59d95b41dabbf33fea282db80c1526ee5911a7b7c3ca0580965dbdce66da"
+      },
+      {
+        "path": "/images/products/mercedes-a-class-oem-ambient-lighting-upgrade-03.jpeg",
+        "sha256": "27939e7610e3e6d02cd4279786d191b57f90c797d3bd5e451fbd1a06a72c7866"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KSAV8ZKHRFPFV67JZ656HNP8",
+    "mediaKey": "car-interior-ambient-led-light-kit-audi-q3-2018-current",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "specific",
+      "label": "Audi Q3 from 2018; confirm generation and trim before ordering.",
+      "makes": [
+        "Audi"
+      ],
+      "models": [
+        "Q3"
+      ],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/car-interior-ambient-led-light-kit-audi-q3-2018-current-01.jpg",
+        "sha256": "094f2290d4b1cfd86195904f9af1735de92bd09c1c8761a40a8726178e038fee"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KD6HD11AB8QPBW5ZF1XTYSHY",
+    "mediaKey": "calipers",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/calipers-01.jpeg",
+        "sha256": "305ac03d7c7fc33722f1ce174cfec0f52f995c739f3737b2925a9a4b5ff1f3d4"
+      },
+      {
+        "path": "/images/products/calipers-02.jpeg",
+        "sha256": "ee37a3df58295aee78e2020e900a41d5653ff45ec2e7af4030935e3727bffc5e"
+      },
+      {
+        "path": "/images/products/calipers-03.jpeg",
+        "sha256": "90ef7b448eef9b499126d442ab9e9efe78f84d708436a2e655ab3693ffe0a5db"
+      },
+      {
+        "path": "/images/products/calipers-04.jpg",
+        "sha256": "d82a2776a86944cb0108e9eb87b78bc8a270de236b8c6855b2829a061e650d93"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KSD0VCX6BQH6C8W6ANB7PKVP",
+    "mediaKey": "car-interior-ambient-led-lighting-kit-audi-8y-2012-2020",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "specific",
+      "label": "Audi A3 8V/8Y-style kit (2012–2020); confirm model and trim before ordering.",
+      "makes": [
+        "Audi"
+      ],
+      "models": [
+        "A3"
+      ],
+      "chassisCodes": [
+        "8V",
+        "8Y"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/car-interior-ambient-led-lighting-kit-audi-8y-2012-2020-01.jpg",
+        "sha256": "abde7dc385098d7d5acdc2894f1339041d7add782aaf661acbdc9bae93c25d15"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KSD0T02SXNKPPZM2GGYRVKHK",
+    "mediaKey": "multi-color-ambient-car-interior-led-kit-audi-8y-2012-2020",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "specific",
+      "label": "Audi A3 8V/8Y-style kit (2012–2020); confirm model and trim before ordering.",
+      "makes": [
+        "Audi"
+      ],
+      "models": [
+        "A3"
+      ],
+      "chassisCodes": [
+        "8V",
+        "8Y"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/multi-color-ambient-car-interior-led-kit-audi-8y-2012-2020-01.jpg",
+        "sha256": "00213181c7a31bebe6e838b65cf3c8a77d21f2462378c0ad2a6b10fde9c3d7f0"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KSCZYYJ1XMT0QDWPFPZM924B",
+    "mediaKey": "car-interior-ambient-light-kit-golf-mk7-mk75-2012-2019",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "specific",
+      "label": "Volkswagen Golf Mk7/Mk7.5 (2012–2019); confirm trim before ordering.",
+      "makes": [
+        "Volkswagen"
+      ],
+      "models": [
+        "Golf"
+      ],
+      "chassisCodes": [
+        "Mk7",
+        "Mk7.5"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/car-interior-ambient-light-kit-golf-mk7-mk75-2012-2019-01.jpg",
+        "sha256": "d1eafe62796ce0a757527ce717236a72f2e076bc89efb13932128859f9495fb4"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KD6H9SHKM5961BQQK82PWZY0",
+    "mediaKey": "rims",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/rims-01.jpg",
+        "sha256": "c62bdb01b335c3f1e890d70dd32812c64e47708e2ba21cecbc3ec5c9d0843279"
+      },
+      {
+        "path": "/images/products/rims-02.jpg",
+        "sha256": "1697fe52527d7a1239b9ea2f9b43554a68d6fd24a65e72b6525b92db49a5fd19"
+      },
+      {
+        "path": "/images/products/rims-03.jpg",
+        "sha256": "8bab25ff6eb627c38897bd9f92062b21a25035bbc6fe3b0c7ec22a679ec886e0"
+      },
+      {
+        "path": "/images/products/rims-04.jpeg",
+        "sha256": "e62cde324e1b2d4c9d30d23de96a61c5397d333493d9aaf68af31b426ff8a374"
+      },
+      {
+        "path": "/images/products/rims-05.jpeg",
+        "sha256": "6be1de468f742add682257d0d6a708d7be3153267aa8737185038bd86c6afb3c"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KSD21GSPKNJ31W9GEAGFTZD4",
+    "mediaKey": "car-ambient-interior-led-light-kit-aclagla-2018-2026",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes A-Class, CLA or GLA (2018–2026); confirm model year before ordering.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "A-Class",
+        "CLA",
+        "GLA"
+      ],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/car-ambient-interior-led-light-kit-aclagla-2018-2026-01.jpg",
+        "sha256": "54b3b503002039dd752cb36f0e1a1c8a5ae83945b957a2b3df36207d1ec7e8e4"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KSD00VPT386Q13SHKVNDQBR6",
+    "mediaKey": "car-led-ambient-light-kit-cla-gla-2018-2026",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes CLA or GLA (2018–2026); confirm model year before ordering.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "CLA",
+        "GLA"
+      ],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/car-led-ambient-light-kit-cla-gla-2018-2026-01.jpg",
+        "sha256": "aa5aa21ce4505e078816f5a224cfb08cbdfd1e1102c394e1a875151ae57bf0cb"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KCFZW77C8HS115SZRECKM9H9",
+    "mediaKey": "screeen-upgrade",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/screeen-upgrade-01.jpg",
+        "sha256": "5086483547d40f5b83e98265a9cbfbcc5695e9cf8dcb5b49186d6571c6f86a45"
+      },
+      {
+        "path": "/images/products/screeen-upgrade-02.jpg",
+        "sha256": "0b69931dc5e631075f3ddf51cbf4bf0ebd2718be669216b7a7bdedd4e78665a8"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01K6GY7W0PTTBFMH5DHF9Z75EN",
+    "mediaKey": "luxury-car-interior",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "universal",
+      "label": "Universal product; installation suitability must still be confirmed.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/luxury-car-interior-01.jpeg",
+        "sha256": "26dffe41ecfc09eeabe80fe5e12cab3e31a827e2caada787962ad052967a850d"
+      },
+      {
+        "path": "/images/products/luxury-car-interior-02.jpeg",
+        "sha256": "536ea2876d022c8459d1b65cd7ee7cdcbdd7e04eba51344ce87eb7ca585c39ef"
+      },
+      {
+        "path": "/images/products/luxury-car-interior-03.jpeg",
+        "sha256": "4261c91013a5edd70f58b1b50a9d36144bfe0c2db22562e74b552f22b09e1885"
+      },
+      {
+        "path": "/images/products/luxury-car-interior-04.jpeg",
+        "sha256": "d78ab5b621355fd68d8a2de03c5f73755c66ef66f44cd80540e417be1e2862a4"
+      },
+      {
+        "path": "/images/products/luxury-car-interior-05.jpeg",
+        "sha256": "5deb44acef483204d2d9ec5e9c932ac7b9588be54589b2b14e1e2b0a839b7797"
+      },
+      {
+        "path": "/images/products/luxury-car-interior-06.jpeg",
+        "sha256": "c48298ece7965d71060229931c5f501f1ee2a72011a8bf75420d4e56ad5a1aec"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KS68E0X8NM8FT2FXN6S0YXCF",
+    "mediaKey": "mercedes-c-class-w205-c205-oem-ambient-lighting",
+    "reviewBasis": "SK Webminds gallery: c class oem lighting / purple / red / menu",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes C-Class W205 saloon or C205 coupé; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class"
+      ],
+      "chassisCodes": [
+        "W205",
+        "C205"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/mercedes-c-class-w205-c205-oem-ambient-lighting-01.jpeg",
+        "sha256": "67f11cffc70e1c7804218acc4548d6898dcd87de4a2a144d7722eddb978c25d3"
+      },
+      {
+        "path": "/images/products/mercedes-c-class-w205-c205-oem-ambient-lighting-02.jpeg",
+        "sha256": "64d6447f1bb4c54b5d501c9e28b3501063ab0677fa0918980631de497ae1882e"
+      },
+      {
+        "path": "/images/products/mercedes-c-class-w205-c205-oem-ambient-lighting-03.jpeg",
+        "sha256": "6b9b77b3c859a02f9ffd3da75e3830919a923fd4b53d9a5f155ee1681449b96a"
+      },
+      {
+        "path": "/images/products/mercedes-c-class-w205-c205-oem-ambient-lighting-04.jpeg",
+        "sha256": "8de4882edc3bc3f61cae33ef99b7c6f5f605f18d31b7f5e0dbf904932bb297d7"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KRGY8J6KK956RF83F6VCCBKA",
+    "mediaKey": "bmw-f-series-oem-ambient-package",
+    "reviewBasis": "SK Webminds gallery: BMW-labelled OEM lighting images",
+    "fitment": {
+      "mode": "specific",
+      "label": "BMW F-Series; confirm model, year and trim before fitting.",
+      "makes": [
+        "BMW"
+      ],
+      "models": [
+        "F-Series"
+      ],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/bmw-f-series-oem-ambient-package-01.jpeg",
+        "sha256": "3f0c186976449ab35e3d3f7bd246256125956488ba26e28864580ef1a8279637"
+      },
+      {
+        "path": "/images/products/bmw-f-series-oem-ambient-package-02.jpeg",
+        "sha256": "836d1390e9ba2ac7d777497f37c767f2e198770b0f5366e7665144c63b3adc3e"
+      },
+      {
+        "path": "/images/products/bmw-f-series-oem-ambient-package-03.jpeg",
+        "sha256": "5b1b445442658f700f61be4857d460e394a98ccbf9a4da0d8e3d96596b8de71c"
+      },
+      {
+        "path": "/images/products/bmw-f-series-oem-ambient-package-04.jpeg",
+        "sha256": "e5bc20eaf2cc6efe927c0ccf33e81eacc8f921756299f2ba1dcdaddc8d023393"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KCFVQV2CB6Q1S1SY4NC1SEYC",
+    "mediaKey": "standard-starlight-500-pieces",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/standard-starlight-500-pieces-01.jpeg",
+        "sha256": "b124ca611465326784ec6c29becb5937573e9b014fa662314cdabdfc7634c8cf"
+      },
+      {
+        "path": "/images/products/standard-starlight-500-pieces-02.jpeg",
+        "sha256": "2ad52fd3787440e84633436e846f17aca7d6708308df4e8cacd3a319cf3cb0c9"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KCFWQED262D2E51977QQ7S2B",
+    "mediaKey": "starlight-standards-600-pieces",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/starlight-standards-600-pieces-01.jpeg",
+        "sha256": "cf841bf0cc812755f0951951812226824f1dd81de3c83322ee7258f45b3aed59"
+      },
+      {
+        "path": "/images/products/starlight-standards-600-pieces-02.jpeg",
+        "sha256": "087ef9c37a139deddf044bcd3ffa79bb121f1dfc6b9fe22980a6724c4b8f00c3"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KCFX7SNW29GS56QF45KP3KA8",
+    "mediaKey": "standard-starlights-700-pieces",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/standard-starlights-700-pieces-01.jpeg",
+        "sha256": "4d52d2778be3591839b52be504460cc5edd44069ca0675c1d1d1627180f2bb85"
+      },
+      {
+        "path": "/images/products/standard-starlights-700-pieces-02.jpeg",
+        "sha256": "dd14224ac3964b9dd866b9b93373353020f3bd70946b6b5e2e7a501e4d262627"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KCFXTQX36J9HK1WCD0BEFFY4",
+    "mediaKey": "twinkle-starlight-550-pieces",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/twinkle-starlight-550-pieces-01.jpeg",
+        "sha256": "06290c2960766239aa9527e909ac00ebc840b51d3c53ea4ca79acc762240ff8f"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KCFY15SN1YX6B855PJK95V46",
+    "mediaKey": "twinkle-starlights-650-pieces",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/twinkle-starlights-650-pieces-01.jpeg",
+        "sha256": "a10caf9e85a00b4d6c289fa578303c89f55004d3e8257c75c4673618bfeda2b1"
+      },
+      {
+        "path": "/images/products/twinkle-starlights-650-pieces-02.jpeg",
+        "sha256": "f9435db653becd715697cc398b7f880e6caf36f67b1b0d2fe7943022aafdf783"
+      },
+      {
+        "path": "/images/products/twinkle-starlights-650-pieces-03.jpeg",
+        "sha256": "34f5608901f4e600def9dc1315103962ae4e747565b73a2c642bd6d21d44c9fd"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KCFY6P0JEPNCDYV38H21M6XX",
+    "mediaKey": "twinkle-starlights-750-pieces",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/twinkle-starlights-750-pieces-01.jpeg",
+        "sha256": "4186066cba2ef24106465df80b3abf5f6880921036bdee66d120776f29920622"
+      },
+      {
+        "path": "/images/products/twinkle-starlights-750-pieces-02.jpeg",
+        "sha256": "ad339491da13642df6f26026702866ca5ec91bc9b4419b4b93c675f47455432a"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KRGYB92HFEDJ2669V89535NR",
+    "mediaKey": "ambient-lighting-package",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "specific",
+      "label": "Volkswagen Golf Mk7/Mk7.5; confirm model year and trim before fitting.",
+      "makes": [
+        "Volkswagen"
+      ],
+      "models": [
+        "Golf"
+      ],
+      "chassisCodes": [
+        "Mk7",
+        "Mk7.5"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/ambient-lighting-package-01.jpg",
+        "sha256": "52e68899524307d9aacbdd9206c4ff6af867d3df2e7ab6d3c573a61a7a74c55b"
+      },
+      {
+        "path": "/images/products/ambient-lighting-package-02.jpg",
+        "sha256": "ef5aee6264254891e119be8a7dd8d889347377d85b7612aa0c8f4e0a4982f432"
+      },
+      {
+        "path": "/images/products/ambient-lighting-package-03.jpg",
+        "sha256": "fd4d58ca6df0867a323aed2c18e8ecb468b94832e79aeaa6a059f3315ced090f"
+      },
+      {
+        "path": "/images/products/ambient-lighting-package-04.jpg",
+        "sha256": "23e17eaa7c6d0780efd6766e7e5b876fa47bcc73f953461e5c2eb176af0c015e"
+      },
+      {
+        "path": "/images/products/ambient-lighting-package-05.jpg",
+        "sha256": "ea7337c2086167de234ee2b3fb8195667325400c2801ced4aa02a9c19e2449cf"
+      },
+      {
+        "path": "/images/products/ambient-lighting-package-06.jpg",
+        "sha256": "7beb391b16f8d714613fcb4471e1b732355bdeb51216264452dc5c1d710606d7"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KRGYEY3SV5BS05BV5XHWKTNX",
+    "mediaKey": "audi-2020-oem-ambient-lighting-upgrade",
+    "reviewBasis": "SK Webminds gallery: Audi-labelled OEM and ambient images",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Audi models from 2020; confirm model, generation and trim before fitting.",
+      "makes": [
+        "Audi"
+      ],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/audi-2020-oem-ambient-lighting-upgrade-01.jpeg",
+        "sha256": "357df3be2646acea9e63e84215a562194ec8c55ff12aaf2539854bbb4f38771f"
+      },
+      {
+        "path": "/images/products/audi-2020-oem-ambient-lighting-upgrade-02.jpeg",
+        "sha256": "52ebc787b0a5ee6f1f7d74dcbf1546360ef43602d1b2b54d500292a34fb1a0f3"
+      },
+      {
+        "path": "/images/products/audi-2020-oem-ambient-lighting-upgrade-03.jpeg",
+        "sha256": "7d6f92d30f0b66b8d23b9fef887fe9d22ed3c4bab1adbbdbade7e966ad488783"
+      },
+      {
+        "path": "/images/products/audi-2020-oem-ambient-lighting-upgrade-04.jpeg",
+        "sha256": "b44c298d15192de4ea3d30bf314b33e04d8cb530241ab332c6d59eb9dc2a2f80"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KCFYD1MN8P4EKSTB989J0ZCG",
+    "mediaKey": "shooting-stars-twinkle-starlight",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/shooting-stars-twinkle-starlight-01.jpeg",
+        "sha256": "2a9312477c7272b9103ef147843efc5b9ef8e1581a52f64fcea901c01a1df5c9"
+      },
+      {
+        "path": "/images/products/shooting-stars-twinkle-starlight-02.jpeg",
+        "sha256": "e2876f91fe576f67946218ed097e7e3efa151099cf40850a8b5d7f5e48a405d6"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KRGY3PHXF5GRNQCA1V2D52Q0",
+    "mediaKey": "mercedes-a-class-cla-gla-oem-ambient-lighting-upgrade",
+    "reviewBasis": "SK Webminds gallery: A-Class OEM lighting images; CLA/GLA fitment requires workshop confirmation",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes A-Class, CLA or GLA; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "A-Class",
+        "CLA",
+        "GLA"
+      ],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/mercedes-a-class-cla-gla-oem-ambient-lighting-upgrade-01.jpeg",
+        "sha256": "012b8ab631ccf1832be0622e5c0f1abd75bd80a15ead46185bb7b518d25ef7e8"
+      },
+      {
+        "path": "/images/products/mercedes-a-class-cla-gla-oem-ambient-lighting-upgrade-02.jpeg",
+        "sha256": "66af59d95b41dabbf33fea282db80c1526ee5911a7b7c3ca0580965dbdce66da"
+      },
+      {
+        "path": "/images/products/mercedes-a-class-cla-gla-oem-ambient-lighting-upgrade-03.jpeg",
+        "sha256": "27939e7610e3e6d02cd4279786d191b57f90c797d3bd5e451fbd1a06a72c7866"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01KCFYNY97DJ0SBEYP5GG6XQ4B",
+    "mediaKey": "twinkle-starlights-800-pieces",
+    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/twinkle-starlights-800-pieces-01.jpeg",
+        "sha256": "e95358e6ffab6b6be1d97d6f89569bdb979c9e3ddb4dc39a5e639895ac00739e"
+      }
+    ]
+  }
+]

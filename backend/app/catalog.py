@@ -4,6 +4,8 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 
@@ -24,6 +26,17 @@ class CatalogProduct(BaseModel):
 
     id: str = Field(min_length=1)
     title: str = Field(min_length=1)
+    collections: list[str] = Field(default_factory=list)
+    kind: Literal["main", "addon", "upgrade"]
+    family: Literal[
+        "ambient-lighting",
+        "starlights",
+        "screen-upgrades",
+        "dashcams",
+        "steering-wheels",
+        "rims-calipers",
+        "general",
+    ]
     purchasable: bool
     available: bool
     variants: list[CatalogVariant]

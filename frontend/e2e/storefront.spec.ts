@@ -73,7 +73,7 @@ for (const [route, title] of primaryRoutes) {
   });
 }
 
-test('homepage uses the original direct service headline', async ({ page }) => {
+test('homepage uses a direct service headline and clear supporting copy', async ({ page }) => {
   await page.goto('/');
 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
@@ -81,7 +81,7 @@ test('homepage uses the original direct service headline', async ({ page }) => {
   );
   await expect(
     page.getByText(
-      'Here at A Star Customs we always provide a 5 star service...come take a look',
+      'Explore professionally fitted upgrades backed by a five-star service from first idea to final handover.',
       { exact: true },
     ),
   ).toBeVisible();
@@ -128,10 +128,10 @@ test('unknown routes render the not-found page', async ({ page }) => {
 });
 
 test('catalog category query filters the product count', async ({ page }) => {
-  await page.goto('/shop?category=DIY');
+  await page.goto('/shop?category=DIY%20kits');
 
   await expect(page.getByRole('heading', { name: '11 products' })).toBeVisible();
-  await expect(page.getByRole('button', { name: /^DIY 11$/ })).toHaveClass(/is-active/);
+  await expect(page.getByRole('button', { name: /^DIY kits 11$/ })).toHaveClass(/is-active/);
 });
 
 test('catalog search resets pagination and narrows results', async ({ page }) => {
@@ -154,7 +154,7 @@ test('multi-variant selection and quantity create distinct trusted cart lines', 
   await page.getByRole('button', { name: '600 Lights £94.99' }).click();
   await page.getByRole('button', { name: 'Increase quantity' }).click();
   await page.getByRole('button', { name: 'Increase quantity' }).click();
-  await page.getByRole('button', { name: 'Add to bag' }).click();
+  await page.getByRole('button', { name: /Add build to bag/ }).click();
 
   const drawer = page.getByRole('dialog', { name: 'Shopping bag' });
   await expect(drawer.getByText('600 Lights')).toBeVisible();
@@ -165,7 +165,7 @@ test('multi-variant selection and quantity create distinct trusted cart lines', 
   await page.getByRole('button', { name: '500 Lights £89.99' }).click();
   await page.getByRole('button', { name: 'Decrease quantity' }).click();
   await page.getByRole('button', { name: 'Decrease quantity' }).click();
-  await page.getByRole('button', { name: 'Add to bag' }).click();
+  await page.getByRole('button', { name: /Add build to bag/ }).click();
 
   await expect(drawer.locator('.cart-line')).toHaveCount(2);
   await expect(drawer.getByText('500 Lights')).toBeVisible();
@@ -201,38 +201,100 @@ test('optional extras update the build total and remain removable cart lines', a
   await expect(page.locator('.whatsapp-button')).toBeVisible();
 });
 
-test('installed starlight packages show disabled pricing placeholders while DIY stays unchanged', async ({ page }) => {
+test('every main product offers active extras without inferred higher-spec claims', async ({ page }) => {
   await page.goto('/standard-starlight-500-pieces');
 
-  for (const label of ['Shooting Stars', 'Colour-Change Starlights', 'Premium Headliner Material']) {
-    const option = page.getByRole('button', { name: new RegExp(label) });
-    await expect(option).toBeDisabled();
-  }
-  await expect(page.getByText('Pricing to be confirmed')).toHaveCount(3);
+  await expect(page.getByRole('button', { name: /4x Speaker Lights.*£39\.99/ })).toBeVisible();
+  await expect(page.getByText('Higher-spec option')).toHaveCount(0);
 
-  await page.goto('/shooting-stars-twinkle-starlight');
-  await expect(page.getByRole('button', { name: /Shooting Stars.*Pricing to be confirmed/ })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /Colour-Change Starlights/ })).toBeDisabled();
+  await page.goto('/dashcams-');
+  await expect(page.getByRole('heading', { name: 'Personalise your package' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /4x Speaker Lights.*£39\.99/ })).toBeVisible();
 
-  await page.goto('/starlight-fiber-optic-kit');
-  await expect(page.getByRole('heading', { name: 'Optional extras' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Add to bag' })).toBeVisible();
+  await page.goto('/luxury-car-interior');
+  await expect(page.getByRole('heading', { name: 'Optional add-ons' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /4x Speaker Lights.*£39\.99/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Add build to bag/ })).toBeVisible();
 });
 
-test('configured add-ons can only be bought through a compatible package', async ({ page }) => {
+test('products labelled add-on can only be bought through a base package', async ({ page }) => {
   await page.goto('/-4x-speaker-lights-optional-add-on');
 
   await expect(
-    page.getByRole('heading', { name: 'Add this to a compatible package.' }),
+    page.getByRole('heading', { name: 'Add this to a base package.' }),
   ).toBeVisible();
   await expect(page.getByRole('button', { name: /Add to bag/ })).toHaveCount(0);
-  await expect(page.getByRole('link', { name: 'Browse compatible packages' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Browse base packages' })).toBeVisible();
+  await expect(page.getByText('If you’re interested')).toHaveCount(0);
 
   await page.goto('/shop');
   await page.getByRole('searchbox', { name: 'Search products' }).fill('4x Speaker Lights');
   const productCard = page.getByRole('article').filter({ hasText: '4x Speaker Lights' });
   await expect(productCard.getByRole('button', { name: /Add .* to bag/ })).toHaveCount(0);
   await expect(productCard.getByRole('link', { name: /View add-on details/ })).toBeVisible();
+});
+
+test('panoramic lights can attach every active optional extra', async ({ page }) => {
+  await page.goto('/panoramic-lights-');
+
+  await expect(page.getByRole('button', { name: /4x Speaker Lights.*£39\.99/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Premium Pack.*£49\.99/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Add build to bag/ })).toBeVisible();
+});
+
+test('upgrade listings are directly purchasable and contain no nested upsells', async ({ page }) => {
+  await page.goto('/ambient-lighting-upgrade');
+
+  await expect(page.getByRole('heading', { name: 'Ambient Lighting Upgrade Audi 2020+' })).toBeVisible();
+  await expect(page.getByText(/Audi models from 2020/)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add to bag' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Personalise your package' })).toHaveCount(0);
+  await expect(page.getByText('If you’re interested')).toHaveCount(0);
+  await expect(page.getByText(/GLA is the higher spec/i)).toHaveCount(0);
+});
+
+test('vehicle-specific catalogue media and gallery groups match their labels', async ({ page }) => {
+  await page.goto('/mercedes-c-class-oem-ambient-lighting');
+
+  await expect(page.getByRole('heading', { name: 'Mercedes C-Class W205/C205 OEM Ambient Lighting' })).toBeVisible();
+  await expect(page.getByText(/W205 saloon or C205 coupé/)).toBeVisible();
+  const cClassImages = page.locator('.product-gallery img');
+  await expect(cClassImages).toHaveCount(5);
+  for (const image of await cClassImages.all()) {
+    await expect(image).toHaveAttribute('src', /mercedes-c-class-w205-c205-oem-ambient-lighting-/);
+  }
+
+  await page.goto('/gallery');
+  for (const [group, prefix] of [
+    ['Ambient lighting', 'gallery-ambient-'],
+    ['Starlights', 'gallery-stars-'],
+    ['Custom steering wheels', 'gallery-steering-'],
+    ['Rims & calipers', 'gallery-rims-'],
+    ['Screen upgrades', 'gallery-screen-'],
+    ['Dashcams', 'gallery-dashcam-'],
+  ] as const) {
+    const section = page.locator('.gallery-group').filter({ has: page.getByRole('heading', { name: group, exact: true }) });
+    for (const image of await section.locator('img').all()) {
+      await expect(image).toHaveAttribute('src', new RegExp(prefix));
+    }
+  }
+});
+
+test('mobile product discovery is collapsed, touch-safe and overflow-free', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/luxury-car-interior');
+
+  const discovery = page.locator('.product-discovery details');
+  await expect(discovery).not.toHaveAttribute('open', '');
+  await discovery.locator('summary').click();
+  await expect(discovery).toHaveAttribute('open', '');
+  const viewport = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    clientWidth: document.documentElement.clientWidth,
+  }));
+  expect(viewport.scrollWidth).toBeLessThanOrEqual(viewport.clientWidth);
+  const extraBox = await page.getByRole('button', { name: /4x Speaker Lights.*£39\.99/ }).boundingBox();
+  expect(extraBox?.height).toBeGreaterThanOrEqual(44);
 });
 
 test('a build keeps add-on quantity synced and supports child or whole-build removal', async ({ page }) => {
@@ -384,6 +446,11 @@ test('a verified paid checkout removes only its purchased cart snapshot', async 
   await page.goto('/checkout/success?session_id=cs_test_paid');
 
   await expect(page.getByRole('heading', { name: 'Thank you — your order is in.' })).toBeVisible();
+  await expect(
+    page.getByText(
+      'We will email you your receipt shortly. Get ready for a 5 star service. The workshop will contact you if compatibility or fitting details need to be confirmed.',
+    ),
+  ).toBeVisible();
   await expect(page.getByText(`Order reference: ${paidOrderReference}`)).toBeVisible();
   await expect
     .poll(() =>
@@ -467,6 +534,62 @@ test('gallery lightbox supports arrow navigation and Escape', async ({ page }) =
   await expect(dialog.getByRole('img')).toHaveAttribute('src', /gallery-ambient-02/);
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
+});
+
+test('gallery headings only show images from the matching service', async ({ page }) => {
+  await page.goto('/gallery');
+
+  const expectedImages = {
+    'Ambient lighting': [
+      'gallery-ambient-01',
+      'gallery-ambient-02',
+      'gallery-ambient-03',
+    ],
+    Starlights: [
+      'gallery-stars-01',
+      'gallery-stars-02',
+      'gallery-stars-07',
+      'gallery-stars-03',
+      'gallery-stars-04',
+      'gallery-stars-05',
+      'gallery-stars-06',
+    ],
+    'Custom steering wheels': [
+      'gallery-steering-01',
+      'gallery-steering-02',
+      'gallery-steering-03',
+    ],
+    'Rims & calipers': [
+      'gallery-rims-01',
+      'gallery-rims-02',
+    ],
+    'Screen upgrades': [
+      'gallery-screen-01',
+      'gallery-screen-02',
+      'gallery-screen-03',
+    ],
+    Dashcams: [
+      'gallery-dashcam-01',
+      'gallery-dashcam-02',
+      'gallery-dashcam-03',
+      'gallery-dashcam-04',
+      'gallery-dashcam-05',
+      'gallery-dashcam-06',
+      'gallery-dashcam-07',
+      'gallery-dashcam-08',
+    ],
+  } as const;
+
+  for (const [heading, imageNames] of Object.entries(expectedImages)) {
+    const group = page.locator('.gallery-group').filter({
+      has: page.getByRole('heading', { name: heading, exact: true }),
+    });
+
+    await expect(group.locator('img')).toHaveCount(imageNames.length);
+    await expect
+      .poll(() => group.locator('img').evaluateAll((images) => images.map((image) => image.getAttribute('src'))))
+      .toEqual(imageNames.map((imageName) => expect.stringContaining(imageName)));
+  }
 });
 
 test('third-party embeds remain blocked without marketing consent', async ({ page }) => {
@@ -582,7 +705,6 @@ test('landscape phone navigation keeps every route visible without scrolling sid
     'Shop',
     'Custom kits',
     'Featured collabs',
-    'Refund policy',
     'Contact',
   ]) {
     await expect(menu.getByRole('link', { name, exact: true })).toBeInViewport();
@@ -598,7 +720,7 @@ test('mobile cart focuses its close control and keeps primary controls touch siz
   const productQuantityBox = await increaseQuantity.boundingBox();
   expect(productQuantityBox?.width).toBeGreaterThanOrEqual(44);
   expect(productQuantityBox?.height).toBeGreaterThanOrEqual(44);
-  await page.getByRole('button', { name: 'Add to bag' }).click();
+  await page.getByRole('button', { name: /Add build to bag/ }).click();
 
   const drawer = page.getByRole('dialog', { name: 'Shopping bag' });
   const close = drawer.getByRole('button', { name: 'Close shopping bag' });

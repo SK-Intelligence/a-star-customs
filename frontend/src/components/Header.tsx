@@ -19,7 +19,6 @@ const navigation = [
   ['Shop', '/shop'],
   ['Custom kits', '/custom-kits'],
   ['Featured collabs', '/featured-collabs'],
-  ['Refund policy', '/refund-policy'],
   ['Contact', '/contact-us'],
 ] as const;
 

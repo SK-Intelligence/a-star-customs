@@ -47,7 +47,7 @@ export const serviceCards: readonly ServiceCard[] = [
     description:
       "Choose colours and lighting zones to add a customisable glow to your interior.",
     image: "/images/site/service-ambient.jpg",
-    href: "/shop?category=Ambients",
+    href: "/shop?category=Ambient%20lighting",
   },
   {
     id: "starlights",
@@ -55,7 +55,7 @@ export const serviceCards: readonly ServiceCard[] = [
     description:
       "Add a standard, twinkle or shooting-star effect to your roof lining.",
     image: "/images/site/service-starlights.jpg",
-    href: "/shop?category=Standard%20Starlights",
+    href: "/shop?category=Starlights",
   },
   {
     id: "steering-wheels",
@@ -63,7 +63,7 @@ export const serviceCards: readonly ServiceCard[] = [
     description:
       "Personalise the part of your car you touch most with unique materials, stitching and finishes.",
     image: "/images/site/service-steering.jpeg",
-    href: "/shop?category=Custom%20Steering%20Wheels",
+    href: "/shop?category=Steering%20wheels",
   },
   {
     id: "rims-calipers",
@@ -71,7 +71,7 @@ export const serviceCards: readonly ServiceCard[] = [
     description:
       "Refresh your wheels or calipers with custom colours and two-tone finishes.",
     image: "/images/site/service-rims.jpg",
-    href: "/shop?category=Rims%20%26%20Caliper",
+    href: "/shop?category=Wheels%20%26%20calipers",
   },
   {
     id: "screen-upgrades",
@@ -79,7 +79,7 @@ export const serviceCards: readonly ServiceCard[] = [
     description:
       "Upgrade to Apple CarPlay or Android Auto for smarter navigation and a sharper display.",
     image: "/images/site/service-screen.webp",
-    href: "/shop?category=Screen%20Upgrades",
+    href: "/shop?category=Screens%20%26%20CarPlay",
   },
   {
     id: "dashcams",
