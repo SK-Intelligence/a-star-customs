@@ -285,7 +285,7 @@ export function ProductPage() {
                 <summary>
                   <span>
                     <strong id="product-discovery-title">If you’re interested</strong>
-                    <small>Standalone upgrades and other popular services</small>
+                    <small>Compatible upgrades and fitment-confirmed services</small>
                   </span>
                   <ArrowRight aria-hidden="true" />
                 </summary>

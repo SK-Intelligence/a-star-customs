@@ -199,6 +199,7 @@ def _validate_builds(
             option = active_add_ons.get((add_on_line.productId, add_on_line.variantId))
             if (
                 option is None
+                or base_product.family not in option.appliesToFamilies
                 or add_on_line.quantity != base.quantity
             ):
                 _raise_build_invalid()

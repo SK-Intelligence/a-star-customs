@@ -4,7 +4,7 @@
     "status": "active",
     "label": "4x Speaker Lights",
     "description": "Add illuminated speaker accents to your ambient lighting installation.",
-    "appliesToFamilies": ["ambient-lighting", "starlights", "screen-upgrades", "dashcams", "steering-wheels", "rims-calipers", "general"],
+    "appliesToFamilies": ["ambient-lighting"],
     "productId": "prod_01KCFR1PBNK4HHMX64NN0BPCCK",
     "variantId": "variant_01KCFR1PF6SSFRX0GSDM2FDNDH"
   },
@@ -13,7 +13,7 @@
     "status": "active",
     "label": "Premium Pack: 25+ Animations & Start-Up Effects",
     "description": "Add an expanded set of animations and start-up effects.",
-    "appliesToFamilies": ["ambient-lighting", "starlights", "screen-upgrades", "dashcams", "steering-wheels", "rims-calipers", "general"],
+    "appliesToFamilies": ["ambient-lighting"],
     "productId": "prod_01KCFRCKR5NV5VGCM7ZTKCZ5DE",
     "variantId": "variant_01KCFRCKV84EMEE32KZB4QF9MK"
   },

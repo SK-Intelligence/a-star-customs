@@ -284,7 +284,7 @@ def test_checkout_accepts_stacked_add_ons_on_a_compatible_listing(
     ] == ["base", "addon", "addon"]
 
 
-def test_checkout_accepts_active_add_ons_on_any_main_listing(
+def test_checkout_rejects_add_on_for_an_incompatible_product_family(
     monkeypatch,
     tmp_path: Path,
 ) -> None:
@@ -321,8 +321,13 @@ def test_checkout_accepts_active_add_ons_on_any_main_listing(
         },
     )
 
-    assert response.status_code == 200
-    assert response.json()["url"] == "https://checkout.stripe.com/c/pay/universal-add-on"
+    assert response.status_code == 409
+    assert response.json() == {
+        "detail": {
+            "code": "BUILD_INVALID",
+            "message": "The configured product build is invalid.",
+        }
+    }
 
 
 def test_checkout_forwards_grouping_to_line_metadata_and_cart_hash(

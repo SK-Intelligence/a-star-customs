@@ -154,7 +154,7 @@ test('multi-variant selection and quantity create distinct trusted cart lines', 
   await page.getByRole('button', { name: '600 Lights £94.99' }).click();
   await page.getByRole('button', { name: 'Increase quantity' }).click();
   await page.getByRole('button', { name: 'Increase quantity' }).click();
-  await page.getByRole('button', { name: /Add build to bag/ }).click();
+  await page.locator('.product-buybox .buy-actions').getByRole('button', { name: 'Add to bag' }).click();
 
   const drawer = page.getByRole('dialog', { name: 'Shopping bag' });
   await expect(drawer.getByText('600 Lights')).toBeVisible();
@@ -165,7 +165,7 @@ test('multi-variant selection and quantity create distinct trusted cart lines', 
   await page.getByRole('button', { name: '500 Lights £89.99' }).click();
   await page.getByRole('button', { name: 'Decrease quantity' }).click();
   await page.getByRole('button', { name: 'Decrease quantity' }).click();
-  await page.getByRole('button', { name: /Add build to bag/ }).click();
+  await page.locator('.product-buybox .buy-actions').getByRole('button', { name: 'Add to bag' }).click();
 
   await expect(drawer.locator('.cart-line')).toHaveCount(2);
   await expect(drawer.getByText('500 Lights')).toBeVisible();
@@ -201,15 +201,14 @@ test('optional extras update the build total and remain removable cart lines', a
   await expect(page.locator('.whatsapp-button')).toBeVisible();
 });
 
-test('every main product offers active extras without inferred higher-spec claims', async ({ page }) => {
+test('optional extras appear only on compatible product families', async ({ page }) => {
   await page.goto('/standard-starlight-500-pieces');
 
-  await expect(page.getByRole('button', { name: /4x Speaker Lights.*£39\.99/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Personalise your package' })).toHaveCount(0);
   await expect(page.getByText('Higher-spec option')).toHaveCount(0);
 
   await page.goto('/dashcams-');
-  await expect(page.getByRole('heading', { name: 'Personalise your package' })).toBeVisible();
-  await expect(page.getByRole('button', { name: /4x Speaker Lights.*£39\.99/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Personalise your package' })).toHaveCount(0);
 
   await page.goto('/luxury-car-interior');
   await expect(page.getByRole('heading', { name: 'Optional add-ons' })).toBeVisible();
@@ -234,12 +233,31 @@ test('products labelled add-on can only be bought through a base package', async
   await expect(productCard.getByRole('link', { name: /View add-on details/ })).toBeVisible();
 });
 
-test('panoramic lights can attach every active optional extra', async ({ page }) => {
+test('panoramic lights do not offer ambient-lighting-only extras', async ({ page }) => {
   await page.goto('/panoramic-lights-');
 
-  await expect(page.getByRole('button', { name: /4x Speaker Lights.*£39\.99/ })).toBeVisible();
-  await expect(page.getByRole('button', { name: /Premium Pack.*£49\.99/ })).toBeVisible();
-  await expect(page.getByRole('button', { name: /Add build to bag/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Personalise your package' })).toHaveCount(0);
+  await expect(page.locator('.product-buybox .buy-actions').getByRole('button', { name: 'Add to bag' })).toBeVisible();
+});
+
+test('vehicle-specific discovery never crosses into another make or model', async ({ page }) => {
+  await page.goto('/-bmw-f-series-oem-ambient-package');
+
+  const discovery = page.locator('.product-discovery');
+  await expect(discovery).toContainText('Compatible upgrades and fitment-confirmed services');
+  await expect(discovery.getByText(/Golf|Audi|Mercedes|A-Class|CLA|GLA/i)).toHaveCount(0);
+
+  await page.goto('/mercedes-c-class-oem-ambient-lighting');
+  const cClassDiscovery = page.locator('.product-discovery');
+  for (const incompatibleSlug of [
+    '-bmw-f-series-oem-ambient-package',
+    'car-interior-ambient-light-kit-golf-mk7-mk75-2012-2019',
+    'car-interior-ambient-led-light-kit-audi-q3-2018-current',
+    'full-oem-ambient-lighting-upgrade-a-class',
+    'full-oem-ambient-lighting-upgrade-a-class1',
+  ]) {
+    await expect(cClassDiscovery.locator(`a[href="/${incompatibleSlug}"]`)).toHaveCount(0);
+  }
 });
 
 test('upgrade listings are directly purchasable and contain no nested upsells', async ({ page }) => {
@@ -720,7 +738,7 @@ test('mobile cart focuses its close control and keeps primary controls touch siz
   const productQuantityBox = await increaseQuantity.boundingBox();
   expect(productQuantityBox?.width).toBeGreaterThanOrEqual(44);
   expect(productQuantityBox?.height).toBeGreaterThanOrEqual(44);
-  await page.getByRole('button', { name: /Add build to bag/ }).click();
+  await page.locator('.product-buybox .buy-actions').getByRole('button', { name: 'Add to bag' }).click();
 
   const drawer = page.getByRole('dialog', { name: 'Shopping bag' });
   const close = drawer.getByRole('button', { name: 'Close shopping bag' });

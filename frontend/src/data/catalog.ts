@@ -110,6 +110,7 @@ export function getProductAddOnOptions(product: Product): readonly ProductAddOnO
   if (product.kind !== "main") return [];
 
   return addOnDefinitions
+    .filter((definition) => definition.appliesToFamilies.includes(product.family))
     .map((definition): ProductAddOnOption => {
       const addOnProduct = definition.productId
         ? products.find((candidate) => candidate.id === definition.productId) ?? null
@@ -136,6 +137,38 @@ export function getProductAddOnOptions(product: Product): readonly ProductAddOnO
     });
 }
 
+function normalizedFitmentValues(values: readonly string[]): Set<string> {
+  return new Set(values.map((value) => value.trim().toLocaleLowerCase("en-GB")));
+}
+
+/** Avoids presenting a vehicle-specific product as compatible with another make or model. */
+export function productFitmentsAreCompatible(source: Product, candidate: Product): boolean {
+  if (candidate.fitment.mode === "universal") return true;
+
+  const sourceMakes = normalizedFitmentValues(source.fitment.makes);
+  const candidateMakes = normalizedFitmentValues(candidate.fitment.makes);
+
+  // A generic service that requires workshop confirmation is safe to discover.
+  if (candidateMakes.size === 0 && candidate.fitment.mode === "confirm") return true;
+
+  // When the current product does not identify a vehicle, do not infer one for the customer.
+  if (sourceMakes.size === 0) return false;
+  if (![...candidateMakes].some((make) => sourceMakes.has(make))) return false;
+
+  const sourceModels = normalizedFitmentValues(source.fitment.models);
+  const candidateModels = normalizedFitmentValues(candidate.fitment.models);
+  if (
+    source.fitment.mode === "specific" &&
+    candidate.fitment.mode === "specific" &&
+    sourceModels.size > 0 &&
+    candidateModels.size > 0
+  ) {
+    return [...candidateModels].some((model) => sourceModels.has(model));
+  }
+
+  return true;
+}
+
 /** Standalone offers for the inline discovery area; never used as fitment claims. */
 export function getDiscoveryProducts(product: Product): readonly Product[] {
   if (product.kind !== "main") return [];
@@ -145,7 +178,8 @@ export function getDiscoveryProducts(product: Product): readonly Product[] {
       candidate.id !== product.id &&
       candidate.kind !== "addon" &&
       candidate.available &&
-      candidate.purchasable,
+      candidate.purchasable &&
+      productFitmentsAreCompatible(product, candidate),
   );
   const upgrades = sellable.filter((candidate) => candidate.kind === "upgrade");
   const mainCandidates = sellable.filter((candidate) => candidate.kind === "main");

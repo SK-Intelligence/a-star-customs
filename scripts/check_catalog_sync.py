@@ -211,11 +211,13 @@ def main() -> None:
             for variant in add_on_product["variants"]
             if variant.get("id") == variant_id
         )
+        applicable_families = add_on.get("appliesToFamilies")
         if (
             add_on_product.get("kind") != "addon"
-            or set(add_on.get("appliesToFamilies", [])) != PRODUCT_FAMILIES
-            or
-            add_on_product.get("purchasable") is not True
+            or not isinstance(applicable_families, list)
+            or not applicable_families
+            or not set(applicable_families).issubset(PRODUCT_FAMILIES)
+            or add_on_product.get("purchasable") is not True
             or add_on_product.get("available") is not True
             or add_on_variant.get("available") is not True
             or not isinstance(add_on_variant.get("price"), int)
