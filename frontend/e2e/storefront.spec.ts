@@ -216,6 +216,35 @@ test('optional extras appear only on compatible product families', async ({ page
   await expect(page.getByRole('button', { name: /Add build to bag/ })).toBeVisible();
 });
 
+test('product discovery is a collapsed buybox disclosure beside optional add-ons', async ({ page }) => {
+  await page.goto('/luxury-car-interior');
+
+  const buybox = page.locator('.product-buybox');
+  const extras = buybox.locator('.build-extras');
+  const discovery = buybox.locator('.product-discovery');
+  const disclosure = discovery.locator('details');
+  const purchaseActions = buybox.locator('.buy-actions');
+
+  await expect(extras.getByRole('heading', { name: 'Optional add-ons' })).toBeVisible();
+  await expect(discovery.getByText('If you’re interested')).toBeVisible();
+  await expect(disclosure).not.toHaveAttribute('open', '');
+
+  const readingOrder = await buybox.evaluate((element) =>
+    Array.from(element.children).map((child) => child.className),
+  );
+  const extrasIndex = readingOrder.indexOf('build-extras');
+  const discoveryIndex = readingOrder.indexOf('product-discovery product-discovery--buybox');
+  const purchaseIndex = readingOrder.indexOf('buy-actions');
+  expect(extrasIndex).toBeGreaterThanOrEqual(0);
+  expect(discoveryIndex).toBeGreaterThan(extrasIndex);
+  expect(discoveryIndex).toBeLessThan(purchaseIndex);
+
+  await discovery.locator('summary').click();
+  await expect(disclosure).toHaveAttribute('open', '');
+  await expect(discovery.locator('.discovery-offer').first()).toBeVisible();
+  await expect(purchaseActions.getByRole('button', { name: /Add build to bag/ })).toBeVisible();
+});
+
 test('products labelled add-on can only be bought through a base package', async ({ page }) => {
   await page.goto('/-4x-speaker-lights-optional-add-on');
 
@@ -244,7 +273,7 @@ test('vehicle-specific discovery never crosses into another make or model', asyn
   await page.goto('/-bmw-f-series-oem-ambient-package');
 
   const discovery = page.locator('.product-discovery');
-  await expect(discovery).toContainText('Compatible upgrades and fitment-confirmed services');
+  await expect(discovery).toContainText('6 compatible upgrades and services');
   await expect(discovery.getByText(/Golf|Audi|Mercedes|A-Class|CLA|GLA/i)).toHaveCount(0);
 
   await page.goto('/mercedes-c-class-oem-ambient-lighting');

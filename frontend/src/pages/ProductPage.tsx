@@ -20,9 +20,6 @@ export function ProductPage() {
   const [selectedAddOnIds, setSelectedAddOnIds] = useState<string[]>([]);
   const [imageIndex, setImageIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const [discoveryOpen, setDiscoveryOpen] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 761px)').matches,
-  );
 
   useEffect(() => {
     setVariantId(product?.variants[0]?.id ?? '');
@@ -30,14 +27,6 @@ export function ProductPage() {
     setSelectedAddOnIds([]);
     setImageIndex(0);
   }, [product?.id, product?.variants]);
-
-  useEffect(() => {
-    const media = window.matchMedia('(min-width: 761px)');
-    const syncDisclosure = () => setDiscoveryOpen(media.matches);
-    syncDisclosure();
-    media.addEventListener('change', syncDisclosure);
-    return () => media.removeEventListener('change', syncDisclosure);
-  }, [product?.id]);
 
   const selectedVariant = product?.variants.find((variant) => variant.id === variantId) ?? product?.variants[0];
   const addOnOnly = product ? isAddOnProduct(product) : false;
@@ -224,6 +213,53 @@ export function ProductPage() {
                 </section>
               ) : null}
 
+              {discoveryProducts.length > 0 ? (
+                <section className="product-discovery product-discovery--buybox" aria-labelledby="product-discovery-title">
+                  <details>
+                    <summary>
+                      <span>
+                        <strong id="product-discovery-title">If you’re interested</strong>
+                        <small>{discoveryProducts.length} compatible upgrades and services</small>
+                      </span>
+                      <ArrowRight aria-hidden="true" />
+                    </summary>
+                    <div className="product-discovery__grid">
+                      {discoveryProducts.map((item) => {
+                        const variant = item.variants.find((candidate) => candidate.available && candidate.price > 0);
+                        return (
+                          <article className="discovery-offer" key={item.id}>
+                            <Link to={`/${item.slug}`} className="discovery-offer__media">
+                              <img
+                                src={item.images[0] ?? '/images/site/hero.jpg'}
+                                alt={item.title}
+                                loading="lazy"
+                                decoding="async"
+                              />
+                            </Link>
+                            <div>
+                              <small>{item.kind === 'upgrade' ? 'Standalone upgrade' : 'You may also like'}</small>
+                              <Link to={`/${item.slug}`}><strong>{item.title}</strong></Link>
+                              <span>{variant ? formatPrice(variant.price) : 'Custom quote'}</span>
+                              {variant ? (
+                                <button
+                                  type="button"
+                                  className="text-button"
+                                  onClick={() => addItem(item.id, variant.id)}
+                                >
+                                  <Plus aria-hidden="true" /> Add to bag
+                                </button>
+                              ) : (
+                                <Link className="text-link" to={`/${item.slug}`}>View details <ArrowRight aria-hidden="true" /></Link>
+                              )}
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  </details>
+                </section>
+              ) : null}
+
               {canBuy ? (
                 <div className="buy-actions">
                   <QuantityControl value={quantity} onChange={setQuantity} />
@@ -275,57 +311,6 @@ export function ProductPage() {
             </div>
             <div className="rich-text" dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />
           </div>
-
-          {discoveryProducts.length > 0 ? (
-            <section className="product-discovery" aria-labelledby="product-discovery-title">
-              <details
-                open={discoveryOpen}
-                onToggle={(event) => setDiscoveryOpen(event.currentTarget.open)}
-              >
-                <summary>
-                  <span>
-                    <strong id="product-discovery-title">If you’re interested</strong>
-                    <small>Compatible upgrades and fitment-confirmed services</small>
-                  </span>
-                  <ArrowRight aria-hidden="true" />
-                </summary>
-                <div className="product-discovery__grid">
-                  {discoveryProducts.map((item) => {
-                    const variant = item.variants.find((candidate) => candidate.available && candidate.price > 0);
-                    return (
-                      <article className="discovery-offer" key={item.id}>
-                        <Link to={`/${item.slug}`} className="discovery-offer__media">
-                          <img
-                            src={item.images[0] ?? '/images/site/hero.jpg'}
-                            alt={item.title}
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        </Link>
-                        <div>
-                          <small>{item.kind === 'upgrade' ? 'Standalone upgrade' : 'You may also like'}</small>
-                          <Link to={`/${item.slug}`}><strong>{item.title}</strong></Link>
-                          <span>{variant ? formatPrice(variant.price) : 'Custom quote'}</span>
-                          {variant ? (
-                            <button
-                              type="button"
-                              className="text-button"
-                              onClick={() => addItem(item.id, variant.id)}
-                            >
-                              <Plus aria-hidden="true" /> Add to bag
-                            </button>
-                          ) : (
-                            <Link className="text-link" to={`/${item.slug}`}>View details <ArrowRight aria-hidden="true" /></Link>
-                          )}
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              </details>
-            </section>
-          ) : null}
-
           <ReviewPanel productId={product.id} />
         </div>
       </section>
