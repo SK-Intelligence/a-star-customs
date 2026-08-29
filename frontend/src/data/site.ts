@@ -54,7 +54,7 @@ export const serviceCards: readonly ServiceCard[] = [
     title: "Starlights",
     description:
       "Add a standard, twinkle or shooting-star effect to your roof lining.",
-    image: "/images/site/service-starlights.jpg",
+    image: "/images/site/gallery-stars-04.webp",
     href: "/shop?category=Starlights",
   },
   {
@@ -70,7 +70,7 @@ export const serviceCards: readonly ServiceCard[] = [
     title: "Rims & calipers",
     description:
       "Refresh your wheels or calipers with custom colours and two-tone finishes.",
-    image: "/images/site/service-rims.jpg",
+    image: "/images/products/rims-01.jpg",
     href: "/shop?category=Wheels%20%26%20calipers",
   },
   {
@@ -109,13 +109,11 @@ export const galleryGroups: readonly GalleryGroup[] = [
     description:
       "Choose standard, twinkle or shooting-star headliners, including custom panoramic-roof options.",
     images: [
-      "/images/site/gallery-stars-01.jpg",
-      "/images/site/gallery-stars-02.jpg",
-      "/images/site/gallery-stars-07.jpg",
       "/images/site/gallery-stars-03.jpg",
       "/images/site/gallery-stars-04.webp",
       "/images/site/gallery-stars-05.jpg",
       "/images/site/gallery-stars-06.jpeg",
+      "/images/site/gallery-stars-07.jpg",
     ],
   },
   {
@@ -124,9 +122,9 @@ export const galleryGroups: readonly GalleryGroup[] = [
     description:
       "Choose the materials, stitching and finish for a custom steering wheel.",
     images: [
-      "/images/site/gallery-steering-01.webp",
-      "/images/site/gallery-steering-02.webp",
-      "/images/site/gallery-steering-03.jpg",
+      "/images/products/custom-steering-wheels-please-contact-first-01.jpeg",
+      "/images/products/custom-steering-wheels-please-contact-first-02.jpeg",
+      "/images/products/custom-steering-wheels-please-contact-first-03.jpeg",
     ],
   },
   {
@@ -135,8 +133,12 @@ export const galleryGroups: readonly GalleryGroup[] = [
     description:
       "See recent wheel colour changes, caliper finishes and detailing work.",
     images: [
-      "/images/site/gallery-rims-01.jpg",
-      "/images/site/gallery-rims-02.webp",
+      "/images/products/rims-01.jpg",
+      "/images/products/rims-02.jpg",
+      "/images/products/rims-04.jpeg",
+      "/images/products/calipers-01.jpeg",
+      "/images/products/calipers-02.jpeg",
+      "/images/products/calipers-04.jpg",
     ],
   },
   {
@@ -145,8 +147,8 @@ export const galleryGroups: readonly GalleryGroup[] = [
     description:
       "Responsive modern displays bring easier navigation, media and smartphone connectivity to the cabin.",
     images: [
-      "/images/site/gallery-screen-01.jpg",
-      "/images/site/gallery-screen-02.jpg",
+      "/images/products/screeen-upgrade-01.jpg",
+      "/images/products/screeen-upgrade-02.jpg",
       "/images/site/gallery-screen-03.webp",
     ],
   },
@@ -156,12 +158,9 @@ export const galleryGroups: readonly GalleryGroup[] = [
     description:
       "Professional installation keeps wiring hidden and the view through your windscreen uncluttered.",
     images: [
-      "/images/site/gallery-dashcam-01.jpg",
-      "/images/site/gallery-dashcam-02.jpg",
-      "/images/site/gallery-dashcam-03.jpg",
-      "/images/site/gallery-dashcam-04.jpg",
-      "/images/site/gallery-dashcam-05.webp",
-      "/images/site/gallery-dashcam-06.jpg",
+      "/images/products/dashcams-01.jpg",
+      "/images/products/dashcams-02.jpg",
+      "/images/products/dashcams-03.jpg",
       "/images/site/gallery-dashcam-07.jpg",
       "/images/site/gallery-dashcam-08.jpg",
     ],
@@ -198,7 +197,7 @@ export const collaborations: readonly Collaboration[] = [
     description:
       "Content creator with nearly 400k followers, known for his viral hair-routine videos.",
     service: "Apple CarPlay installation",
-    image: "/images/site/gallery-screen-01.jpg",
+    image: "/images/products/screeen-upgrade-01.jpg",
   },
 ] as const;
 

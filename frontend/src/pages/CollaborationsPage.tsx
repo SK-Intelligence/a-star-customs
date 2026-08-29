@@ -35,6 +35,37 @@ export function CollaborationsPage() {
               The brief changes with every car; the standard of finish does not.
             </p>
           </div>
+
+          <div className="collaboration-videos">
+            <div className="collaboration-videos__heading">
+              <div>
+                <p className="eyebrow">Watch the work</p>
+                <h3>Build videos from the workshop.</h3>
+              </div>
+              <a
+                className="text-link collaboration-videos__link"
+                href="https://www.tiktok.com/@a.starcustoms"
+                target="_blank"
+                rel="noreferrer"
+              >
+                View more on TikTok <ExternalLink aria-hidden="true" />
+              </a>
+            </div>
+            <ConsentGate title="TikTok build videos">
+              <div className="tiktok-grid">
+                {tiktokVideos.map((videoId) => (
+                  <iframe
+                    key={videoId}
+                    src={`https://www.tiktok.com/player/v1/${videoId}?autoplay=0&loop=0`}
+                    title="A Star Customs TikTok build video"
+                    loading="lazy"
+                    allow="fullscreen"
+                  />
+                ))}
+              </div>
+            </ConsentGate>
+          </div>
+
           <div className="collaboration-grid">
             {collaborations.map((collaboration, index) => (
               <article className="collaboration-card" key={collaboration.id}>
@@ -49,36 +80,6 @@ export function CollaborationsPage() {
               </article>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="section section--carbon social-builds">
-        <div className="container">
-          <div className="section-heading">
-            <p className="eyebrow">Watch the work</p>
-            <h2>Build videos from the workshop.</h2>
-          </div>
-          <ConsentGate title="TikTok build videos">
-            <div className="tiktok-grid">
-              {tiktokVideos.map((videoId) => (
-                <iframe
-                  key={videoId}
-                  src={`https://www.tiktok.com/player/v1/${videoId}?autoplay=0&loop=0`}
-                  title="A Star Customs TikTok build video"
-                  loading="lazy"
-                  allow="fullscreen"
-                />
-              ))}
-            </div>
-          </ConsentGate>
-          <a
-            className="text-link social-builds__link"
-            href="https://www.tiktok.com/@a.starcustoms"
-            target="_blank"
-            rel="noreferrer"
-          >
-            View more on TikTok <ExternalLink aria-hidden="true" />
-          </a>
         </div>
       </section>
     </>

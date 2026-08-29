@@ -300,7 +300,7 @@ test('upgrade listings are directly purchasable and contain no nested upsells', 
   await expect(page.getByText(/GLA is the higher spec/i)).toHaveCount(0);
 });
 
-test('vehicle-specific catalogue media and gallery groups match their labels', async ({ page }) => {
+test('vehicle-specific catalogue media matches its label', async ({ page }) => {
   await page.goto('/mercedes-c-class-oem-ambient-lighting');
 
   await expect(page.getByRole('heading', { name: 'Mercedes C-Class W205/C205 OEM Ambient Lighting' })).toBeVisible();
@@ -309,21 +309,6 @@ test('vehicle-specific catalogue media and gallery groups match their labels', a
   await expect(cClassImages).toHaveCount(5);
   for (const image of await cClassImages.all()) {
     await expect(image).toHaveAttribute('src', /mercedes-c-class-w205-c205-oem-ambient-lighting-/);
-  }
-
-  await page.goto('/gallery');
-  for (const [group, prefix] of [
-    ['Ambient lighting', 'gallery-ambient-'],
-    ['Starlights', 'gallery-stars-'],
-    ['Custom steering wheels', 'gallery-steering-'],
-    ['Rims & calipers', 'gallery-rims-'],
-    ['Screen upgrades', 'gallery-screen-'],
-    ['Dashcams', 'gallery-dashcam-'],
-  ] as const) {
-    const section = page.locator('.gallery-group').filter({ has: page.getByRole('heading', { name: group, exact: true }) });
-    for (const image of await section.locator('img').all()) {
-      await expect(image).toHaveAttribute('src', new RegExp(prefix));
-    }
   }
 });
 
@@ -593,35 +578,34 @@ test('gallery headings only show images from the matching service', async ({ pag
       'gallery-ambient-03',
     ],
     Starlights: [
-      'gallery-stars-01',
-      'gallery-stars-02',
-      'gallery-stars-07',
       'gallery-stars-03',
       'gallery-stars-04',
       'gallery-stars-05',
       'gallery-stars-06',
+      'gallery-stars-07',
     ],
     'Custom steering wheels': [
-      'gallery-steering-01',
-      'gallery-steering-02',
-      'gallery-steering-03',
+      'custom-steering-wheels-please-contact-first-01',
+      'custom-steering-wheels-please-contact-first-02',
+      'custom-steering-wheels-please-contact-first-03',
     ],
     'Rims & calipers': [
-      'gallery-rims-01',
-      'gallery-rims-02',
+      'rims-01',
+      'rims-02',
+      'rims-04',
+      'calipers-01',
+      'calipers-02',
+      'calipers-04',
     ],
     'Screen upgrades': [
-      'gallery-screen-01',
-      'gallery-screen-02',
+      'screeen-upgrade-01',
+      'screeen-upgrade-02',
       'gallery-screen-03',
     ],
     Dashcams: [
-      'gallery-dashcam-01',
-      'gallery-dashcam-02',
-      'gallery-dashcam-03',
-      'gallery-dashcam-04',
-      'gallery-dashcam-05',
-      'gallery-dashcam-06',
+      'dashcams-01',
+      'dashcams-02',
+      'dashcams-03',
       'gallery-dashcam-07',
       'gallery-dashcam-08',
     ],
@@ -632,10 +616,65 @@ test('gallery headings only show images from the matching service', async ({ pag
       has: page.getByRole('heading', { name: heading, exact: true }),
     });
 
+    await group.scrollIntoViewIfNeeded();
     await expect(group.locator('img')).toHaveCount(imageNames.length);
     await expect
       .poll(() => group.locator('img').evaluateAll((images) => images.map((image) => image.getAttribute('src'))))
       .toEqual(imageNames.map((imageName) => expect.stringContaining(imageName)));
+    await expect
+      .poll(() => group.locator('img').evaluateAll((images) => images.every((image) => image.naturalWidth > 0)))
+      .toBe(true);
+  }
+});
+
+test('service cards use visually verified images for each service', async ({ page }) => {
+  await page.goto('/services');
+
+  const expectedImages = {
+    'Ambient lighting': '/images/site/service-ambient.jpg',
+    Starlights: '/images/site/gallery-stars-04.webp',
+    'Custom steering wheels': '/images/site/service-steering.jpeg',
+    'Rims & calipers': '/images/products/rims-01.jpg',
+    'Screen upgrades': '/images/site/service-screen.webp',
+    Dashcams: '/images/site/service-dashcam.jpg',
+  } as const;
+
+  for (const [heading, imagePath] of Object.entries(expectedImages)) {
+    const card = page.locator('.service-card').filter({
+      has: page.getByRole('heading', { name: heading, exact: true }),
+    });
+    await card.scrollIntoViewIfNeeded();
+    await expect(card.locator('img')).toHaveAttribute('src', imagePath);
+    await expect.poll(() => card.locator('img').evaluate((image) => image.naturalWidth > 0)).toBe(true);
+  }
+});
+
+test('TikTok builds appear inside Cars we have worked on before the car cards', async ({ page }) => {
+  await page.goto('/featured-collabs');
+
+  const section = page.locator('.collaboration-section');
+  await expect(section.getByRole('heading', { name: 'Build videos from the workshop.' })).toBeVisible();
+  await expect(page.locator('.social-builds')).toHaveCount(0);
+  await expect
+    .poll(() =>
+      section
+        .locator('.collaboration-videos, .collaboration-grid')
+        .evaluateAll((elements) => elements.map((element) => element.className)),
+    )
+    .toEqual(['collaboration-videos', 'collaboration-grid']);
+
+  const expectedCollaborationImages = {
+    Avi: '/images/site/gallery-ambient-01.jpeg',
+    'Laiba Ali': '/images/site/gallery-stars-06.jpeg',
+    MUKS: '/images/site/gallery-ambient-03.jpg',
+    'Jad Ajram': '/images/products/screeen-upgrade-01.jpg',
+  } as const;
+
+  for (const [name, imagePath] of Object.entries(expectedCollaborationImages)) {
+    const card = section.locator('.collaboration-card').filter({
+      has: page.getByRole('heading', { name, exact: true }),
+    });
+    await expect(card.locator('img')).toHaveAttribute('src', imagePath);
   }
 });
 
@@ -644,6 +683,18 @@ test('third-party embeds remain blocked without marketing consent', async ({ pag
 
   await expect(page.getByRole('heading', { name: 'TikTok build videos' })).toBeVisible();
   await expect(page.locator('.tiktok-grid iframe')).toHaveCount(0);
+});
+
+test('allowing TikTok content stores consent and loads all build videos', async ({ page }) => {
+  await page.goto('/featured-collabs');
+  await page.getByRole('button', { name: 'Allow content' }).click();
+
+  await expect(page.locator('.tiktok-grid iframe')).toHaveCount(3);
+  await expect
+    .poll(() =>
+      page.evaluate(() => JSON.parse(localStorage.getItem('astar-cookie-preferences') ?? '{}').marketing),
+    )
+    .toBe(true);
 });
 
 test('allowing map content stores marketing consent and loads the embed', async ({ page }) => {
