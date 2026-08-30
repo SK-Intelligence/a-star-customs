@@ -29,6 +29,8 @@ export function WhatsAppButton() {
     return () => observer.disconnect();
   }, [pathname]);
 
+  if (pathname === '/contact-us') return null;
+
   return (
     <a
       className={isObscured ? 'whatsapp-button is-obscured' : 'whatsapp-button'}

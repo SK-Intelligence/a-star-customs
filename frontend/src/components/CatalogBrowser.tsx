@@ -1,6 +1,6 @@
 import { Search, SlidersHorizontal } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useMemo } from 'react';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { productMinimumPrice, shopCategories, type Product } from '../data/catalog';
 import { ProductCard } from './ProductCard';
 
@@ -10,6 +10,7 @@ interface CatalogBrowserProps {
   source: readonly Product[];
   showCategories?: boolean;
   emptyMessage?: string;
+  returnLabel?: string;
 }
 
 const PAGE_SIZE = 20;
@@ -18,11 +19,17 @@ export function CatalogBrowser({
   source,
   showCategories = true,
   emptyMessage = 'No products match those filters yet.',
+  returnLabel = 'shop',
 }: CatalogBrowserProps) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<SortMode>('price-asc');
-  const [page, setPage] = useState(1);
+  const location = useLocation();
+  const query = searchParams.get('q') ?? '';
+  const requestedSort = searchParams.get('sort');
+  const sort: SortMode = requestedSort === 'price-desc' || requestedSort === 'recent'
+    ? requestedSort
+    : 'price-asc';
+  const requestedPage = Number.parseInt(searchParams.get('page') ?? '1', 10);
+  const page = Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const requestedCategory = searchParams.get('category');
   const sourceCategories = shopCategories.filter((category) => source.some(category.matches));
   const selectedCategory = sourceCategories.find(({ label }) => label === requestedCategory);
@@ -56,13 +63,31 @@ export function CatalogBrowser({
   const safePage = Math.min(page, pageCount);
   const visible = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  const chooseCategory = (category: string) => {
+  const updateParams = (
+    update: (next: URLSearchParams) => void,
+    options: { replace?: boolean } = {},
+  ) => {
     const next = new URLSearchParams(searchParams);
-    if (category === 'All products') next.delete('category');
-    else next.set('category', category);
-    setSearchParams(next);
-    setPage(1);
+    update(next);
+    setSearchParams(next, options);
   };
+
+  const choosePage = (nextPage: number) => {
+    updateParams((next) => {
+      if (nextPage <= 1) next.delete('page');
+      else next.set('page', String(nextPage));
+    });
+  };
+
+  const chooseCategory = (category: string) => {
+    updateParams((next) => {
+      if (category === 'All products') next.delete('category');
+      else next.set('category', category);
+      next.delete('page');
+    });
+  };
+
+  const returnTo = `${location.pathname}${location.search}`;
 
   return (
     <div className={showCategories ? 'catalog-layout' : 'catalog-layout catalog-layout--full'}>
@@ -113,8 +138,11 @@ export function CatalogBrowser({
               type="search"
               value={query}
               onChange={(event) => {
-                setQuery(event.target.value);
-                setPage(1);
+                updateParams((next) => {
+                  if (event.target.value) next.set('q', event.target.value);
+                  else next.delete('q');
+                  next.delete('page');
+                }, { replace: true });
               }}
               placeholder="Search products"
             />
@@ -125,8 +153,12 @@ export function CatalogBrowser({
             <select
               value={sort}
               onChange={(event) => {
-                setSort(event.target.value as SortMode);
-                setPage(1);
+                updateParams((next) => {
+                  const nextSort = event.target.value as SortMode;
+                  if (nextSort === 'price-asc') next.delete('sort');
+                  else next.set('sort', nextSort);
+                  next.delete('page');
+                });
               }}
             >
               <option value="price-asc">Price: low to high</option>
@@ -146,7 +178,14 @@ export function CatalogBrowser({
 
         {visible.length > 0 ? (
           <div className="product-grid">
-            {visible.map((product) => <ProductCard product={product} key={product.id} />)}
+            {visible.map((product) => (
+              <ProductCard
+                product={product}
+                returnTo={returnTo}
+                returnLabel={returnLabel}
+                key={product.id}
+              />
+            ))}
           </div>
         ) : (
           <div className="empty-results">
@@ -157,8 +196,7 @@ export function CatalogBrowser({
               type="button"
               className="button button--ghost"
               onClick={() => {
-                setQuery('');
-                chooseCategory('All products');
+                setSearchParams(new URLSearchParams(), { replace: true });
               }}
             >
               Clear filters
@@ -168,7 +206,7 @@ export function CatalogBrowser({
 
         {pageCount > 1 ? (
           <nav className="pagination" aria-label="Product pages">
-            <button type="button" disabled={safePage === 1} onClick={() => setPage(safePage - 1)}>
+            <button type="button" disabled={safePage === 1} onClick={() => choosePage(safePage - 1)}>
               Previous
             </button>
             {Array.from({ length: pageCount }, (_, index) => index + 1).map((number) => (
@@ -177,12 +215,12 @@ export function CatalogBrowser({
                 key={number}
                 className={safePage === number ? 'is-active' : undefined}
                 aria-current={safePage === number ? 'page' : undefined}
-                onClick={() => setPage(number)}
+                onClick={() => choosePage(number)}
               >
                 {number}
               </button>
             ))}
-            <button type="button" disabled={safePage === pageCount} onClick={() => setPage(safePage + 1)}>
+            <button type="button" disabled={safePage === pageCount} onClick={() => choosePage(safePage + 1)}>
               Next
             </button>
           </nav>

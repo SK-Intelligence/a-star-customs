@@ -60,6 +60,16 @@ export type ProductFamily =
   | "rims-calipers"
   | "general";
 
+export const productFamilyLabels: Readonly<Record<ProductFamily, string>> = {
+  "ambient-lighting": "Ambient lighting",
+  starlights: "Starlights",
+  "screen-upgrades": "Screens & CarPlay",
+  dashcams: "Dashcams",
+  "steering-wheels": "Steering wheels",
+  "rims-calipers": "Wheels & calipers",
+  general: "A Star Customs",
+};
+
 export interface ShopCategory {
   label: string;
   matches: (product: Product) => boolean;
@@ -97,6 +107,10 @@ export function isAddOnProduct(product: Product): boolean {
 
 export function getProductFamily(product: Product): ProductFamily {
   return product.family;
+}
+
+export function getProductFamilyLabel(product: Product): string {
+  return productFamilyLabels[product.family];
 }
 
 export function productMinimumPrice(product: Product): number {

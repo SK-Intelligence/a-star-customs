@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ShieldCheck, SlidersHorizontal, X } from 'lucide-react';
+import { Cookie, ShieldCheck, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDialogFocus } from '../hooks/useDialogFocus';
 
@@ -105,6 +105,19 @@ export function CookieConsent() {
     initialFocusSelector: '.cookie-modal__close, .cookie-options input:not([disabled])',
   });
 
+  useEffect(() => {
+    const handleChange = (event: Event) => {
+      const detail: unknown = (event as CustomEvent<unknown>).detail;
+      if (isCookiePreferences(detail)) {
+        setPreferences(detail);
+        setDraft(detail);
+      }
+    };
+
+    window.addEventListener(EVENT_NAME, handleChange);
+    return () => window.removeEventListener(EVENT_NAME, handleChange);
+  }, []);
+
   if (preferences && !isManaging) {
     return (
       <button
@@ -116,7 +129,8 @@ export function CookieConsent() {
           setIsManaging(true);
         }}
       >
-        <SlidersHorizontal aria-hidden="true" />
+        <Cookie aria-hidden="true" />
+        <span>Cookies</span>
       </button>
     );
   }

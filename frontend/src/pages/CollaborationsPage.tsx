@@ -36,7 +36,7 @@ export function CollaborationsPage() {
             </p>
           </div>
 
-          <div className="collaboration-videos">
+          <div className="collaboration-videos" data-floating-action-zone>
             <div className="collaboration-videos__heading">
               <div>
                 <p className="eyebrow">Watch the work</p>

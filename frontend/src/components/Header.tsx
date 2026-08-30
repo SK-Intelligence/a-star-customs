@@ -11,6 +11,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useDialogFocus } from '../hooks/useDialogFocus';
 import { socialLinks } from '../data/site';
 import { cartItemCount, useCartStore } from '../store/cart';
+import { productBySlug } from '../data/catalog';
 
 const navigation = [
   ['Home', '/'],
@@ -25,6 +26,7 @@ const navigation = [
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const isProductRoute = productBySlug.has(location.pathname.slice(1));
   const itemCount = useCartStore(cartItemCount);
   const openCart = useCartStore((state) => state.openCart);
   const closeMenu = () => setMenuOpen(false);
@@ -57,7 +59,9 @@ export function Header() {
                 key={href}
                 to={href}
                 end={href === '/'}
-                className={({ isActive }) => (isActive ? 'is-active' : undefined)}
+                className={({ isActive }) => (
+                  isActive || (href === '/shop' && isProductRoute) ? 'is-active' : undefined
+                )}
               >
                 {label}
               </NavLink>
@@ -105,7 +109,9 @@ export function Header() {
               to={href}
               end={href === '/'}
               tabIndex={menuOpen ? 0 : -1}
-              className={({ isActive }) => (isActive ? 'is-active' : undefined)}
+              className={({ isActive }) => (
+                isActive || (href === '/shop' && isProductRoute) ? 'is-active' : undefined
+              )}
             >
               {label}
             </NavLink>

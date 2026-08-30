@@ -3,9 +3,10 @@ import { useEffect } from 'react';
 interface SeoProps {
   title: string;
   description: string;
+  noIndex?: boolean;
 }
 
-export function Seo({ title, description }: SeoProps) {
+export function Seo({ title, description, noIndex = false }: SeoProps) {
   useEffect(() => {
     const fullTitle = `${title} | A Star Customs`;
     const canonicalUrl = `${window.location.origin}${window.location.pathname}`;
@@ -43,7 +44,20 @@ export function Seo({ title, description }: SeoProps) {
     upsertMeta('og:description', description);
     upsertMeta('og:url', canonicalUrl);
     upsertMeta('og:type', 'website');
-  }, [description, title]);
+
+    const managedRobots = document.querySelector<HTMLMetaElement>(
+      'meta[name="robots"][data-astar-managed="true"]',
+    );
+    if (noIndex) {
+      const robots = managedRobots ?? document.createElement('meta');
+      robots.name = 'robots';
+      robots.dataset.astarManaged = 'true';
+      robots.content = 'noindex, nofollow';
+      if (!managedRobots) document.head.append(robots);
+    } else {
+      managedRobots?.remove();
+    }
+  }, [description, noIndex, title]);
 
   return null;
 }

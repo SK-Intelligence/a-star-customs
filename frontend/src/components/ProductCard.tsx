@@ -5,9 +5,11 @@ import { whatsappUrl } from '../data/site';
 
 interface ProductCardProps {
   product: Product;
+  returnTo: string;
+  returnLabel: string;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, returnTo, returnLabel }: ProductCardProps) {
   const firstVariant = product.variants[0];
   const prices = product.variants.map((variant) => variant.price).filter((price) => price > 0);
   const minimumPrice = prices.length > 0 ? Math.min(...prices) : 0;
@@ -17,7 +19,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <article className="product-card">
-      <Link className="product-card__media" to={`/${product.slug}`}>
+      <Link className="product-card__media" to={`/${product.slug}`} state={{ returnTo, returnLabel }}>
         {product.ribbonText ? <span className="product-ribbon">{product.ribbonText}</span> : null}
         <img
           src={product.images[0] ?? '/images/site/hero.jpg'}
@@ -31,7 +33,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </Link>
       <div className="product-card__body">
         <div>
-          <Link to={`/${product.slug}`}><h3>{product.title}</h3></Link>
+          <Link to={`/${product.slug}`} state={{ returnTo, returnLabel }}><h3>{product.title}</h3></Link>
           <p className="product-price">
             {minimumPrice > 0 ? `${hasPriceRange ? 'From ' : ''}${formatPrice(minimumPrice)}` : 'Custom quote'}
           </p>
@@ -40,6 +42,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <Link
             className="product-card__action"
             to={`/${product.slug}`}
+            state={{ returnTo, returnLabel }}
             aria-label={`View add-on details for ${product.title}`}
           >
             <SlidersHorizontal aria-hidden="true" />
@@ -49,6 +52,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <Link
             className="product-card__action"
             to={`/${product.slug}`}
+            state={{ returnTo, returnLabel }}
             aria-label={`${product.kind === 'upgrade' ? 'View upgrade' : supportsAddOns ? 'View package options' : 'View product'} for ${product.title}`}
           >
             <SlidersHorizontal aria-hidden="true" />

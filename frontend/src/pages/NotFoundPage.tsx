@@ -5,7 +5,7 @@ import { Seo } from '../components/Seo';
 export function NotFoundPage() {
   return (
     <section className="not-found">
-      <Seo title="Page Not Found" description="The page you requested could not be found." />
+      <Seo title="Page Not Found" description="The page you requested could not be found." noIndex />
       <span>404</span>
       <p className="eyebrow">Page not found</p>
       <h1>We couldn’t find that page.</h1>

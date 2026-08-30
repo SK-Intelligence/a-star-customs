@@ -27,7 +27,7 @@
   --line-strong: rgb(255 255 255 / 22%);
   --text: #f8f7fb;
   --muted: #aaa5b0;
-  --purple: #a342ff;
+  --purple: #9b39ef;
   --purple-bright: #bf73ff;
   --purple-dark: #6720a8;
   --green: #23d366;
@@ -933,7 +933,7 @@ h3 {
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
-  color: #5e5961;
+  color: #928b96;
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -1228,7 +1228,7 @@ h3 {
 
 .collaboration-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -1437,7 +1437,7 @@ h3 {
 }
 
 .catalog-categories button span {
-  color: #77727c;
+  color: #928b96;
   font-size: 0.65rem;
 }
 
@@ -1694,8 +1694,8 @@ h3 {
 }
 
 .pagination button {
-  min-width: 2.7rem;
-  min-height: 2.7rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   padding-inline: 0.8rem;
   border: 1px solid var(--line);
   background: transparent;
@@ -2273,8 +2273,8 @@ h3 {
   display: grid;
   grid-template-columns: minmax(230px, 0.38fr) minmax(0, 1fr);
   gap: clamp(2rem, 7vw, 8rem);
-  margin-top: clamp(5rem, 10vw, 10rem);
-  padding-block: clamp(3rem, 6vw, 6rem);
+  margin-top: clamp(3.5rem, 6vw, 6rem);
+  padding-block: clamp(2.5rem, 4vw, 4rem);
   border-block: 1px solid var(--line);
 }
 
@@ -2442,8 +2442,8 @@ h3 {
 
 /* Reviews */
 .review-panel {
-  margin-top: clamp(5rem, 9vw, 9rem);
-  padding-top: clamp(3rem, 6vw, 5rem);
+  margin-top: clamp(3.5rem, 6vw, 6rem);
+  padding-top: clamp(2.5rem, 4vw, 4rem);
   border-top: 1px solid var(--line);
 }
 
@@ -3460,14 +3460,19 @@ h3 {
   z-index: 80;
   bottom: max(1rem, env(safe-area-inset-bottom));
   left: max(1rem, env(safe-area-inset-left));
-  display: grid;
-  width: 2.8rem;
-  height: 2.8rem;
-  place-items: center;
+  display: flex;
+  min-height: 2.8rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding-inline: 0.8rem;
   border: 1px solid var(--line-strong);
-  border-radius: 50%;
+  border-radius: 999px;
   background: rgb(14 13 16 / 92%);
+  color: #fff;
   cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 800;
   box-shadow: 0 10px 25px rgb(0 0 0 / 25%);
 }
 
@@ -4154,6 +4159,12 @@ h3 {
     right: max(1rem, env(safe-area-inset-right));
     bottom: calc(4.9rem + env(safe-area-inset-bottom));
     left: auto;
+    width: 3.25rem;
+    padding: 0;
+  }
+
+  .cookie-settings-button span {
+    display: none;
   }
 }
 

@@ -1,17 +1,18 @@
 import { ArrowLeft, ArrowRight, Check, MessageCircle, Plus, ShieldCheck, ShoppingBag, Sparkles, Wrench } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { ImageLightbox } from '../components/ImageLightbox';
 import { QuantityControl } from '../components/QuantityControl';
 import { ReviewPanel } from '../components/ReviewPanel';
 import { Seo } from '../components/Seo';
-import { formatPrice, getDiscoveryProducts, getProductAddOnOptions, isAddOnProduct, productBySlug, type AvailableProductAddOnOption } from '../data/catalog';
+import { formatPrice, getDiscoveryProducts, getProductAddOnOptions, getProductFamilyLabel, isAddOnProduct, productBySlug, type AvailableProductAddOnOption } from '../data/catalog';
 import { whatsappUrl } from '../data/site';
 import { useCartStore } from '../store/cart';
 import { NotFoundPage } from './NotFoundPage';
 
 export function ProductPage() {
   const { slug = '' } = useParams();
+  const location = useLocation();
   const product = productBySlug.get(slug);
   const addItem = useCartStore((state) => state.addItem);
   const addItems = useCartStore((state) => state.addItems);
@@ -44,6 +45,17 @@ export function ProductPage() {
   );
 
   if (!product || !selectedVariant) return <NotFoundPage />;
+
+  const navigationState = location.state as { returnTo?: unknown; returnLabel?: unknown } | null;
+  const returnTo = typeof navigationState?.returnTo === 'string'
+    && navigationState.returnTo.startsWith('/')
+    && !navigationState.returnTo.startsWith('//')
+    ? navigationState.returnTo
+    : '/shop';
+  const returnLabel = typeof navigationState?.returnLabel === 'string'
+    ? navigationState.returnLabel
+    : 'shop';
+  const discoveryNavigationState = { returnTo, returnLabel };
 
   const activeImage = product.images[imageIndex] ?? product.images[0] ?? '/images/site/hero.jpg';
   const canBuy =
@@ -95,7 +107,7 @@ export function ProductPage() {
       />
       <section className="product-page section--carbon">
         <div className="container">
-          <Link className="back-link" to="/shop"><ArrowLeft aria-hidden="true" /> Back to shop</Link>
+          <Link className="back-link" to={returnTo}><ArrowLeft aria-hidden="true" /> Back to {returnLabel}</Link>
           <div className="product-detail">
             <div className="product-gallery">
               <button className="product-gallery__main" type="button" onClick={() => setLightboxIndex(imageIndex)}>
@@ -121,7 +133,7 @@ export function ProductPage() {
             </div>
 
             <div className="product-buybox" data-floating-action-zone>
-              <p className="eyebrow">{product.collections[0] ?? 'A Star Customs'}</p>
+              <p className="eyebrow">{getProductFamilyLabel(product)}</p>
               <h1>{product.title}</h1>
               {product.subtitle ? <p className="product-buybox__subtitle">{product.subtitle}</p> : null}
               <p className={`product-fitment product-fitment--${product.fitment.mode}`}>
@@ -228,7 +240,12 @@ export function ProductPage() {
                         const variant = item.variants.find((candidate) => candidate.available && candidate.price > 0);
                         return (
                           <article className="discovery-offer" key={item.id}>
-                            <Link to={`/${item.slug}`} className="discovery-offer__media">
+                            <Link
+                              to={`/${item.slug}`}
+                              state={discoveryNavigationState}
+                              className="discovery-offer__media"
+                              aria-label={`View ${item.title}`}
+                            >
                               <img
                                 src={item.images[0] ?? '/images/site/hero.jpg'}
                                 alt={item.title}
@@ -238,7 +255,7 @@ export function ProductPage() {
                             </Link>
                             <div>
                               <small>{item.kind === 'upgrade' ? 'Standalone upgrade' : 'You may also like'}</small>
-                              <Link to={`/${item.slug}`}><strong>{item.title}</strong></Link>
+                              <Link to={`/${item.slug}`} state={discoveryNavigationState}><strong>{item.title}</strong></Link>
                               <span>{variant ? formatPrice(variant.price) : 'Custom quote'}</span>
                               {variant ? (
                                 <button
@@ -249,7 +266,7 @@ export function ProductPage() {
                                   <Plus aria-hidden="true" /> Add to bag
                                 </button>
                               ) : (
-                                <Link className="text-link" to={`/${item.slug}`}>View details <ArrowRight aria-hidden="true" /></Link>
+                                <Link className="text-link" to={`/${item.slug}`} state={discoveryNavigationState}>View details <ArrowRight aria-hidden="true" /></Link>
                               )}
                             </div>
                           </article>

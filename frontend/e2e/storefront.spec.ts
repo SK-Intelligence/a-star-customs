@@ -125,6 +125,10 @@ test('unknown routes render the not-found page', async ({ page }) => {
 
   await expect(page).toHaveTitle(/Page Not Found/);
   await expect(page.getByRole('heading', { name: 'We couldn’t find that page.' })).toBeVisible();
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
+
+  await page.getByRole('link', { name: 'Back home' }).click();
+  await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
 });
 
 test('catalog category query filters the product count', async ({ page }) => {
@@ -141,12 +145,34 @@ test('catalog search resets pagination and narrows results', async ({ page }) =>
     'aria-current',
     'page',
   );
+  await expect(page).toHaveURL(/page=2/);
 
   await page.getByRole('searchbox', { name: 'Search products' }).fill('Wireless Carplay');
 
+  await expect(page).toHaveURL(/q=Wireless(?:\+|%20)Carplay/);
+  await expect(page).not.toHaveURL(/page=/);
   await expect(page.getByRole('heading', { name: '1 product' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Wireless Carplay Adapter' })).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Product pages' })).toHaveCount(0);
+
+  await page.getByRole('link', { name: 'Wireless Carplay Adapter', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Back to shop' })).toBeVisible();
+  await page.getByRole('link', { name: 'Back to shop' }).click();
+  await expect(page).toHaveURL(/q=Wireless(?:\+|%20)Carplay/);
+  await expect(page.getByRole('heading', { name: '1 product' })).toBeVisible();
+});
+
+test('custom kits contains only DIY products and uses kit-specific hero media', async ({ page }) => {
+  await page.goto('/custom-kits');
+
+  await expect(page.getByRole('heading', { name: '11 products' })).toBeVisible();
+  await expect(page.locator('.page-hero')).toHaveCSS(
+    'background-image',
+    /starlight-fiber-optic-kit-01\.jpg/,
+  );
+
+  await page.getByRole('heading', { name: 'Universal Starlight Fiber Optic Kit (Standard)', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Back to custom kits' })).toBeVisible();
 });
 
 test('multi-variant selection and quantity create distinct trusted cart lines', async ({ page }) => {
@@ -695,10 +721,14 @@ test('allowing TikTok content stores consent and loads all build videos', async 
       page.evaluate(() => JSON.parse(localStorage.getItem('astar-cookie-preferences') ?? '{}').marketing),
     )
     .toBe(true);
+
+  await page.getByRole('button', { name: 'Open cookie preferences' }).click();
+  await expect(page.getByRole('checkbox', { name: /Marketing & social media/ })).toBeChecked();
 });
 
 test('allowing map content stores marketing consent and loads the embed', async ({ page }) => {
   await page.goto('/contact-us');
+  await expect(page.locator('.whatsapp-button')).toHaveCount(0);
   await page.getByRole('button', { name: 'Allow content' }).click();
 
   await expect(page.getByTitle('A Star Customs workshop map')).toBeVisible();

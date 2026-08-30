@@ -14,7 +14,7 @@ export function ShopPage() {
         eyebrow="Products & fitted packages"
         title="Shop car upgrades."
         description="Shop ready-to-order products and fitted packages. Products marked custom quote must be discussed with the workshop before ordering."
-        image="/images/site/gallery-stars-01.jpg"
+        image="/images/site/hero.jpg"
       />
       <section className="section shop-section section--carbon">
         <div className="container">
