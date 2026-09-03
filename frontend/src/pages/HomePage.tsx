@@ -112,8 +112,8 @@ export function HomePage() {
             </p>
             <dl className="about-stats" aria-label="A Star Customs experience">
               <div>
-                <dt>400+</dt>
-                <dd>Happy clients</dd>
+                <dt>1000+</dt>
+                <dd>Vehicles transformed</dd>
               </div>
               <div>
                 <dt>5</dt>

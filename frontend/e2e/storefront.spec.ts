@@ -103,7 +103,8 @@ test('homepage keeps the original service, gallery and shop routes prominent', a
     'href',
     '/gallery',
   );
-  await expect(main.getByText('400+', { exact: true })).toBeVisible();
+  await expect(main.getByText('1000+', { exact: true })).toBeVisible();
+  await expect(main.getByText('Vehicles transformed', { exact: true })).toBeVisible();
   await expect(main.getByText('5', { exact: true })).toBeVisible();
 });
 
