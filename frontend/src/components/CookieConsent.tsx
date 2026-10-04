@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Cookie, ShieldCheck, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ShieldCheck, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useDialogFocus } from '../hooks/useDialogFocus';
+import { OPEN_COOKIE_PREFERENCES_EVENT } from '../hooks/cookiePreferencesEvents';
+import { useAnyDialogOpen, useDialogFocus } from '../hooks/useDialogFocus';
 
 const STORAGE_KEY = 'astar-cookie-preferences';
 const EVENT_NAME = 'astar-cookie-preferences-changed';
@@ -105,6 +106,17 @@ export function CookieConsent() {
     initialFocusSelector: '.cookie-modal__close, .cookie-options input:not([disabled])',
   });
 
+  // While another modal (bag drawer, mobile menu, review form) is open the banner steps aside:
+  // inert and invisible, so it neither covers that dialog's controls nor takes focus. It is
+  // still mounted, so it is back, unanswered, the moment the dialog closes. Consent is never
+  // implied by this: nothing is stored until the visitor picks a choice.
+  const otherDialogOpen = useAnyDialogOpen();
+  const yielding = otherDialogOpen && !isManaging;
+  const wrapRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (wrapRef.current) wrapRef.current.inert = yielding;
+  }, [yielding]);
+
   useEffect(() => {
     const handleChange = (event: Event) => {
       const detail: unknown = (event as CustomEvent<unknown>).detail;
@@ -118,31 +130,44 @@ export function CookieConsent() {
     return () => window.removeEventListener(EVENT_NAME, handleChange);
   }, []);
 
-  if (preferences && !isManaging) {
-    return (
-      <button
-        className="cookie-settings-button"
-        type="button"
-        aria-label="Open cookie preferences"
-        onClick={() => {
-          setDraft(preferences);
-          setIsManaging(true);
-        }}
-      >
-        <Cookie aria-hidden="true" />
-        <span>Cookies</span>
-      </button>
-    );
-  }
+  const latestPreferences = useRef(preferences);
+  latestPreferences.current = preferences;
+  useEffect(() => {
+    const handleOpen = () => {
+      setDraft(latestPreferences.current ?? { analytics: false, marketing: false });
+      setIsManaging(true);
+    };
+    window.addEventListener(OPEN_COOKIE_PREFERENCES_EVENT, handleOpen);
+    return () => window.removeEventListener(OPEN_COOKIE_PREFERENCES_EVENT, handleOpen);
+  }, []);
+
+  if (preferences && !isManaging) return null;
 
   const accept = (next: CookiePreferences) => {
+    // The banner is about to unmount. If it held focus, hand focus to the page content rather
+    // than letting it fall back to the document start, where the skip link would take it.
+    const heldFocus = !isManaging && wrapRef.current?.contains(document.activeElement);
     savePreferences(next);
     setPreferences(next);
     setIsManaging(false);
+    if (heldFocus) {
+      window.requestAnimationFrame(() => {
+        document.getElementById('main-content')?.focus({ preventScroll: true });
+      });
+    }
   };
 
   return (
-    <div className={isManaging ? 'cookie-modal-backdrop' : 'cookie-banner-wrap'}>
+    <div
+      ref={wrapRef}
+      className={
+        isManaging
+          ? 'cookie-modal-backdrop'
+          : yielding
+            ? 'cookie-banner-wrap is-yielding'
+            : 'cookie-banner-wrap'
+      }
+    >
       <section
         ref={preferencesRef}
         className={isManaging ? 'cookie-modal' : 'cookie-banner'}

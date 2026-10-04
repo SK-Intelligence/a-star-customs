@@ -1,5 +1,6 @@
 import { Facebook, Instagram, Mail, MapPin, Music2, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { openCookiePreferences } from '../hooks/cookiePreferencesEvents';
 import { contactDetails, socialLinks } from '../data/site';
 
 const footerLinks = [
@@ -70,6 +71,14 @@ export function Footer() {
       <div className="container footer-base">
         <span>© {new Date().getFullYear()} A Star Customs</span>
         <span>Car upgrades and custom fitting · Hounslow, London</span>
+        <button
+          className="footer-cookie-button"
+          type="button"
+          aria-label="Open cookie preferences"
+          onClick={openCookiePreferences}
+        >
+          Cookie preferences
+        </button>
       </div>
     </footer>
   );
