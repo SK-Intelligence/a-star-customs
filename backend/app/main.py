@@ -60,9 +60,11 @@ ITEM_UNAVAILABLE_DETAIL = {
     "code": "ITEM_UNAVAILABLE",
     "message": "Item is not available for online purchase.",
 }
-# Longest location segment returned in a validation error (an unexpected field's name is
-# client input).
+# Validation errors: the name of an unexpected field is client input, so it is replaced; other
+# location parts are schema names, capped as a backstop. At most this many errors are returned.
+UNEXPECTED_FIELD = "<unexpected field>"
 VALIDATION_LOC_PART_LIMIT = 64
+VALIDATION_ERROR_LIMIT = 20
 
 app = FastAPI(title="A Star Customs API", version="1.0.0")
 
@@ -81,18 +83,18 @@ async def validation_error_handler(
     request: Request, exc: RequestValidationError
 ) -> JSONResponse:
     """FastAPI's default 422 body echoes each rejected value (input, ctx); return only
-    where, what and why."""
-    errors = [
-        {
-            "loc": [
-                part[:VALIDATION_LOC_PART_LIMIT] if isinstance(part, str) else part
-                for part in error.get("loc", ())
-            ],
-            "msg": error.get("msg", ""),
-            "type": error.get("type", ""),
-        }
-        for error in exc.errors()
-    ]
+    where, what and why, for at most VALIDATION_ERROR_LIMIT errors."""
+    errors = []
+    for error in exc.errors()[:VALIDATION_ERROR_LIMIT]:
+        loc = [
+            part[:VALIDATION_LOC_PART_LIMIT] if isinstance(part, str) else part
+            for part in error.get("loc", ())
+        ]
+        if error.get("type") == "extra_forbidden" and loc:
+            loc[-1] = UNEXPECTED_FIELD
+        errors.append(
+            {"loc": loc, "msg": error.get("msg", ""), "type": error.get("type", "")}
+        )
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, content={"detail": errors}
     )
@@ -113,7 +115,7 @@ def _validate_product(product_id: str) -> None:
         ) from exc
     if not product_exists:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Product not found."
+            status_code=status.HTTP_404_NOT_FOUND, detail=PRODUCT_NOT_FOUND_DETAIL
         )
 
 

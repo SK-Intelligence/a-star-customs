@@ -395,6 +395,43 @@ def test_validation_errors_omit_input_ctx_and_long_field_names() -> None:
     }
 
 
+def test_validation_errors_replace_unexpected_field_names() -> None:
+    app.dependency_overrides[get_settings] = unconfigured_settings
+
+    response = client.post(
+        "/api/checkout/session",
+        json={
+            "items": [
+                {
+                    "productId": "prod_x",
+                    "variantId": "variant_x",
+                    "quantity": 1,
+                    "attacker_chosen_name": 1,
+                }
+            ],
+            "another_attacker_name": True,
+        },
+    )
+
+    assert response.status_code == 422
+    assert "attacker_chosen_name" not in response.text
+    assert "another_attacker_name" not in response.text
+    assert sorted(error["loc"] for error in response.json()["detail"]) == [
+        ["body", "<unexpected field>"],
+        ["body", "items", 0, "<unexpected field>"],
+    ]
+
+
+def test_validation_errors_are_capped_at_twenty() -> None:
+    app.dependency_overrides[get_settings] = unconfigured_settings
+    line = {"productId": "", "variantId": "", "quantity": 99, "extra": 1}
+
+    response = client.post("/api/checkout/session", json={"items": [line] * 50})
+
+    assert response.status_code == 422
+    assert len(response.json()["detail"]) == 20
+
+
 def test_checkout_accepts_only_catalog_identifiers_and_quantity() -> None:
     app.dependency_overrides[get_settings] = unconfigured_settings
 

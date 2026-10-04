@@ -82,7 +82,20 @@ def test_review_rejects_unknown_product_without_creating_database(
     )
 
     assert response.status_code == 404
+    assert response.json() == {
+        "detail": {"code": "PRODUCT_NOT_FOUND", "message": "Product not found."}
+    }
     assert not database_path.exists()
+
+
+def test_review_listing_for_unknown_product_does_not_echo_it(tmp_path: Path) -> None:
+    configure_reviews(tmp_path / "reviews.db")
+
+    response = client.get("/api/reviews/prod_echo_marker_not_in_catalog")
+
+    assert response.status_code == 404
+    assert response.json()["detail"]["code"] == "PRODUCT_NOT_FOUND"
+    assert "prod_echo_marker_not_in_catalog" not in response.text
 
 
 def test_review_submission_is_strictly_validated(tmp_path: Path) -> None:
