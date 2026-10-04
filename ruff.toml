@@ -1,0 +1,13 @@
+# Ruff (lint only) for the FastAPI backend and the repository scripts. Run by the Quality gate's
+# lint job: `ruff check backend scripts` from the repository root. The rule set is explicit so a
+# newer Ruff cannot change it silently; the version is pinned in backend/requirements.txt.
+# `ruff format` is not enforced yet: the code predates it and reformatting is a separate change.
+target-version = "py312"
+
+[lint]
+# pycodestyle errors, Pyflakes and flake8-bugbear.
+select = ["E4", "E7", "E9", "F", "B"]
+
+[lint.flake8-bugbear]
+# FastAPI's dependency injection is declared as a default argument by design.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Header", "fastapi.Query", "fastapi.Body"]
