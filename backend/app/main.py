@@ -72,7 +72,9 @@ def _validate_product(product_id: str) -> None:
             detail="The product catalog is temporarily unavailable.",
         ) from exc
     if not product_exists:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Product not found."
+        )
 
 
 @app.get("/api/reviews/{product_id}", response_model=ReviewListResponse)
@@ -254,7 +256,9 @@ async def create_checkout_session(
                 detail=f"Product not found: {item.productId}.",
             )
 
-        variant = next((entry for entry in product.variants if entry.id == item.variantId), None)
+        variant = next(
+            (entry for entry in product.variants if entry.id == item.variantId), None
+        )
         if variant is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -311,7 +315,9 @@ async def create_checkout_session(
         )
 
     order_reference = f"asc_{uuid4().hex}"
-    cart_reference = hashlib.sha256("|".join(cart_identity_parts).encode()).hexdigest()[:20]
+    cart_reference = hashlib.sha256("|".join(cart_identity_parts).encode()).hexdigest()[
+        :20
+    ]
     try:
         await asyncio.to_thread(
             create_pending_order,
@@ -353,7 +359,13 @@ async def create_checkout_session(
                 "cart_reference": cart_reference,
                 "line_count": str(len(stripe_line_items)),
                 "build_count": str(
-                    len({item.buildId for item in cart.items if item.buildId is not None})
+                    len(
+                        {
+                            item.buildId
+                            for item in cart.items
+                            if item.buildId is not None
+                        }
+                    )
                 ),
             },
         )
@@ -461,7 +473,9 @@ async def get_checkout_session_status(
             detail="Order status is temporarily unavailable.",
         ) from exc
     if order is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Order not found."
+        )
     return CheckoutStatusResponse(
         orderReference=order.order_reference,
         status=_verified_checkout_status(session, order.status),
@@ -528,7 +542,9 @@ async def stripe_webhook(
     new_status = status_by_event.get(event_type)
     if event_type == "checkout.session.completed":
         payment_status = _stripe_value(session, "payment_status")
-        new_status = "paid" if payment_status in {"paid", "no_payment_required"} else "pending"
+        new_status = (
+            "paid" if payment_status in {"paid", "no_payment_required"} else "pending"
+        )
     if not isinstance(stripe_session_id, str):
         stripe_session_id = None
     if new_status is not None and stripe_session_id is None:

@@ -70,7 +70,9 @@ def test_get_returns_only_approved_reviews(tmp_path: Path) -> None:
     assert "status" not in body["reviews"][0]
 
 
-def test_review_rejects_unknown_product_without_creating_database(tmp_path: Path) -> None:
+def test_review_rejects_unknown_product_without_creating_database(
+    tmp_path: Path,
+) -> None:
     database_path = tmp_path / "reviews.db"
     configure_reviews(database_path)
 

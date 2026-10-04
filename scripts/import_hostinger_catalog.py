@@ -25,9 +25,7 @@ FONTS_DIR = FRONTEND / "public" / "fonts"
 
 STORE_ID = "store_01K4R1BZDYA3NY80HWDBGHZTTV"
 PRODUCT_API = f"https://api-ecommerce.hostinger.com/store/{STORE_ID}/products"
-COLLECTIONS_API = (
-    f"https://api-ecommerce.hostinger.com/store/{STORE_ID}/collections"
-)
+COLLECTIONS_API = f"https://api-ecommerce.hostinger.com/store/{STORE_ID}/collections"
 SITE_ASSET_ROOT = "https://assets.zyrosite.com/A85MjQWzv9S34zLw"
 
 SITE_ASSETS = {

@@ -45,7 +45,9 @@ def main() -> None:
     frontend_add_ons = load_json_array(FRONTEND_ADD_ONS)
     backend_add_ons = load_json_array(BACKEND_ADD_ONS)
     if frontend_add_ons != backend_add_ons:
-        raise SystemExit("Catalog check failed: frontend and backend add-on configs differ.")
+        raise SystemExit(
+            "Catalog check failed: frontend and backend add-on configs differ."
+        )
 
     product_ids: set[str] = set()
     products_by_id: dict[str, dict[str, Any]] = {}
@@ -61,9 +63,13 @@ def main() -> None:
         if not isinstance(product_id, str) or not product_id:
             raise SystemExit("Catalog check failed: a product has no valid ID.")
         if not isinstance(slug, str) or not slug:
-            raise SystemExit(f"Catalog check failed: product {product_id} has no valid slug.")
+            raise SystemExit(
+                f"Catalog check failed: product {product_id} has no valid slug."
+            )
         if product_id in product_ids or slug in slugs:
-            raise SystemExit(f"Catalog check failed: duplicate product ID or slug at {slug}.")
+            raise SystemExit(
+                f"Catalog check failed: duplicate product ID or slug at {slug}."
+            )
         product_ids.add(product_id)
         products_by_id[product_id] = product
         slugs.add(slug)
@@ -81,9 +87,14 @@ def main() -> None:
             or fitment.get("mode") not in {"universal", "specific", "confirm"}
             or not isinstance(fitment.get("label"), str)
             or not fitment["label"].strip()
-            or any(not isinstance(fitment.get(key), list) for key in ("makes", "models", "chassisCodes"))
+            or any(
+                not isinstance(fitment.get(key), list)
+                for key in ("makes", "models", "chassisCodes")
+            )
         ):
-            raise SystemExit(f"Catalog check failed: invalid fitment metadata in {slug}.")
+            raise SystemExit(
+                f"Catalog check failed: invalid fitment metadata in {slug}."
+            )
         if not isinstance(media_key, str) or not media_key:
             raise SystemExit(f"Catalog check failed: missing media key in {slug}.")
         if media_key in media_keys:
@@ -96,14 +107,18 @@ def main() -> None:
                 f"Catalog check failed: specific fitment lacks make/model in {slug}."
             )
         if (comparison_group is None) != (spec_tier is None):
-            raise SystemExit(f"Catalog check failed: incomplete comparison metadata in {slug}.")
+            raise SystemExit(
+                f"Catalog check failed: incomplete comparison metadata in {slug}."
+            )
         if comparison_group is not None and (
             not isinstance(comparison_group, str)
             or not comparison_group
             or not isinstance(spec_tier, int)
             or spec_tier < 0
         ):
-            raise SystemExit(f"Catalog check failed: invalid comparison metadata in {slug}.")
+            raise SystemExit(
+                f"Catalog check failed: invalid comparison metadata in {slug}."
+            )
 
         variants = product.get("variants")
         if not isinstance(variants, list) or not variants:
@@ -113,7 +128,9 @@ def main() -> None:
             variant_id = variant.get("id")
             price = variant.get("price")
             if not isinstance(variant_id, str) or variant_id in variant_ids:
-                raise SystemExit(f"Catalog check failed: invalid or duplicate variant in {slug}.")
+                raise SystemExit(
+                    f"Catalog check failed: invalid or duplicate variant in {slug}."
+                )
             if not isinstance(price, int) or price < 0:
                 raise SystemExit(f"Catalog check failed: invalid price in {slug}.")
             variant_ids.add(variant_id)
@@ -135,14 +152,16 @@ def main() -> None:
 
     if missing_images:
         raise SystemExit(
-            "Catalog check failed: missing images:\n" + "\n".join(sorted(set(missing_images)))
+            "Catalog check failed: missing images:\n"
+            + "\n".join(sorted(set(missing_images)))
         )
 
     media_review = load_json_array(MEDIA_REVIEW)
-    reviews_by_product_id = {
-        entry.get("productId"): entry for entry in media_review
-    }
-    if len(reviews_by_product_id) != len(media_review) or set(reviews_by_product_id) != product_ids:
+    reviews_by_product_id = {entry.get("productId"): entry for entry in media_review}
+    if (
+        len(reviews_by_product_id) != len(media_review)
+        or set(reviews_by_product_id) != product_ids
+    ):
         raise SystemExit(
             "Catalog check failed: media review manifest must contain every product exactly once."
         )
@@ -188,11 +207,15 @@ def main() -> None:
             raise SystemExit("Catalog check failed: invalid or duplicate add-on ID.")
         add_on_ids.add(add_on_id)
         if status not in {"active", "disabled"}:
-            raise SystemExit(f"Catalog check failed: invalid status for add-on {add_on_id}.")
+            raise SystemExit(
+                f"Catalog check failed: invalid status for add-on {add_on_id}."
+            )
         if not isinstance(label, str) or not label.strip():
             raise SystemExit(f"Catalog check failed: add-on {add_on_id} has no label.")
         if not isinstance(description, str) or not description.strip():
-            raise SystemExit(f"Catalog check failed: add-on {add_on_id} has no description.")
+            raise SystemExit(
+                f"Catalog check failed: add-on {add_on_id} has no description."
+            )
         applicable_families = add_on.get("appliesToFamilies")
         if "appliesToProducts" in add_on:
             applicable_products = add_on["appliesToProducts"]
@@ -213,9 +236,9 @@ def main() -> None:
                 )
         if "exclusiveGroup" in add_on:
             exclusive_group = add_on["exclusiveGroup"]
-            if not isinstance(exclusive_group, str) or not EXCLUSIVE_GROUP_PATTERN.fullmatch(
-                exclusive_group
-            ):
+            if not isinstance(
+                exclusive_group, str
+            ) or not EXCLUSIVE_GROUP_PATTERN.fullmatch(exclusive_group):
                 raise SystemExit(
                     f"Catalog check failed: add-on {add_on_id} has an invalid exclusive group."
                 )

@@ -36,7 +36,9 @@ def test_checkout_status_rejects_invalid_session_id_without_provider_call(
     def unexpected_retrieve(*_: object, **__: object) -> None:
         raise AssertionError("Stripe must not be called for an invalid session ID")
 
-    monkeypatch.setattr("app.main.stripe.checkout.Session.retrieve", unexpected_retrieve)
+    monkeypatch.setattr(
+        "app.main.stripe.checkout.Session.retrieve", unexpected_retrieve
+    )
     app.dependency_overrides[get_settings] = lambda: Settings(
         stripe_secret_key="sk_test_placeholder",
         orders_database_path=tmp_path / "orders.db",

@@ -266,9 +266,7 @@ def test_checkout_rejects_unknown_product() -> None:
     response = client.post(
         "/api/checkout/session",
         json={
-            "items": [
-                {"productId": "unknown", "variantId": "unknown", "quantity": 1}
-            ]
+            "items": [{"productId": "unknown", "variantId": "unknown", "quantity": 1}]
         },
     )
 

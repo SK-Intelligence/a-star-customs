@@ -54,7 +54,9 @@ class AddOnOption(BaseModel):
             or any(not product_id.strip() for product_id in self.appliesToProducts)
             or len(set(self.appliesToProducts)) != len(self.appliesToProducts)
         ):
-            raise ValueError("product-scoped add-ons require unique, non-blank product IDs")
+            raise ValueError(
+                "product-scoped add-ons require unique, non-blank product IDs"
+            )
         if self.status == "active" and (not self.productId or not self.variantId):
             raise ValueError("active add-ons require product and variant IDs")
         if self.status == "disabled" and (
@@ -76,7 +78,9 @@ def add_ons_for_product(
         if family in option.appliesToFamilies
         and (option.appliesToProducts is None or product_id in option.appliesToProducts)
     ]
-    product_scoped = [option for option in matching if option.appliesToProducts is not None]
+    product_scoped = [
+        option for option in matching if option.appliesToProducts is not None
+    ]
     return product_scoped or matching
 
 
@@ -92,7 +96,9 @@ def load_add_ons() -> list[AddOnOption]:
             raise ValueError("add-on configuration root must be a list")
         add_ons = [AddOnOption.model_validate(item) for item in raw_add_ons]
     except (OSError, json.JSONDecodeError, ValidationError, ValueError) as exc:
-        raise AddOnConfigurationError("The add-on configuration is unavailable.") from exc
+        raise AddOnConfigurationError(
+            "The add-on configuration is unavailable."
+        ) from exc
 
     option_ids = [option.id for option in add_ons]
     catalog_ids = [
@@ -101,7 +107,9 @@ def load_add_ons() -> list[AddOnOption]:
         if option.status == "active"
     ]
     if len(set(option_ids)) != len(option_ids):
-        raise AddOnConfigurationError("The add-on configuration contains duplicate IDs.")
+        raise AddOnConfigurationError(
+            "The add-on configuration contains duplicate IDs."
+        )
     if len(set(catalog_ids)) != len(catalog_ids):
         raise AddOnConfigurationError(
             "The add-on configuration contains duplicate catalog entries."

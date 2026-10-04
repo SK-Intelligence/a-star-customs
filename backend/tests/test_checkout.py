@@ -133,7 +133,9 @@ def test_order_initialization_failure_prevents_stripe_session_creation(
         raise AssertionError("Stripe must not be called before the order exists")
 
     monkeypatch.setattr("app.main.create_pending_order", fail_order_creation)
-    monkeypatch.setattr("app.main.stripe.checkout.Session.create", unexpected_stripe_call)
+    monkeypatch.setattr(
+        "app.main.stripe.checkout.Session.create", unexpected_stripe_call
+    )
     app.dependency_overrides[get_settings] = lambda: Settings(
         stripe_secret_key="sk_test_placeholder",
         stripe_payment_method_configuration_id="pmc_test_checkout",
@@ -401,16 +403,19 @@ def test_checkout_forwards_grouping_to_line_metadata_and_cart_hash(
         "line_type": "base",
         "build_id": "build-one",
     }
-    assert first_line_items[1]["price_data"]["product_data"]["metadata"][
-        "line_type"
-    ] == "addon"
+    assert (
+        first_line_items[1]["price_data"]["product_data"]["metadata"]["line_type"]
+        == "addon"
+    )
     first_metadata = sessions[0]["metadata"]  # type: ignore[assignment]
     second_metadata = sessions[1]["metadata"]  # type: ignore[assignment]
     assert first_metadata["build_count"] == "2"
     assert first_metadata["cart_reference"] != second_metadata["cart_reference"]
 
 
-def test_checkout_preserves_legacy_standalone_payload(monkeypatch, tmp_path: Path) -> None:
+def test_checkout_preserves_legacy_standalone_payload(
+    monkeypatch, tmp_path: Path
+) -> None:
     captured: dict[str, object] = {}
 
     def fake_create(**kwargs: object) -> SimpleNamespace:
@@ -594,7 +599,10 @@ def test_other_ambient_products_keep_family_add_ons() -> None:
 
     options = add_ons_for_product(load_add_ons(), base.id, base.family)
 
-    assert [option.id for option in options] == ["speaker-lights", "premium-animation-pack"]
+    assert [option.id for option in options] == [
+        "speaker-lights",
+        "premium-animation-pack",
+    ]
 
 
 def test_checkout_accepts_c_class_build_with_one_choice_per_exclusive_pair(
