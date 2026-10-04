@@ -16,7 +16,7 @@ First-time setup is in `README.md` (npm install, `backend/.venv`). Enable the pr
 | Lint, types, forbidden text | an ESLint error or warning (`frontend/eslint.config.js`), a `tsc -b` error, a Ruff finding or unformatted Python (`ruff check` / `ruff format --check`, `ruff.toml`), or a Stripe/Web3Forms secret or Hostinger URL in the storefront source (`scripts/check-forbidden-text.mjs`) |
 | Unit tests + coverage, catalog sync | a failing backend test, backend coverage below `fail_under` in `backend/.coveragerc` (the measured baseline rounded down: 90.10% -> 90), or `scripts/check_catalog_sync.py` |
 | Production build | `npm run build` failing, or forbidden text in the built bundle (`frontend/dist`) |
-| E2E | the Playwright suite (desktop, and a 390 x 844 phone) against the production build served by `vite preview` with the FastAPI backend |
+| E2E | the Playwright suite (desktop, and a 390 x 844 phone) against the production build served by `vite preview` with the FastAPI backend, including the fitment parity checks in `frontend/e2e/fitment.spec.ts` |
 | Accessibility | a serious or critical axe violation on `/`, the C-Class product page, `/shop`, `/contact-us` or `/checkout` at 390px and 1440px (`frontend/e2e/accessibility.spec.ts`) |
 | Lighthouse | on `/` and the C-Class product page (mobile, median of 3): accessibility below 0.95, best practices below 0.9, performance below 0.75 (`frontend/lighthouserc.json`; the measured level, to be raised to 0.8 once the photos are responsive) |
 | Docker images | `docker build` of `backend/Dockerfile` or `frontend/Dockerfile` from the repository root, exactly as Railway builds them |

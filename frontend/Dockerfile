@@ -1,7 +1,7 @@
 FROM python:3.12-alpine AS catalog-check
 
 WORKDIR /workspace
-COPY scripts/check_catalog_sync.py scripts/media-review.json ./scripts/
+COPY scripts/check_catalog_sync.py scripts/media-review.json scripts/generic-add-on-approvals.json ./scripts/
 COPY frontend/src/data/catalog.json frontend/src/data/add-ons.json ./frontend/src/data/
 COPY backend/app/catalog.json backend/app/add-ons.json ./backend/app/
 COPY frontend/public ./frontend/public
