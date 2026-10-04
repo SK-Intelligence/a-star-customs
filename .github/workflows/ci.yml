@@ -163,10 +163,10 @@ jobs:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with: { name: frontend-dist, path: frontend/dist }
       # Budgets in frontend/lighthouserc.json (median of 3 runs): accessibility >= 0.95, best
-      # practices >= 0.9, performance >= 0.75. Performance is the measured level (medians 0.79 on
-      # / and 0.76 on the product page, 2026-10-04), not 0.8: the full-size hero and product
-      # photos put LCP at 5-9 s on a throttled phone. Raise it to 0.8 once the images are
-      # responsive (srcset/WebP). Uses the runner's preinstalled Chrome.
+      # practices >= 0.9, performance >= 0.8. With responsive WebP images (responsive-images.ts)
+      # the local medians were 0.93 on / and 0.96 on the product page (LCP 3.2 s and 2.7 s,
+      # 2026-10-04; 0.75 and 0.75 before). The budget stays well below them because runner
+      # medians vary by several points. Uses the runner's preinstalled Chrome.
       - run: npx -y @lhci/cli@0.15.1 autorun
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()

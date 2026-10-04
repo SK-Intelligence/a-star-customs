@@ -18,7 +18,7 @@ First-time setup is in `README.md` (npm install, `backend/.venv`). Enable the pr
 | Production build | `npm run build` failing, or forbidden text in the built bundle (`frontend/dist`) |
 | E2E | the Playwright suite (desktop, and a 390 x 844 phone) against the production build served by `vite preview` with the FastAPI backend |
 | Accessibility | a serious or critical axe violation on `/`, the C-Class product page, `/shop`, `/contact-us` or `/checkout` at 390px and 1440px (`frontend/e2e/accessibility.spec.ts`) |
-| Lighthouse | on `/` and the C-Class product page (mobile, median of 3): accessibility below 0.95, best practices below 0.9, performance below 0.75 (`frontend/lighthouserc.json`; the measured level, to be raised to 0.8 once the photos are responsive) |
+| Lighthouse | on `/` and the C-Class product page (mobile, median of 3): accessibility below 0.95, best practices below 0.9, performance below 0.8 (`frontend/lighthouserc.json`; local medians 0.93 and 0.96 with the responsive WebP photos) |
 | Docker images | `docker build` of `backend/Dockerfile` or `frontend/Dockerfile` from the repository root, exactly as Railway builds them |
 | Ops scripts | a ShellCheck finding in `ops/smoke-test.sh` or `.githooks/pre-push` |
 | Security | an `npm audit` high or critical advisory outside `AUDIT_ALLOW`, any `pip-audit` finding in `backend/requirements.txt`, a gitleaks secret (`.gitleaks.toml`), or a Semgrep ERROR finding |
