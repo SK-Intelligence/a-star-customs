@@ -85,8 +85,8 @@ Create a Web3Forms access key for the company inbox and add it as `WEB3FORMS_ACC
 ## Verification
 
 ```bash
+npm run ci:fast
 npm run verify
-npm audit --omit=dev
 npm run test:e2e
 ```
 
@@ -94,7 +94,9 @@ npm run test:e2e
 
 ## CI/CD
 
-Every change goes through a pull request into `main`. The **Quality gate** workflow (`.github/workflows/ci.yml`) runs lint and types, backend tests with coverage, the catalog check, the production build with a bundle secret scan, Playwright E2E (desktop and phone), axe accessibility, Lighthouse, both Docker images, ShellCheck, security scans and SonarQube. Railway deploys `main` only after it passes. Run `npm run ci:fast` before pushing and `npm run setup:hooks` once per clone. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, every job and the live smoke check.
+Every change goes through a pull request into `main`. The **Quality gate** workflow (`.github/workflows/ci.yml`) runs ESLint, `tsc` and Ruff (lint and format), backend tests with a coverage floor, the catalogue check with its fitment heuristics, the production build with a bundle secret scan, Playwright E2E (desktop and phone), axe accessibility, Lighthouse, both Docker images, ShellCheck, npm audit, pip-audit, gitleaks, Semgrep and SonarQube. Run `npm run ci:fast` before pushing and `npm run setup:hooks` once per clone.
+
+Railway is required to connect both services to GitHub, use `frontend/railway.json` and `backend/railway.json`, and turn on Wait for CI, so that it deploys `main` only after the gate passes. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, every job, the required Railway setup and the live smoke check.
 
 ## Production with Docker
 
