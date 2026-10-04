@@ -3,9 +3,15 @@ import path from 'node:path';
 import { expect, test } from '@playwright/test';
 import { createServer } from 'vite';
 
-// Parity between the storefront's fitment logic and an independent oracle, and between those
-// functions and what a product page actually renders. The catalogue check
-// (scripts/check_catalog_sync.py) holds the same rule for the build; see its `covers`.
+// Parity between the storefront's fitment logic and a parity copy of the rule kept here, and
+// between those functions and what a product page actually renders. The parity copy only
+// proves catalog.ts still implements the stated rule; the hard-coded intent cases below
+// ("the audited cross-model suggestions stay gone") pin what the rule must mean. The catalogue
+// check (scripts/check_catalog_sync.py) holds the same rule for the build; see its `covers`.
+//
+// Model years are not compared anywhere: the catalogue has no year field yet (it waits for the
+// client's fitment data), so a 2012-2020 kit and a 2021+ kit for the same model/chassis count
+// as fitting each other.
 
 type Fitment = {
   mode: 'universal' | 'specific' | 'confirm';
@@ -67,14 +73,14 @@ async function loadCatalogModule(): Promise<CatalogModule> {
   }
 }
 
-// The oracle: written from the rule, not from catalog.ts. A candidate fits a page when it is
+// The parity copy: written from the rule, not from catalog.ts. A candidate fits a page when it is
 // universal, or confirm-first with no make, or it lists every make and model of the page and,
 // if it lists chassis codes, every chassis code of the page.
 const lower = (values: string[]) => values.map((value) => value.trim().toLowerCase());
 const includesAll = (outer: string[], inner: string[]) =>
   lower(inner).every((value) => lower(outer).includes(value));
 
-function oracleCovers(page: Product, candidate: Product): boolean {
+function parityCovers(page: Product, candidate: Product): boolean {
   const pageFit = page.fitment;
   const fit = candidate.fitment;
   if (fit.mode === 'universal') return true;
@@ -86,7 +92,7 @@ function oracleCovers(page: Product, candidate: Product): boolean {
   return pageFit.chassisCodes.length > 0 && includesAll(fit.chassisCodes, pageFit.chassisCodes);
 }
 
-function oracleDiscovery(page: Product, catalog: readonly Product[]): string[] {
+function parityDiscovery(page: Product, catalog: readonly Product[]): string[] {
   if (page.kind !== 'main') return [];
   const eligible = catalog.filter(
     (candidate) =>
@@ -94,7 +100,7 @@ function oracleDiscovery(page: Product, catalog: readonly Product[]): string[] {
       candidate.kind !== 'addon' &&
       candidate.purchasable &&
       candidate.available &&
-      oracleCovers(page, candidate),
+      parityCovers(page, candidate),
   );
   const families = new Set<string>();
   const onePerFamily = eligible.filter(
@@ -120,23 +126,23 @@ test.describe('fitment parity', () => {
     for (const page of catalog.products) {
       const discovery = catalog.getDiscoveryProducts(page);
       for (const offer of discovery) {
-        expect(oracleCovers(page, offer), `${offer.slug} offered on ${page.slug}`).toBe(true);
+        expect(parityCovers(page, offer), `${offer.slug} offered on ${page.slug}`).toBe(true);
       }
       expect(
         discovery.map((offer) => offer.slug),
         `discovery list for ${page.slug}`,
-      ).toEqual(oracleDiscovery(page, catalog.products));
+      ).toEqual(parityDiscovery(page, catalog.products));
 
       for (const option of catalog.getProductAddOnOptions(page)) {
         if (!option.isAvailable || !option.product) continue;
         const addOn = option.product;
         const pair = `${option.definition.id} on ${page.slug}`;
         if (addOn.fitment.makes.length > 0) {
-          expect(oracleCovers(page, addOn), pair).toBe(true);
+          expect(parityCovers(page, addOn), pair).toBe(true);
         } else if (addOn.fitment.mode === 'confirm' && page.fitment.makes.length > 0) {
           expect(approvedGenericAddOns.has(pair), `${pair} needs an approval`).toBe(true);
         } else {
-          expect(oracleCovers(page, addOn), pair).toBe(true);
+          expect(parityCovers(page, addOn), pair).toBe(true);
         }
       }
     }

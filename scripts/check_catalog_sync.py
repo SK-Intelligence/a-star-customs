@@ -229,7 +229,11 @@ def _values(values: list[str]) -> set[str]:
 
 
 def covers(base: dict[str, Any], candidate: dict[str, Any]) -> bool:
-    """True when `candidate` is known to fit every vehicle `base` is sold for."""
+    """True when `candidate` is known to fit every vehicle `base` is sold for.
+
+    Model years are not compared: the catalogue has no year field yet (it waits for the
+    client's data), so listings for the same make/model/chassis count as fitting each other.
+    Mirrors productFitmentsAreCompatible in frontend/src/data/catalog.ts."""
     base_fit, cand_fit = base["fitment"], candidate["fitment"]
     if cand_fit["mode"] == "universal":
         return True

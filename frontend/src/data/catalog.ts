@@ -198,6 +198,11 @@ function isSubset(values: ReadonlySet<string>, superset: ReadonlySet<string>): b
  * source and, when it lists chassis codes, every chassis code of the source. A
  * make-only candidate is too vague for a model-specific page, and a single shared
  * model is not enough: a CLA/GLA overlap does not make an A-Class kit fit a C-Class.
+ *
+ * Model years are not compared: the catalogue has no year field yet, so two listings for the
+ * same make/model/chassis count as compatible whatever years their titles mention. Add a years
+ * check here (and in `covers` in scripts/check_catalog_sync.py and the parity copy in
+ * e2e/fitment.spec.ts) once the client supplies year ranges.
  */
 export function productFitmentsAreCompatible(source: Product, candidate: Product): boolean {
   if (candidate.fitment.mode === "universal") return true;
