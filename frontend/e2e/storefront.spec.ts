@@ -430,25 +430,6 @@ test('panoramic lights do not offer ambient-lighting-only extras', async ({ page
   await expect(page.locator('.product-buybox .buy-actions').getByRole('button', { name: 'Add to bag' })).toBeVisible();
 });
 
-test('vehicle-specific discovery never crosses into another make or model', async ({ page }) => {
-  await page.goto('/-bmw-f-series-oem-ambient-package');
-
-  const discovery = page.locator('.product-discovery');
-  await expect(discovery).toContainText('6 compatible upgrades and services');
-  await expect(discovery.getByText(/Golf|Audi|Mercedes|A-Class|CLA|GLA/i)).toHaveCount(0);
-
-  await page.goto('/mercedes-c-class-oem-ambient-lighting');
-  const cClassDiscovery = page.locator('.product-discovery');
-  for (const incompatibleSlug of [
-    '-bmw-f-series-oem-ambient-package',
-    'car-interior-ambient-light-kit-golf-mk7-mk75-2012-2019',
-    'car-interior-ambient-led-light-kit-audi-q3-2018-current',
-    'full-oem-ambient-lighting-upgrade-a-class1',
-  ]) {
-    await expect(cClassDiscovery.locator(`a[href="/${incompatibleSlug}"]`)).toHaveCount(0);
-  }
-});
-
 test('upgrade listings are directly purchasable and contain no nested upsells', async ({ page }) => {
   await page.goto('/ambient-lighting-upgrade');
 

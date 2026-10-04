@@ -106,6 +106,8 @@ jobs:
       - run: npx playwright install-deps chromium
         if: steps.pw-cache.outputs.cache-hit == 'true'
       # The built bundle under `vite preview` with the FastAPI backend (frontend/playwright.config.ts).
+      # Includes e2e/fitment.spec.ts: catalog.ts against an independent fitment oracle, and every
+      # purchasable product page's rendered offers and extras against catalog.ts.
       - run: npx playwright test --grep-invert @a11y
         working-directory: frontend
         env: { E2E_TARGET: prod }
