@@ -1,7 +1,7 @@
-# Ruff (lint only) for the FastAPI backend and the repository scripts. Run by the Quality gate's
-# lint job: `ruff check backend scripts` from the repository root. The rule set is explicit so a
-# newer Ruff cannot change it silently; the version is pinned in backend/requirements.txt.
-# `ruff format` is not enforced yet: the code predates it and reformatting is a separate change.
+# Ruff for the FastAPI backend and the repository scripts. Run by the Quality gate's lint job
+# from the repository root: `ruff check backend scripts` and `ruff format --check backend scripts`
+# (default formatter settings). The rule set is explicit so a newer Ruff cannot change it
+# silently; the version is pinned in backend/requirements.txt.
 target-version = "py312"
 
 [lint]

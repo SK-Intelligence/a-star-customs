@@ -43,6 +43,7 @@ jobs:
       # Ruff (ruff.toml) on the backend and scripts; the version is pinned in backend/requirements.txt.
       - run: pip install -r backend/requirements.txt
       - run: ruff check backend scripts
+      - run: ruff format --check backend scripts
       # Stripe/Web3Forms secrets or Hostinger URLs in the storefront source.
       - run: npm run check:text
 

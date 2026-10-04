@@ -9,7 +9,7 @@
     "build": "npm --workspace frontend run build",
     "dev": "npm --workspace frontend run dev",
     "lint": "npm --workspace frontend run lint && npm run lint:backend",
-    "lint:backend": "backend/.venv/bin/ruff check backend scripts",
+    "lint:backend": "backend/.venv/bin/ruff check backend scripts && backend/.venv/bin/ruff format --check backend scripts",
     "typecheck": "npm --workspace frontend run typecheck",
     "check:text": "node scripts/check-forbidden-text.mjs",
     "check:catalog": "python scripts/check_catalog_sync.py",

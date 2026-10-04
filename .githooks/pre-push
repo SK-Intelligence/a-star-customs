@@ -1,5 +1,5 @@
 #!/bin/sh
-# Blocks a push to main unless the fast checks pass (ESLint, types, Ruff, forbidden text, backend
+# Blocks a push to main unless the fast checks pass (ESLint, types, Ruff lint + format, forbidden text, backend
 # tests, catalog sync). Enable once per clone: npm run setup:hooks
 # The Quality gate on GitHub still runs the full suite; this only stops the obvious breakage early.
 protected=0
