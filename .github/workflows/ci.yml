@@ -59,7 +59,9 @@ jobs:
       # Fails below fail_under in backend/.coveragerc (the measured baseline, rounded down).
       - run: pytest -q --cov --cov-report=term --cov-report=xml
         working-directory: backend
-      # Both catalogue and add-on copies identical, classification/fitment metadata, media SHA-256s.
+      # Both catalogue and add-on copies identical, classification/fitment metadata, media SHA-256s,
+      # and the fitment guards (discovery and add-ons fit the base vehicle, text matches fitment,
+      # duplicate listings).
       - run: python scripts/check_catalog_sync.py
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
