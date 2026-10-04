@@ -1,7 +1,13 @@
-"""Fail when the public and server catalog snapshots drift or reference missing media."""
+"""Fail when the public and server catalog snapshots drift or reference missing media.
+
+Default (the Docker builds): sync, metadata, media, add-on rules and the structural fitment
+guards. --ci (the Quality gate and ci:fast) adds the text-against-fitment and duplicate-listing
+heuristics, which can need a human decision and so never block a deploy build on their own.
+"""
 
 from __future__ import annotations
 
+import argparse
 import json
 import hashlib
 import html
@@ -112,16 +118,50 @@ MODEL_PATTERN = re.compile(
     + r")\b",
     re.IGNORECASE,
 )
-MERCEDES_CLASS_PATTERN = re.compile(
-    r"\b([abceglmsv])[\s-]?class(?:es)?\b", re.IGNORECASE
-)
+# Hyphenated "C-Class" always names a Mercedes; "C Class"/"CClass" needs an upper-case class
+# letter and Mercedes context ("a class of its own" is not a car).
+MERCEDES_CLASS_PATTERN = re.compile(r"\b([abceglmsv])-class(?:es)?\b", re.IGNORECASE)
+MERCEDES_CLASS_LOOSE_PATTERN = re.compile(r"\b([ABCEGLMSV]) ?[Cc]lass(?:es)?\b")
 MERCEDES_SLASH_LIST_PATTERN = re.compile(
     r"\b[A-Za-z]{1,3}(?:\s?/\s?[A-Za-z]{1,3})+\b", re.IGNORECASE
 )
-BMW_SERIES_PATTERN = re.compile(r"\b([1-8]|[efg])[\s-]series\b", re.IGNORECASE)
-CHASSIS_PATTERN = re.compile(
-    r"\b([wcxvahrs]\d{3}|[efg]\d{2}|8[a-z]|mk\s?\d(?:\.\d{1,2})?)\b", re.IGNORECASE
-)
+BMW_SERIES_PATTERN = re.compile(r"\b([1-8]|[efg])([\s-])series\b", re.IGNORECASE)
+# Chassis and trim codes look like ordinary part numbers (H264, E27, S100, 8x, Mk2), so each
+# counts only with its make's context within VEHICLE_CONTEXT_WINDOW characters (see `near`).
+MERCEDES_CODE_PATTERN = re.compile(r"\b([wcxvahrs])(\d{3})\b", re.IGNORECASE)
+BMW_CHASSIS_PATTERN = re.compile(r"\b([efg]\d{2})\b", re.IGNORECASE)
+# Audi platform codes (Typ 8L/8P/8V/8Y A3, 8K/8W A4, 8T/8F A5, 8R/8U Q5/Q3, 8J/8S TT). 8X
+# (A1) is left out: "8x" is far more often a count.
+AUDI_CHASSIS_PATTERN = re.compile(r"\b(8[lpvykwtfrujs])\b", re.IGNORECASE)
+VW_GENERATION_PATTERN = re.compile(r"\b(mk\s?\d(?:\.\d{1,2})?)\b", re.IGNORECASE)
+VEHICLE_CONTEXT_WINDOW = 80
+MAKE_CONTEXT = {
+    MERCEDES: re.compile(
+        r"\b(?:mercedes|merc|benz|amg|[abceglmsv]-class|cla|gla|glb|glc|gle|gls|cls|slk|slc)\b",
+        re.IGNORECASE,
+    ),
+    "bmw": re.compile(r"\b(?:bmw|[1-8efg]-series)\b", re.IGNORECASE),
+    "audi": re.compile(r"\baudi\b", re.IGNORECASE),
+    "volkswagen": re.compile(
+        r"\b(?:volkswagen|vw|golf|polo|passat|tiguan|t-roc|scirocco|arteon)\b",
+        re.IGNORECASE,
+    ),
+}
+# Model names that are also everyday words or sizes; they need their make's context.
+AMBIGUOUS_MODELS = {
+    "sl",
+    *(f"a{n}" for n in range(1, 9)),
+    *(f"q{n}" for n in range(2, 9)),
+    "tt",
+    "r8",
+    "golf",
+    "polo",
+    "passat",
+    "tiguan",
+    "t-roc",
+    "scirocco",
+    "arteon",
+}
 GENERIC_FITMENT_CLAIM = re.compile(
     r"\b(most (?:car )?models|most (?:cars|vehicles)|any (?:car|vehicle)|all (?:cars|vehicles)"
     r"|fits all|universal(?:ly)?)\b",
@@ -265,6 +305,19 @@ def add_on_options(
     return options
 
 
+def discovery_candidates(
+    base: dict[str, Any], catalog: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """getDiscoveryProducts' filter minus its fitment check: every standalone offer on sale."""
+    return [
+        candidate
+        for candidate in catalog
+        if candidate["id"] != base["id"]
+        and candidate["kind"] != "addon"
+        and sellable(candidate)
+    ]
+
+
 def discovery_products(
     base: dict[str, Any], catalog: list[dict[str, Any]]
 ) -> list[dict[str, Any]]:
@@ -273,11 +326,8 @@ def discovery_products(
         return []
     admitted = [
         candidate
-        for candidate in catalog
-        if candidate["id"] != base["id"]
-        and candidate["kind"] != "addon"
-        and sellable(candidate)
-        and covers(base, candidate)
+        for candidate in discovery_candidates(base, catalog)
+        if covers(base, candidate)
     ]
     upgrades = [candidate for candidate in admitted if candidate["kind"] == "upgrade"]
     seen_families: set[str] = set()
@@ -287,6 +337,34 @@ def discovery_products(
             seen_families.add(candidate["family"])
             diverse.append(candidate)
     return [*upgrades, *diverse][:6]
+
+
+def _vehicles(fitment: dict[str, Any]) -> set[tuple[str, str | None, str | None]]:
+    """The (make, model, chassis) combinations a fitment names; None where it names none."""
+    return {
+        (make, model, chassis)
+        for make in _values(fitment["makes"])
+        for model in (_values(fitment["models"]) or {None})
+        for chassis in (_values(fitment["chassisCodes"]) or {None})
+    }
+
+
+def fits_every_vehicle(base: dict[str, Any], candidate: dict[str, Any]) -> bool:
+    """Independent statement of the rule `covers` implements, vehicle by vehicle, so guard 2
+    still fails if `covers` (or its TypeScript twin) is loosened. Model years are not compared:
+    the catalogue has no year field yet."""
+    fit = candidate["fitment"]
+    if fit["mode"] == "universal" or (fit["mode"] == "confirm" and not fit["makes"]):
+        return True
+    vehicles = _vehicles(base["fitment"])
+    makes, models = _values(fit["makes"]), _values(fit["models"])
+    chassis = _values(fit["chassisCodes"])
+    return bool(vehicles) and all(
+        make in makes
+        and (model in models if models else model is None)
+        and (not chassis or vehicle_chassis in chassis)
+        for make, model, vehicle_chassis in vehicles
+    )
 
 
 def listing_text(product: dict[str, Any]) -> str:
@@ -300,16 +378,53 @@ def listing_text(product: dict[str, Any]) -> str:
     return " ".join(part for part in parts if part)
 
 
+def near(text: str, start: int, end: int, make: str) -> bool:
+    """True when `make`'s context appears within VEHICLE_CONTEXT_WINDOW characters of the match
+    at text[start:end], not counting the match itself (so "golf" alone is not its own context).
+    Audi models and Audi platform codes vouch for each other ("A3 8V"), as do VW models and Mk
+    generations ("Golf Mk7")."""
+    lo = max(0, start - VEHICLE_CONTEXT_WINDOW)
+    window = text[lo : end + VEHICLE_CONTEXT_WINDOW]
+    patterns = [MAKE_CONTEXT[make]]
+    if make == "audi":
+        patterns += [AUDI_CHASSIS_PATTERN, MODEL_PATTERN]
+    elif make == "volkswagen":
+        patterns.append(VW_GENERATION_PATTERN)
+    for pattern in patterns:
+        for match in pattern.finditer(window):
+            if lo + match.start() < end and lo + match.end() > start:
+                continue  # the match itself
+            if pattern is MODEL_PATTERN and MODEL_MAKES[match.group(1).lower()] != make:
+                continue
+            return True
+    return False
+
+
 def vehicle_terms(text: str) -> set[str]:
-    """Every make, model and chassis code the text names, as 'make:x', 'model:make/x', 'chassis:x'."""
+    """Every make, model and chassis code the text names, as 'make:x', 'model:make/x', 'chassis:x'.
+
+    Ambiguous tokens (part-number-shaped codes, model names that are also words) count only
+    near their make's context; see MAKE_CONTEXT and VEHICLE_CONTEXT_WINDOW. In Mercedes
+    context, a class letter plus a number ending in 0 (C200, C300, E220, A180) is a trim of
+    that class and is read as the class; any other letter-and-three-digit code (W205, C205,
+    X156) is a chassis code.
+    """
     terms = {
         f"make:{MAKE_ALIASES[m.group(1).lower()]}" for m in MAKE_PATTERN.finditer(text)
     }
     for match in MODEL_PATTERN.finditer(text):
         model = match.group(1).lower()
-        terms.add(f"model:{MODEL_MAKES[model]}/{model}")
+        make = MODEL_MAKES[model]
+        if model in AMBIGUOUS_MODELS and not near(
+            text, match.start(), match.end(), make
+        ):
+            continue
+        terms.add(f"model:{make}/{model}")
     for match in MERCEDES_CLASS_PATTERN.finditer(text):
         terms.add(f"model:{MERCEDES}/{match.group(1).lower()}-class")
+    for match in MERCEDES_CLASS_LOOSE_PATTERN.finditer(text):
+        if near(text, match.start(), match.end(), MERCEDES):
+            terms.add(f"model:{MERCEDES}/{match.group(1).lower()}-class")
     for match in MERCEDES_SLASH_LIST_PATTERN.finditer(text):
         tokens = [token.strip().lower() for token in match.group(0).split("/")]
         if any(MODEL_MAKES.get(token) == MERCEDES for token in tokens):
@@ -319,9 +434,24 @@ def vehicle_terms(text: str) -> set[str]:
                 if token in set("abceglmsv")
             )
     for match in BMW_SERIES_PATTERN.finditer(text):
-        terms.add(f"model:bmw/{match.group(1).lower()}-series")
-    for match in CHASSIS_PATTERN.finditer(text):
-        terms.add("chassis:" + match.group(1).lower().replace(" ", ""))
+        if match.group(2) == "-" or near(text, match.start(), match.end(), "bmw"):
+            terms.add(f"model:bmw/{match.group(1).lower()}-series")
+    for match in MERCEDES_CODE_PATTERN.finditer(text):
+        if not near(text, match.start(), match.end(), MERCEDES):
+            continue
+        letter, number = match.group(1).lower(), match.group(2)
+        if letter in "abcegs" and number.endswith("0"):
+            terms.add(f"model:{MERCEDES}/{letter}-class")
+        else:
+            terms.add(f"chassis:{letter}{number}")
+    for pattern, make in (
+        (BMW_CHASSIS_PATTERN, "bmw"),
+        (AUDI_CHASSIS_PATTERN, "audi"),
+        (VW_GENERATION_PATTERN, "volkswagen"),
+    ):
+        for match in pattern.finditer(text):
+            if near(text, match.start(), match.end(), make):
+                terms.add("chassis:" + match.group(1).lower().replace(" ", ""))
     return terms
 
 
@@ -344,8 +474,12 @@ def terms_outside_fitment(product: dict[str, Any], terms: set[str]) -> set[str]:
 
 
 def check_fitment_guards(
-    catalog: list[dict[str, Any]], add_ons: list[dict[str, Any]]
+    catalog: list[dict[str, Any]],
+    add_ons: list[dict[str, Any]],
+    heuristics: bool = True,
 ) -> None:
+    """Guards 1 and 2 are structural and always run (the Docker builds run them). Guards 3 and
+    4 are text and duplicate heuristics that only the Quality gate runs (`--ci`)."""
     errors: list[str] = []
     warnings: list[str] = []
     products_by_id = {product["id"]: product for product in catalog}
@@ -386,13 +520,21 @@ def check_fitment_guards(
         for add_on_id, slug in sorted(approved - used_approvals, key=str)
     )
 
-    # 2. Discovery: every offer the product page shows must fit every vehicle of the page.
+    # 2. Discovery: every offer the product page shows (the port, which filters the candidates
+    #    with `covers`) must fit every vehicle of the page by the independent rule.
     for base in bases:
+        offered = discovery_products(base, catalog)
+        candidate_ids = {c["id"] for c in discovery_candidates(base, catalog)}
         errors.extend(
             f"discovery offers {candidate['slug']} on {base['slug']}, which it does not fit."
-            for candidate in discovery_products(base, catalog)
-            if not covers(base, candidate)
+            for candidate in offered
+            if candidate["id"] not in candidate_ids
+            or not fits_every_vehicle(base, candidate)
         )
+
+    if not heuristics:
+        _report(errors, warnings)
+        return
 
     # 3. Text against fitment.
     used_exceptions: dict[str, set[str]] = {}
@@ -455,6 +597,10 @@ def check_fitment_guards(
         if pair not in used_allowlist
     )
 
+    _report(errors, warnings)
+
+
+def _report(errors: list[str], warnings: list[str]) -> None:
     for warning in warnings:
         print(f"Catalog check warning: {warning}")
     if errors:
@@ -474,7 +620,14 @@ def _fitment_key(product: dict[str, Any]) -> tuple[Any, ...]:
     )
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--ci",
+        action="store_true",
+        help="also run the text-against-fitment and duplicate-listing heuristics",
+    )
+    args = parser.parse_args(argv)
     frontend = load_json_array(FRONTEND_CATALOG)
     backend = load_json_array(BACKEND_CATALOG)
     if frontend != backend:
@@ -730,12 +883,17 @@ def main() -> None:
             "Catalog check failed: every add-on exclusive group needs at least two members."
         )
 
-    check_fitment_guards(frontend, frontend_add_ons)
+    check_fitment_guards(frontend, frontend_add_ons, heuristics=args.ci)
 
+    guards = (
+        "fitment guards"
+        if args.ci
+        else "structural fitment guards (no --ci heuristics)"
+    )
     print(
         f"Catalog check passed: {len(frontend)} products, "
         f"{len(variant_ids)} variants, {len(frontend_add_ons)} add-ons, "
-        "all referenced media present, fitment guards clean."
+        f"all referenced media present, {guards} clean."
     )
 
 

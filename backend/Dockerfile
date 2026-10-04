@@ -6,6 +6,8 @@ COPY scripts/check_catalog_sync.py scripts/media-review.json scripts/generic-add
 COPY frontend/src/data/catalog.json frontend/src/data/add-ons.json ./frontend/src/data/
 COPY backend/app/catalog.json backend/app/add-ons.json ./backend/app/
 COPY frontend/public ./frontend/public
+# Structural catalogue checks only; the text and duplicate heuristics (--ci) run in the
+# Quality gate, so a judgement call never blocks a deploy build.
 RUN python scripts/check_catalog_sync.py && touch /catalog-check-passed
 
 FROM python:3.12.15-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d
