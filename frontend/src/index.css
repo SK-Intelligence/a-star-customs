@@ -638,6 +638,7 @@ h3 {
 }
 
 .footer-nav > a,
+.footer-nav > button,
 .footer-contact > a,
 .footer-contact > p {
   width: fit-content;
@@ -647,7 +648,18 @@ h3 {
   transition: color 180ms ease;
 }
 
+.footer-nav > button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.87rem;
+  text-align: left;
+}
+
 .footer-nav > a:hover,
+.footer-nav > button:hover,
 .footer-contact > a:hover {
   color: var(--purple-bright);
 }
@@ -658,7 +670,8 @@ h3 {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding-block: 1.25rem;
+  /* Bottom clearance keeps the copyright line clear of the fixed WhatsApp bubble. */
+  padding-block: 1.25rem calc(4.75rem + env(safe-area-inset-bottom));
   border-top: 1px solid var(--line);
   color: #7d7882;
   font-size: 0.69rem;
@@ -3497,20 +3510,6 @@ h3 {
   accent-color: var(--purple);
 }
 
-/* Cookie preferences stay reachable from the footer's always-present link, not a floating
-   button: a floating control sat over prices, totals and primary buttons on phones. */
-.footer-cookie-button {
-  min-height: 2.75rem;
-  padding: 0 0.1rem;
-  border: 0;
-  border-bottom: 1px solid var(--purple);
-  background: transparent;
-  color: #fff;
-  cursor: pointer;
-  font: inherit;
-  letter-spacing: inherit;
-}
-
 /* Floating WhatsApp */
 .whatsapp-button {
   position: fixed;
@@ -4173,6 +4172,7 @@ h3 {
   /* Compact phone banner: roughly a fifth of the screen instead of two fifths. Accept all and
      Essentials only sit side by side at identical size; every control is >= 44px tall. */
   .cookie-banner {
+    width: 100%;
     gap: 0.7rem;
     padding: 0.85rem 0.9rem 0.6rem;
   }
@@ -4220,6 +4220,12 @@ h3 {
     display: none;
   }
 
+  .whatsapp-button.is-behind-banner {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
   .whatsapp-button {
     width: 3.25rem;
     justify-content: center;
@@ -4252,6 +4258,7 @@ h3 {
 @media (pointer: coarse) {
   .back-link,
   .footer-nav > a,
+  .footer-nav > button,
   .footer-contact > a,
   .catalog-categories button,
   .checkout-items article > div > div > button {
@@ -4259,6 +4266,7 @@ h3 {
   }
 
   .footer-nav > a,
+  .footer-nav > button,
   .footer-contact > a,
   .checkout-items article > div > div > button {
     display: inline-flex;
@@ -4310,5 +4318,63 @@ h3 {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Short landscape phone: the banner would take most of the height as a single column, so it
+   spreads into two columns (text left, actions right), about 150px tall. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .cookie-banner-wrap {
+    right: max(0.5rem, env(safe-area-inset-right));
+    bottom: max(0.5rem, env(safe-area-inset-bottom));
+    left: max(0.5rem, env(safe-area-inset-left));
+    max-height: calc(100dvh - 1rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+
+  .cookie-banner {
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem);
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    width: 100%;
+    padding: 0.7rem 1rem;
+  }
+
+  .cookie-banner h2 {
+    font-size: 1.3rem;
+  }
+
+  .cookie-banner p:not(.eyebrow) {
+    max-width: none;
+    margin-top: 0.25rem;
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+
+  .cookie-banner .cookie-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+  }
+
+  .cookie-banner .cookie-actions .button {
+    min-height: 2.75rem;
+    padding: 0.4rem;
+    font-size: 0.72rem;
+  }
+
+  .cookie-banner .cookie-actions .text-button {
+    grid-column: 1 / -1;
+    justify-content: center;
+    min-height: 2.75rem;
+    border-bottom: 0;
+    text-decoration: underline;
+    text-decoration-color: var(--purple);
+    text-underline-offset: 0.3em;
+  }
+
+  .whatsapp-button.is-behind-banner {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
   }
 }
