@@ -1,0 +1,6 @@
+# Python tools the Quality gate's security job runs (not part of the app). Installed with
+# `pip install --require-hashes -r .github/ci-tools.txt`. After editing:
+#   pip-compile --generate-hashes --allow-unsafe --strip-extras \
+#     .github/ci-tools.in -o .github/ci-tools.txt
+pip-audit==2.10.1
+semgrep==1.178.0

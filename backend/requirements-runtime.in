@@ -1,0 +1,10 @@
+# Direct runtime dependencies of the FastAPI backend. The installed tree is locked with hashes in
+# requirements-runtime.txt (backend/Dockerfile installs it with --require-hashes). After editing:
+#   (cd backend && pip-compile --generate-hashes --allow-unsafe --strip-extras \
+#     requirements-runtime.in -o requirements-runtime.txt)
+fastapi==0.142.2
+starlette==1.7.0
+uvicorn[standard]==0.34.0
+pydantic-settings==2.7.1
+httpx==0.28.1
+stripe==12.5.1

@@ -16,8 +16,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# The fully locked runtime tree (backend/requirements-runtime.in -> .txt with hashes).
 COPY backend/requirements-runtime.txt ./requirements-runtime.txt
-RUN pip install --no-cache-dir -r requirements-runtime.txt \
+RUN pip install --no-cache-dir --require-hashes -r requirements-runtime.txt \
     && useradd --uid 10001 --create-home --shell /usr/sbin/nologin appuser
 
 COPY --chown=appuser:appuser backend/app ./app

@@ -41,7 +41,7 @@ jobs:
       - run: npm --workspace frontend run lint
       - run: npm run typecheck
       # Ruff (ruff.toml) on the backend and scripts; the version is pinned in backend/requirements.txt.
-      - run: pip install -r backend/requirements.txt
+      - run: pip install --require-hashes -r backend/requirements.txt
       - run: ruff check backend scripts
       - run: ruff format --check backend scripts
       # Stripe/Web3Forms secrets or Hostinger URLs in the storefront source.
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with: { python-version: "${{ env.PYTHON_VERSION }}", cache: pip, cache-dependency-path: backend/requirements.txt }
-      - run: pip install -r backend/requirements.txt
+      - run: pip install --require-hashes -r backend/requirements.txt
       # Fails below fail_under in backend/.coveragerc (the measured baseline, rounded down).
       - run: pytest -q --cov --cov-report=term --cov-report=xml
         working-directory: backend
@@ -95,7 +95,7 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with: { python-version: "${{ env.PYTHON_VERSION }}", cache: pip, cache-dependency-path: backend/requirements.txt }
       - run: npm ci
-      - run: pip install -r backend/requirements-runtime.txt
+      - run: pip install --require-hashes -r backend/requirements-runtime.txt
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with: { name: frontend-dist, path: frontend/dist }
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
@@ -127,7 +127,7 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with: { python-version: "${{ env.PYTHON_VERSION }}", cache: pip, cache-dependency-path: backend/requirements.txt }
       - run: npm ci
-      - run: pip install -r backend/requirements-runtime.txt
+      - run: pip install --require-hashes -r backend/requirements-runtime.txt
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with: { name: frontend-dist, path: frontend/dist }
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
@@ -162,7 +162,7 @@ jobs:
         with: { python-version: "${{ env.PYTHON_VERSION }}", cache: pip, cache-dependency-path: backend/requirements.txt }
       - run: npm ci
         working-directory: .
-      - run: pip install -r backend/requirements-runtime.txt
+      - run: pip install --require-hashes -r backend/requirements-runtime.txt
         working-directory: .
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with: { name: frontend-dist, path: frontend/dist }
@@ -216,11 +216,14 @@ jobs:
           node scripts/check-audit.mjs "$RUNNER_TEMP/audit.json"
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with: { python-version: "${{ env.PYTHON_VERSION }}" }
-      # The backend's runtime and test requirements (any known vulnerability fails).
+      # The Python tools below, from a hashed lock.
+      - run: pip install --quiet --require-hashes -r .github/ci-tools.txt
+      # Exactly the locked trees: the runtime image (requirements-runtime.txt) and the test/lint
+      # set (requirements.txt). Any known vulnerability fails.
       - name: pip-audit
         run: |
-          pip install --quiet pip-audit==2.10.1
-          pip-audit --progress-spinner off -r backend/requirements.txt
+          pip-audit --progress-spinner off --require-hashes --disable-pip \
+            -r backend/requirements-runtime.txt -r backend/requirements.txt
       # The gitleaks binary (MIT) rather than gitleaks-action, which needs a paid licence for
       # organisation repositories. Scans the whole history with the repo's .gitleaks.toml.
       - name: gitleaks
@@ -232,7 +235,6 @@ jobs:
           "$RUNNER_TEMP/gitleaks" git --redact --no-banner --config .gitleaks.toml --exit-code 1 .
       - name: Semgrep OSS (fails on ERROR findings)
         run: |
-          pip install --quiet semgrep==1.178.0
           semgrep scan --config p/typescript --config p/react --config p/python --config p/owasp-top-ten \
             --severity ERROR --error --metrics off --exclude "*.spec.ts" --exclude "tests" \
             frontend/src backend/app scripts

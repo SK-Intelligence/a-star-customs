@@ -18,7 +18,7 @@ Requirements: Node.js 20+, npm, Python 3.12+.
 npm install
 
 python3 -m venv backend/.venv
-backend/.venv/bin/pip install -r backend/requirements.txt
+backend/.venv/bin/pip install --require-hashes -r backend/requirements.txt
 
 cp .env.example backend/.env
 ```
