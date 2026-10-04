@@ -186,35 +186,44 @@ function normalizedFitmentValues(values: readonly string[]): Set<string> {
   return new Set(values.map((value) => value.trim().toLocaleLowerCase("en-GB")));
 }
 
-/** Avoids presenting a vehicle-specific product as compatible with another make or model. */
+function isSubset(values: ReadonlySet<string>, superset: ReadonlySet<string>): boolean {
+  return [...values].every((value) => superset.has(value));
+}
+
+/**
+ * True when `candidate` is known to fit every vehicle `source` is sold for.
+ *
+ * A universal candidate, or a confirm-first candidate that names no make, is allowed
+ * everywhere. Otherwise the candidate must cover every make and every model of the
+ * source and, when it lists chassis codes, every chassis code of the source. A
+ * make-only candidate is too vague for a model-specific page, and a single shared
+ * model is not enough: a CLA/GLA overlap does not make an A-Class kit fit a C-Class.
+ */
 export function productFitmentsAreCompatible(source: Product, candidate: Product): boolean {
   if (candidate.fitment.mode === "universal") return true;
 
-  const sourceMakes = normalizedFitmentValues(source.fitment.makes);
   const candidateMakes = normalizedFitmentValues(candidate.fitment.makes);
-
-  // A generic service that requires workshop confirmation is safe to discover.
   if (candidateMakes.size === 0 && candidate.fitment.mode === "confirm") return true;
 
   // When the current product does not identify a vehicle, do not infer one for the customer.
-  if (sourceMakes.size === 0) return false;
-  if (![...candidateMakes].some((make) => sourceMakes.has(make))) return false;
+  const sourceMakes = normalizedFitmentValues(source.fitment.makes);
+  if (sourceMakes.size === 0 || !isSubset(sourceMakes, candidateMakes)) return false;
 
   const sourceModels = normalizedFitmentValues(source.fitment.models);
   const candidateModels = normalizedFitmentValues(candidate.fitment.models);
-  if (
-    source.fitment.mode === "specific" &&
-    candidate.fitment.mode === "specific" &&
-    sourceModels.size > 0 &&
-    candidateModels.size > 0
-  ) {
-    return [...candidateModels].some((model) => sourceModels.has(model));
-  }
+  if (candidateModels.size === 0) return sourceModels.size === 0;
+  if (sourceModels.size === 0 || !isSubset(sourceModels, candidateModels)) return false;
 
-  return true;
+  const candidateChassis = normalizedFitmentValues(candidate.fitment.chassisCodes);
+  if (candidateChassis.size === 0) return true;
+  const sourceChassis = normalizedFitmentValues(source.fitment.chassisCodes);
+  return sourceChassis.size > 0 && isSubset(sourceChassis, candidateChassis);
 }
 
-/** Standalone offers for the inline discovery area; never used as fitment claims. */
+/**
+ * Standalone offers for the inline discovery area. Every offer passes
+ * `productFitmentsAreCompatible`, so it must fit every vehicle the page is sold for.
+ */
 export function getDiscoveryProducts(product: Product): readonly Product[] {
   if (product.kind !== "main") return [];
 
