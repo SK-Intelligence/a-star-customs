@@ -177,7 +177,8 @@ jobs:
       # / and 0.76 on the product page, 2026-10-04), not 0.8: the full-size hero and product
       # photos put LCP at 5-9 s on a throttled phone. Raise it to 0.8 once the images are
       # responsive (srcset/WebP). Uses the runner's preinstalled Chrome.
-      - run: npx -y @lhci/cli@0.15.1 autorun
+      # @lhci/cli 0.15.1 from the lockfile (root devDependencies).
+      - run: npx lhci autorun
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with: { name: lighthouse, path: frontend/.lighthouseci, retention-days: 14, include-hidden-files: true }
@@ -214,9 +215,16 @@ jobs:
         with: { node-version: "${{ env.NODE_VERSION }}" }
       # Every dependency, dev included: the build and test tools run in CI and in the Railway build.
       # AUDIT_ALLOW lists advisories with no patched release that cannot be exploited here. Each
-      # entry says why; remove it as soon as a fix ships. None today.
+      # entry says why; remove it as soon as a fix ships. All three are in @lhci/cli's tree, which
+      # only runs in the Lighthouse job against this repository's own localhost build:
+      #   GHSA-c475-qrg2-pj4r (2026-10-04): basic-ftp <=6.2.0 directory-listing ReDoS, via
+      #   proxy-agent -> get-uri. Only reached for an ftp:// PAC URL; lhci never configures a proxy.
+      #   GHSA-jmr9-qjv8-65gv, GHSA-7pqw-9j4j-h8q3 (2026-10-04): extract-zip <=2.0.1 symlink path
+      #   traversal, no fix, via lighthouse -> puppeteer-core -> @puppeteer/browsers. Only used to
+      #   unpack a downloaded browser; lhci uses the runner's installed Chrome and downloads none.
+      # tmp is overridden to 0.2.7 in package.json (GHSA-ph9p-34f9-6g65).
       - name: npm audit (high and critical)
-        env: { AUDIT_ALLOW: "" }
+        env: { AUDIT_ALLOW: "GHSA-c475-qrg2-pj4r GHSA-jmr9-qjv8-65gv GHSA-7pqw-9j4j-h8q3" }
         run: |
           npm audit --json > "$RUNNER_TEMP/audit.json" || true
           node scripts/check-audit.mjs "$RUNNER_TEMP/audit.json"

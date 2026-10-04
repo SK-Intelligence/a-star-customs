@@ -21,5 +21,11 @@
     "setup:hooks": "git config core.hooksPath .githooks && echo \"Git hooks enabled: pushing main now runs npm run ci:fast first.\"",
     "verify": "npm run build && npm run check:catalog && npm run test:backend",
     "verify:full": "npm run verify && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@lhci/cli": "0.15.1"
+  },
+  "overrides": {
+    "tmp": "0.2.7"
   }
 }
