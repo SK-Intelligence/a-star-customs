@@ -2729,6 +2729,32 @@ h3 {
   color: var(--muted);
 }
 
+.cart-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin: 1rem 1.5rem 0;
+  padding: 0.85rem;
+  border: 1px solid rgb(163 66 255 / 30%);
+  background: rgb(163 66 255 / 7%);
+  font-size: 0.8rem;
+}
+
+.cart-notice p {
+  flex: 1 1 16rem;
+  margin: 0;
+}
+
+.cart-notice .text-button {
+  min-height: 44px;
+}
+
+.checkout-page .cart-notice {
+  margin: 0 0 1.5rem;
+}
+
 .cart-lines {
   display: grid;
   gap: 1rem;

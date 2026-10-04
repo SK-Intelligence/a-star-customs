@@ -11,7 +11,12 @@ import stripe
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.addons import AddOnConfigurationError, AddOnOption, load_add_ons
+from app.addons import (
+    AddOnConfigurationError,
+    AddOnOption,
+    add_ons_for_product,
+    load_add_ons,
+)
 from app.catalog import CatalogConfigurationError, CatalogProduct, load_catalog
 from app.config import Settings, get_settings
 from app.models import (
@@ -195,14 +200,25 @@ def _validate_builds(
         ]
         if len(set(add_on_ids)) != len(add_on_ids):
             _raise_build_invalid()
+        applicable_add_on_ids = {
+            option.id
+            for option in add_ons_for_product(
+                add_ons, base_product.id, base_product.family
+            )
+        }
+        exclusive_groups: set[str] = set()
         for add_on_line in add_on_lines:
             option = active_add_ons.get((add_on_line.productId, add_on_line.variantId))
             if (
                 option is None
-                or base_product.family not in option.appliesToFamilies
+                or option.id not in applicable_add_on_ids
                 or add_on_line.quantity != base.quantity
             ):
                 _raise_build_invalid()
+            if option.exclusiveGroup is not None:
+                if option.exclusiveGroup in exclusive_groups:
+                    _raise_build_invalid()
+                exclusive_groups.add(option.exclusiveGroup)
 
 
 @app.post("/api/checkout/session", response_model=CheckoutResponse)

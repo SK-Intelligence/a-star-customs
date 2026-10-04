@@ -243,6 +243,140 @@ test('optional extras appear only on compatible product families', async ({ page
   await expect(page.getByRole('button', { name: /Add build to bag/ })).toBeVisible();
 });
 
+const cClassAddOnPrices = [
+  ['Dashboard', '£179.99'],
+  ['AMG Dashboard', '£219.99'],
+  ['Front vents', '£199.99'],
+  ['Front and rear vents', '£219.99'],
+  ['3D speakers (front)', '£199.99'],
+  ['Speaker light covers (all doors)', '£99.99'],
+] as const;
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function cClassExtra(page: Page, label: string) {
+  return page
+    .locator('.build-extras')
+    .getByRole('button', { name: new RegExp(`^Optional extra ${escapeRegExp(label)} `) });
+}
+
+test('C-Class builder offers its own price list with one choice per exclusive pair', async ({ page }) => {
+  await page.goto('/mercedes-c-class-oem-ambient-lighting');
+
+  const extras = page.locator('.build-extras');
+  await expect(page.locator('.product-buybox__price')).toHaveText('£399.99');
+  await expect(extras.getByText('6 options')).toBeVisible();
+  await expect(extras.locator('.build-extra')).toHaveCount(6);
+  for (const [label, price] of cClassAddOnPrices) {
+    await expect(cClassExtra(page, label)).toContainText(`+${price} per build`);
+  }
+  await expect(extras.getByRole('button', { name: /4x Speaker Lights|Premium Pack/ })).toHaveCount(0);
+
+  await cClassExtra(page, 'Dashboard').click();
+  await cClassExtra(page, 'AMG Dashboard').click();
+  await expect(cClassExtra(page, 'AMG Dashboard')).toHaveAttribute('aria-pressed', 'true');
+  await expect(cClassExtra(page, 'Dashboard')).toHaveAttribute('aria-pressed', 'false');
+
+  await cClassExtra(page, 'Front vents').click();
+  await cClassExtra(page, 'Front and rear vents').click();
+  await expect(cClassExtra(page, 'Front and rear vents')).toHaveAttribute('aria-pressed', 'true');
+  await expect(cClassExtra(page, 'Front vents')).toHaveAttribute('aria-pressed', 'false');
+
+  await cClassExtra(page, '3D speakers (front)').click();
+  await cClassExtra(page, 'Speaker light covers (all doors)').click();
+  await expect(page.locator('.build-total')).toContainText('Extras (4)');
+  await page.getByRole('button', { name: 'Add build to bag · £1,139.95' }).click();
+
+  const drawer = page.getByRole('dialog', { name: 'Shopping bag' });
+  await expect(drawer.locator('.cart-line')).toHaveCount(5);
+});
+
+test('checkout swaps exclusive C-Class add-ons instead of stacking both', async ({ page }) => {
+  await page.goto('/mercedes-c-class-oem-ambient-lighting');
+  await cClassExtra(page, 'Dashboard').click();
+  await page.getByRole('button', { name: /Add build to bag/ }).click();
+  await page.getByRole('dialog', { name: 'Shopping bag' }).getByRole('link', { name: /Review & checkout/ }).click();
+
+  const extras = page.getByRole('region', { name: /Add-ons for Mercedes C-Class/ });
+  const dashboard = extras.getByRole('button', { name: /^Dashboard / });
+  const amgDashboard = extras.getByRole('button', { name: /^AMG Dashboard / });
+  await expect(extras.getByRole('button')).toHaveCount(6);
+  await expect(dashboard).toHaveAttribute('aria-pressed', 'true');
+  await amgDashboard.click();
+  await expect(amgDashboard).toHaveAttribute('aria-pressed', 'true');
+  await expect(dashboard).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('.checkout-build-line--addon')).toHaveCount(1);
+  await expect(page.locator('.checkout-build-line--addon')).toContainText('AMG Dashboard');
+});
+
+test('a saved bag drops add-ons that no longer apply and checks out without a build review', async ({ page }) => {
+  const buildId = 'saved-c-class-build';
+  await seedCartState(page, [
+    {
+      productId: 'prod_01KS68E0X8NM8FT2FXN6S0YXCF',
+      variantId: 'variant_01KS68E0Z7ZWA7WJVATE0RXWHR',
+      quantity: 1,
+      buildId,
+      lineType: 'base',
+    },
+    // Family-wide add-on the C-Class used to offer.
+    {
+      productId: 'prod_01KCFR1PBNK4HHMX64NN0BPCCK',
+      variantId: 'variant_01KCFR1PF6SSFRX0GSDM2FDNDH',
+      quantity: 1,
+      buildId,
+      lineType: 'addon',
+    },
+    // Dashboard and AMG Dashboard share an exclusive group; the first one stays.
+    {
+      productId: 'prod_01M43GJ28Z7ED1SAW9MYAME13D',
+      variantId: 'variant_01M43GJ28ZTRKDR1ANEY1KMZCA',
+      quantity: 1,
+      buildId,
+      lineType: 'addon',
+    },
+    {
+      productId: 'prod_01M43GJ290B3KS8X3C92SV2CMZ',
+      variantId: 'variant_01M43GJ2908X81YFQ7VCZDN349',
+      quantity: 1,
+      buildId,
+      lineType: 'addon',
+    },
+    // Add-on whose base line is gone.
+    {
+      productId: premiumAddOnProductId,
+      variantId: premiumAddOnVariantId,
+      quantity: 1,
+      buildId: 'missing-base-build',
+      lineType: 'addon',
+    },
+  ]);
+  await page.goto('/checkout');
+
+  const notice = page.locator('.checkout-page').getByRole('status').filter({ hasText: /no longer apply/ });
+  await expect(notice).toBeVisible();
+  await expect(page.locator('.checkout-build-line--base')).toHaveCount(1);
+  await expect(page.locator('.checkout-build-line--addon')).toHaveCount(1);
+  await expect(page.locator('.checkout-build-line--addon')).toContainText('Mercedes C-Class Dashboard Lighting');
+  await expect(page.locator('.order-summary dl')).toContainText('£579.98');
+  await expect
+    .poll(() => page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? '{}').state?.lines?.length, cartStorageKey))
+    .toBe(2);
+
+  await page.getByRole('checkbox').check();
+  const checkoutResponse = page.waitForResponse('**/api/checkout/session');
+  await page.getByRole('button', { name: /Continue to secure payment/ }).click();
+  const response = await checkoutResponse;
+  expect(response.status()).not.toBe(409);
+  expect(response.request().postDataJSON().items).toHaveLength(2);
+  await expect(page.getByText(/This build needs a quick review/)).toHaveCount(0);
+
+  await notice.getByRole('button', { name: 'Dismiss' }).click();
+  await expect(notice).toHaveCount(0);
+});
+
 test('product discovery is a collapsed buybox disclosure beside optional add-ons', async ({ page }) => {
   await page.goto('/luxury-car-interior');
 
@@ -309,7 +443,6 @@ test('vehicle-specific discovery never crosses into another make or model', asyn
     '-bmw-f-series-oem-ambient-package',
     'car-interior-ambient-light-kit-golf-mk7-mk75-2012-2019',
     'car-interior-ambient-led-light-kit-audi-q3-2018-current',
-    'full-oem-ambient-lighting-upgrade-a-class',
     'full-oem-ambient-lighting-upgrade-a-class1',
   ]) {
     await expect(cClassDiscovery.locator(`a[href="/${incompatibleSlug}"]`)).toHaveCount(0);

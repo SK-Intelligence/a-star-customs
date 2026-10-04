@@ -8,6 +8,8 @@ import stripe
 import pytest
 from fastapi.testclient import TestClient
 
+from app.addons import add_ons_for_product, load_add_ons
+from app.catalog import load_catalog
 from app.config import Settings, get_settings
 from app.main import app
 
@@ -514,3 +516,181 @@ def test_checkout_rejects_invalid_builds_with_stable_code(
             "message": "The configured product build is invalid.",
         }
     }
+
+
+C_CLASS_BASE = {
+    "productId": "prod_01KS68E0X8NM8FT2FXN6S0YXCF",
+    "variantId": "variant_01KS68E0Z7ZWA7WJVATE0RXWHR",
+}
+C_CLASS_ADD_ONS = {
+    "dashboard": {
+        "productId": "prod_01M43GJ28Z7ED1SAW9MYAME13D",
+        "variantId": "variant_01M43GJ28ZTRKDR1ANEY1KMZCA",
+    },
+    "amg-dashboard": {
+        "productId": "prod_01M43GJ290B3KS8X3C92SV2CMZ",
+        "variantId": "variant_01M43GJ2908X81YFQ7VCZDN349",
+    },
+    "front-vents": {
+        "productId": "prod_01M43GJ291T7WETX9HJ3W1FZ42",
+        "variantId": "variant_01M43GJ2917HQVCPS59DNYW367",
+    },
+    "front-and-rear-vents": {
+        "productId": "prod_01M43GJ2924FAM33VG1SY8JDQN",
+        "variantId": "variant_01M43GJ29244258NFEYNSQGNJ0",
+    },
+    "3d-speakers-front": {
+        "productId": "prod_01M43GJ293T2A5MH0FF973DHTB",
+        "variantId": "variant_01M43GJ293EN56PSRWEPNCRZVJ",
+    },
+    "speaker-light-covers": {
+        "productId": "prod_01M43GJ2948X0SX0WSST55MJ53",
+        "variantId": "variant_01M43GJ294MMHQS10QQPK7PJWP",
+    },
+}
+
+
+def build_items(
+    base: dict[str, str],
+    add_ons: list[dict[str, str]],
+    build_id: str = "c-class-build",
+) -> list[dict[str, object]]:
+    return [
+        {**base, "quantity": 1, "buildId": build_id, "lineType": "base"},
+        *(
+            {**add_on, "quantity": 1, "buildId": build_id, "lineType": "addon"}
+            for add_on in add_ons
+        ),
+    ]
+
+
+def test_c_class_offers_only_its_six_product_scoped_add_ons() -> None:
+    catalog = load_catalog()
+    base = catalog[C_CLASS_BASE["productId"]]
+    options = add_ons_for_product(load_add_ons(), base.id, base.family)
+
+    prices = {
+        option.label: next(
+            variant.price
+            for variant in catalog[option.productId].variants
+            if variant.id == option.variantId
+        )
+        for option in options
+    }
+    assert prices == {
+        "Dashboard": 17999,
+        "AMG Dashboard": 21999,
+        "Front vents": 19999,
+        "Front and rear vents": 21999,
+        "3D speakers (front)": 19999,
+        "Speaker light covers (all doors)": 9999,
+    }
+    assert base.variants[0].price == 39999
+
+
+def test_other_ambient_products_keep_family_add_ons() -> None:
+    catalog = load_catalog()
+    base = catalog[AMBIENT_BASE["productId"]]
+
+    options = add_ons_for_product(load_add_ons(), base.id, base.family)
+
+    assert [option.id for option in options] == ["speaker-lights", "premium-animation-pack"]
+
+
+def test_checkout_accepts_c_class_build_with_one_choice_per_exclusive_pair(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_create(**kwargs: object) -> SimpleNamespace:
+        captured.update(kwargs)
+        return SimpleNamespace(
+            id="cs_test_c_class_build",
+            url="https://checkout.stripe.com/c/pay/c-class-build",
+        )
+
+    monkeypatch.setattr("app.main.stripe.checkout.Session.create", fake_create)
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        stripe_secret_key="sk_test_placeholder",
+        stripe_payment_method_configuration_id="pmc_test_checkout",
+        stripe_webhook_secret="whsec_test_checkout",
+        orders_database_path=tmp_path / "orders.db",
+    )
+
+    response = client.post(
+        "/api/checkout/session",
+        json={
+            "items": build_items(
+                C_CLASS_BASE,
+                [
+                    C_CLASS_ADD_ONS["amg-dashboard"],
+                    C_CLASS_ADD_ONS["front-and-rear-vents"],
+                    C_CLASS_ADD_ONS["3d-speakers-front"],
+                    C_CLASS_ADD_ONS["speaker-light-covers"],
+                ],
+            )
+        },
+    )
+
+    assert response.status_code == 200
+    line_items = captured["line_items"]  # type: ignore[assignment]
+    assert [item["price_data"]["unit_amount"] for item in line_items] == [
+        39999,
+        21999,
+        21999,
+        19999,
+        9999,
+    ]
+
+
+@pytest.mark.parametrize(
+    "items",
+    [
+        build_items(
+            C_CLASS_BASE,
+            [C_CLASS_ADD_ONS["dashboard"], C_CLASS_ADD_ONS["amg-dashboard"]],
+        ),
+        build_items(
+            C_CLASS_BASE,
+            [C_CLASS_ADD_ONS["front-vents"], C_CLASS_ADD_ONS["front-and-rear-vents"]],
+        ),
+        build_items(C_CLASS_BASE, [SPEAKER_ADD_ON]),
+        build_items(C_CLASS_BASE, [PREMIUM_ADD_ON]),
+        build_items(AMBIENT_BASE, [C_CLASS_ADD_ONS["dashboard"]]),
+        build_items(AMBIENT_BASE, [C_CLASS_ADD_ONS["speaker-light-covers"]]),
+    ],
+    ids=[
+        "both-dashboards",
+        "both-vent-options",
+        "generic-speaker-lights-on-c-class",
+        "generic-animation-pack-on-c-class",
+        "c-class-dashboard-on-other-product",
+        "c-class-speaker-covers-on-other-product",
+    ],
+)
+def test_checkout_rejects_inapplicable_or_conflicting_c_class_add_ons(
+    items: list[dict[str, object]],
+) -> None:
+    response = client.post("/api/checkout/session", json={"items": items})
+
+    assert response.status_code == 409
+    assert response.json()["detail"]["code"] == "BUILD_INVALID"
+
+
+def test_checkout_rejects_deleted_duplicate_a_class_listing() -> None:
+    response = client.post(
+        "/api/checkout/session",
+        json={
+            "items": [
+                {
+                    "productId": "prod_01KD61YEY0HMGATXME9EGEFCX9",
+                    "variantId": "variant_01KR7SZY6F105B69EWSAM62GB8",
+                    "quantity": 1,
+                }
+            ]
+        },
+    )
+
+    assert response.status_code == 404
+    assert "prod_01KD61YEY0HMGATXME9EGEFCX9" not in load_catalog()

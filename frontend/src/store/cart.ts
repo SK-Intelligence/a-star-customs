@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import { products } from "../data/catalog";
+import { exclusiveSiblingDefinitions, getProductAddOnOptions, products } from "../data/catalog";
 
 const MIN_QUANTITY = 1;
 const MAX_QUANTITY = 10;
@@ -23,6 +23,9 @@ export interface CartState {
   lines: CartLine[];
   checkoutSnapshots: CheckoutSnapshot[];
   isOpen: boolean;
+  /** Set when add-ons that no longer apply to their build were dropped; not persisted. */
+  removedAddOnNotice: boolean;
+  dismissRemovedAddOnNotice: () => void;
   addItem: (productId: string, variantId: string, quantity?: number) => void;
   addItems: (lines: CartLine[]) => void;
   addBuildAddOn: (buildId: string, productId: string, variantId: string) => void;
@@ -117,8 +120,46 @@ function sanitiseLines(value: unknown): CartLine[] {
   return Array.from(lines.values());
 }
 
+/**
+ * Drops add-on lines whose build has no base, whose base no longer offers them, or
+ * that repeat an exclusive group already used in the same build (the first one wins).
+ */
+function enforceBuildRules(lines: CartLine[]): { lines: CartLine[]; removedAddOns: number } {
+  const basesByBuild = new Map(
+    lines.flatMap((line) =>
+      line.lineType === "base" && line.buildId ? [[line.buildId, line] as const] : [],
+    ),
+  );
+  const usedGroups = new Set<string>();
+  let removedAddOns = 0;
+  const kept = lines.filter((line) => {
+    if (line.lineType !== "addon" || !line.buildId) return true;
+    const base = basesByBuild.get(line.buildId);
+    const baseProduct = base
+      ? products.find((candidate) => candidate.id === base.productId)
+      : undefined;
+    const option = baseProduct
+      ? getProductAddOnOptions(baseProduct).find(
+          (candidate) =>
+            candidate.isAvailable &&
+            candidate.definition.productId === line.productId &&
+            candidate.definition.variantId === line.variantId,
+        )
+      : undefined;
+    const group = option?.definition.exclusiveGroup;
+    const groupKey = group == null ? null : `${line.buildId}:${group}`;
+    if (!option || (groupKey !== null && usedGroups.has(groupKey))) {
+      removedAddOns += 1;
+      return false;
+    }
+    if (groupKey !== null) usedGroups.add(groupKey);
+    return true;
+  });
+  return { lines: kept, removedAddOns };
+}
+
 function mergeLines(currentLines: CartLine[], additions: CartLine[]): CartLine[] {
-  return sanitiseLines([...currentLines, ...additions]);
+  return enforceBuildRules(sanitiseLines([...currentLines, ...additions])).lines;
 }
 
 function sanitiseCheckoutSnapshots(value: unknown): CheckoutSnapshot[] {
@@ -153,6 +194,8 @@ export const useCartStore = create<CartState>()(
       lines: [],
       checkoutSnapshots: [],
       isOpen: false,
+      removedAddOnNotice: false,
+      dismissRemovedAddOnNotice: () => set({ removedAddOnNotice: false }),
       addItem: (productId, variantId, quantity = 1) => {
         set((state) => ({
           lines: mergeLines(state.lines, [
@@ -184,20 +227,45 @@ export const useCartStore = create<CartState>()(
             return state;
           }
 
-          let insertionIndex = state.lines.length;
-          for (let index = state.lines.length - 1; index >= 0; index -= 1) {
-            if (state.lines[index]?.buildId === buildId) {
+          // Selecting one option of an exclusive group replaces the other in this build.
+          const baseProduct = products.find((candidate) => candidate.id === base.productId);
+          const options = baseProduct ? getProductAddOnOptions(baseProduct) : [];
+          const selected = options.find(
+            ({ definition }) =>
+              definition.productId === productId && definition.variantId === variantId,
+          );
+          const siblings = selected
+            ? exclusiveSiblingDefinitions(options, selected.definition)
+            : [];
+          const lines = state.lines.filter(
+            (line) =>
+              !(
+                line.buildId === buildId &&
+                line.lineType === "addon" &&
+                siblings.some(
+                  (sibling) =>
+                    sibling.productId === line.productId &&
+                    sibling.variantId === line.variantId,
+                )
+              ),
+          );
+
+          let insertionIndex = lines.length;
+          for (let index = lines.length - 1; index >= 0; index -= 1) {
+            if (lines[index]?.buildId === buildId) {
               insertionIndex = index + 1;
               break;
             }
           }
 
           return {
-            lines: sanitiseLines([
-              ...state.lines.slice(0, insertionIndex),
-              addOn,
-              ...state.lines.slice(insertionIndex),
-            ]),
+            lines: enforceBuildRules(
+              sanitiseLines([
+                ...lines.slice(0, insertionIndex),
+                addOn,
+                ...lines.slice(insertionIndex),
+              ]),
+            ).lines,
           };
         }),
       updateQuantity: (target, quantity) =>
@@ -274,14 +342,23 @@ export const useCartStore = create<CartState>()(
         lines: state.lines,
         checkoutSnapshots: state.checkoutSnapshots,
       }),
+      onRehydrateStorage: () => (state) => {
+        // Hydration does not write back to storage on its own. Any set() through the
+        // store persists, so the cleaned bag is saved and the notice shows only once.
+        if (state?.removedAddOnNotice) state.closeCart();
+      },
       merge: (persistedState, currentState) => {
         const persisted = persistedState as {
           lines?: unknown;
           checkoutSnapshots?: unknown;
         } | undefined;
+        const { lines, removedAddOns } = enforceBuildRules(
+          sanitiseLines(persisted?.lines),
+        );
         return {
           ...currentState,
-          lines: sanitiseLines(persisted?.lines),
+          lines,
+          removedAddOnNotice: removedAddOns > 0,
           checkoutSnapshots: sanitiseCheckoutSnapshots(
             persisted?.checkoutSnapshots,
           ),

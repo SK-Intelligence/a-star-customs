@@ -43,5 +43,69 @@
     "appliesToFamilies": ["starlights"],
     "productId": null,
     "variantId": null
+  },
+  {
+    "id": "c-class-dashboard",
+    "status": "active",
+    "label": "Dashboard",
+    "description": "Ambient lighting across the dashboard trim. Choose either Dashboard or AMG Dashboard, not both.",
+    "appliesToFamilies": ["ambient-lighting"],
+    "appliesToProducts": ["prod_01KS68E0X8NM8FT2FXN6S0YXCF"],
+    "exclusiveGroup": "c-class-dashboard",
+    "productId": "prod_01M43GJ28Z7ED1SAW9MYAME13D",
+    "variantId": "variant_01M43GJ28ZTRKDR1ANEY1KMZCA"
+  },
+  {
+    "id": "c-class-amg-dashboard",
+    "status": "active",
+    "label": "AMG Dashboard",
+    "description": "Ambient lighting for the AMG dashboard trim. Choose either Dashboard or AMG Dashboard, not both.",
+    "appliesToFamilies": ["ambient-lighting"],
+    "appliesToProducts": ["prod_01KS68E0X8NM8FT2FXN6S0YXCF"],
+    "exclusiveGroup": "c-class-dashboard",
+    "productId": "prod_01M43GJ290B3KS8X3C92SV2CMZ",
+    "variantId": "variant_01M43GJ2908X81YFQ7VCZDN349"
+  },
+  {
+    "id": "c-class-front-vents",
+    "status": "active",
+    "label": "Front vents",
+    "description": "Illuminated front air vents. Choose either Front vents or Front and rear vents, not both.",
+    "appliesToFamilies": ["ambient-lighting"],
+    "appliesToProducts": ["prod_01KS68E0X8NM8FT2FXN6S0YXCF"],
+    "exclusiveGroup": "c-class-vents",
+    "productId": "prod_01M43GJ291T7WETX9HJ3W1FZ42",
+    "variantId": "variant_01M43GJ2917HQVCPS59DNYW367"
+  },
+  {
+    "id": "c-class-front-and-rear-vents",
+    "status": "active",
+    "label": "Front and rear vents",
+    "description": "Illuminated front and rear air vents. Choose either Front vents or Front and rear vents, not both.",
+    "appliesToFamilies": ["ambient-lighting"],
+    "appliesToProducts": ["prod_01KS68E0X8NM8FT2FXN6S0YXCF"],
+    "exclusiveGroup": "c-class-vents",
+    "productId": "prod_01M43GJ2924FAM33VG1SY8JDQN",
+    "variantId": "variant_01M43GJ29244258NFEYNSQGNJ0"
+  },
+  {
+    "id": "c-class-3d-speakers-front",
+    "status": "active",
+    "label": "3D speakers (front)",
+    "description": "Illuminated 3D speakers for the front doors.",
+    "appliesToFamilies": ["ambient-lighting"],
+    "appliesToProducts": ["prod_01KS68E0X8NM8FT2FXN6S0YXCF"],
+    "productId": "prod_01M43GJ293T2A5MH0FF973DHTB",
+    "variantId": "variant_01M43GJ293EN56PSRWEPNCRZVJ"
+  },
+  {
+    "id": "c-class-speaker-light-covers",
+    "status": "active",
+    "label": "Speaker light covers (all doors)",
+    "description": "Illuminated speaker light covers for all doors.",
+    "appliesToFamilies": ["ambient-lighting"],
+    "appliesToProducts": ["prod_01KS68E0X8NM8FT2FXN6S0YXCF"],
+    "productId": "prod_01M43GJ2948X0SX0WSST55MJ53",
+    "variantId": "variant_01M43GJ294MMHQS10QQPK7PJWP"
   }
 ]

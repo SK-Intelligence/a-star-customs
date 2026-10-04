@@ -2,6 +2,7 @@ import { ArrowLeft, ArrowRight, Check, CreditCard, LockKeyhole, Plus, ShieldChec
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { QuantityControl } from '../components/QuantityControl';
+import { RemovedAddOnNotice } from '../components/RemovedAddOnNotice';
 import { Seo } from '../components/Seo';
 import { formatPrice, getProductAddOnOptions, products } from '../data/catalog';
 import { cartSubtotal, useCartStore } from '../store/cart';
@@ -101,6 +102,8 @@ export function CheckoutPage() {
           </div>
           <span><LockKeyhole aria-hidden="true" /> Payment handled by Stripe</span>
         </div>
+
+        <RemovedAddOnNotice />
 
         <div className="checkout-layout">
           <div className="checkout-items">

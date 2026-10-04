@@ -603,68 +603,6 @@
     "mediaKey": "panoramic-lights"
   },
   {
-    "id": "prod_01KD61YEY0HMGATXME9EGEFCX9",
-    "slug": "full-oem-ambient-lighting-upgrade-a-class",
-    "title": "Mercedes A-Class OEM Ambient Lighting Upgrade (MUST CONTACT FIRST)",
-    "subtitle": null,
-    "ribbonText": "Custom Pricing",
-    "descriptionHtml": "<p>Transform your vehicle’s interior with our premium, factory-grade ambient lighting packages. We specialize in creating a fully integrated <strong>OEM look</strong> with a premium finish—no messy wires, just a seamless installation that looks exactly like it came from the factory.</p><p><strong> Proven Expertise:</strong> We have extensive experience and specific packages ready for:</p><ul><li><p><strong>Mercedes-Benz:</strong> C-Class, A-Class (w/ Turbo Vents &amp; 64-Colour options)</p></li><li><p><strong>BMW:</strong> F-Series (w/ iDrive Integration &amp; Two-Tone support)</p></li><li><p><strong>Other Models:</strong> Available upon request! Please message us with your vehicle details.</p></li></ul><p><strong> Typical Package Includes:</strong> Depending on your vehicle model, our full kits cover:</p><ul><li><p>All 4 Door Strips &amp; Handle Lighting</p></li><li><p>Dashboard Trim &amp; Driver’s Side Lighting</p></li><li><p>Front &amp; Rear Footwells</p></li><li><p>Centre Console &amp; Cupholder Illumination</p></li><li><p>Door Storage/Bin Lights</p></li><li><p>Air Vents (Turbine style for Mercedes)</p></li></ul><p><strong> Key Features:</strong></p><ul><li><p><strong>Full Integration:</strong> Controlled via your original car screen (iDrive/MBUX) or Smartphone App.</p></li><li><p><strong>Professional Finish:</strong> Full coding included for a seamless experience.</p></li><li><p><strong>Peace of Mind:</strong> Includes <strong>1 Year Warranty</strong> on parts and installation.</p></li></ul><p><strong> Optional Upgrades:</strong> Take it to the next level with these add-ons (message for a quote):</p><ul><li><p> 3D Rotating Tweeters / Door Speakers</p></li><li><p> Illuminated Door Handles</p></li><li><p>️ AMG Dashboard Display (for Mercedes)</p></li></ul><p></p><p><strong>️ PLEASE READ BEFORE BUYING:</strong> <strong>This listing price represents a [DEPOSIT / STARTING PRICE] for a standard kit.</strong> Every car is different. Please <strong>contact us</strong> with your Make, Model, and Year before purchasing so we can build the perfect package for you!</p><h3><strong>Do not order until you have reached out to us beforehand!</strong></h3><p></p>",
-    "images": [
-      "/images/products/mercedes-a-class-oem-ambient-lighting-upgrade-01.jpeg",
-      "/images/products/mercedes-a-class-oem-ambient-lighting-upgrade-02.jpeg",
-      "/images/products/mercedes-a-class-oem-ambient-lighting-upgrade-03.jpeg"
-    ],
-    "collectionIds": [
-      "pcol_01KCFZ6WQEQP9BYKY0ECR0HYT6",
-      "pcol_01KCFNY9B69TCCMR45GSH79Q2W",
-      "pcol_01KCS0PFCZJAJSGRAMVB3EPYE5"
-    ],
-    "collections": [
-      "OEM Ambient Lighting",
-      "Supplied & Fitted",
-      "Custom Fittings"
-    ],
-    "variants": [
-      {
-        "id": "variant_01KR7SZY6F105B69EWSAM62GB8",
-        "title": "Vents",
-        "price": 19999,
-        "available": true
-      },
-      {
-        "id": "variant_01KR7SZY6SC7MR51ED2JARX54D",
-        "title": "Dashboard",
-        "price": 17999,
-        "available": true
-      },
-      {
-        "id": "variant_01KR7SZY723SKZFMYMYQRCW2FH",
-        "title": "Speakers",
-        "price": 9999,
-        "available": true
-      }
-    ],
-    "purchasable": false,
-    "available": false,
-    "updatedAt": "2026-05-16T17:14:26.081Z",
-    "kind": "upgrade",
-    "family": "ambient-lighting",
-    "fitment": {
-      "mode": "specific",
-      "label": "Mercedes A-Class; contact the workshop to confirm model year and trim before ordering.",
-      "makes": [
-        "Mercedes-Benz"
-      ],
-      "models": [
-        "A-Class"
-      ],
-      "chassisCodes": []
-    },
-    "comparisonGroup": null,
-    "specTier": null,
-    "mediaKey": "mercedes-a-class-oem-ambient-lighting-upgrade"
-  },
-  {
     "id": "prod_01KSAV8ZKHRFPFV67JZ656HNP8",
     "slug": "car-interior-ambient-led-light-kit-audi-q3-2018-current",
     "title": "Car Interior Ambient LED Light Kit (Audi Q3 2018-current)",
@@ -1172,6 +1110,288 @@
     "comparisonGroup": null,
     "specTier": null,
     "mediaKey": "mercedes-c-class-w205-c205-oem-ambient-lighting"
+  },
+  {
+    "id": "prod_01M43GJ28Z7ED1SAW9MYAME13D",
+    "slug": "mercedes-c-class-w205-c205-oem-lighting-dashboard-add-on",
+    "title": "Mercedes C-Class Dashboard Lighting (Add-On)",
+    "subtitle": null,
+    "ribbonText": null,
+    "descriptionHtml": "<p>Dashboard lighting for the Mercedes C-Class W205/C205 OEM Ambient Lighting package, controlled through your infotainment screen with the same 64 colour options.</p><p><em>Note: This is an optional add-on for the Mercedes C-Class OEM Ambient Lighting package and can only be added from that package's builder.</em></p><p>Choose either Dashboard or AMG Dashboard, not both.</p><p>Includes a 1-Year Warranty.</p>",
+    "images": [
+      "/images/products/mercedes-c-class-w205-c205-oem-lighting-dashboard-add-on-01.jpeg"
+    ],
+    "collectionIds": [
+      "pcol_01KCFZ6WQEQP9BYKY0ECR0HYT6"
+    ],
+    "collections": [
+      "OEM Ambient Lighting"
+    ],
+    "variants": [
+      {
+        "id": "variant_01M43GJ28ZTRKDR1ANEY1KMZCA",
+        "title": "Dashboard",
+        "price": 17999,
+        "available": true
+      }
+    ],
+    "purchasable": true,
+    "available": true,
+    "updatedAt": "2026-10-04T13:09:55.000Z",
+    "kind": "addon",
+    "family": "ambient-lighting",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes C-Class W205 saloon or C205 coupé; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class"
+      ],
+      "chassisCodes": [
+        "W205",
+        "C205"
+      ]
+    },
+    "comparisonGroup": null,
+    "specTier": null,
+    "mediaKey": "mercedes-c-class-w205-c205-oem-lighting-dashboard-add-on"
+  },
+  {
+    "id": "prod_01M43GJ290B3KS8X3C92SV2CMZ",
+    "slug": "mercedes-c-class-w205-c205-oem-lighting-amg-dashboard-add-on",
+    "title": "Mercedes C-Class AMG Dashboard Lighting (Add-On)",
+    "subtitle": null,
+    "ribbonText": null,
+    "descriptionHtml": "<p>AMG Dashboard lighting for the Mercedes C-Class W205/C205 OEM Ambient Lighting package, controlled through your infotainment screen with the same 64 colour options.</p><p><em>Note: This is an optional add-on for the Mercedes C-Class OEM Ambient Lighting package and can only be added from that package's builder.</em></p><p>Choose either Dashboard or AMG Dashboard, not both.</p><p>Includes a 1-Year Warranty.</p>",
+    "images": [
+      "/images/products/mercedes-c-class-w205-c205-oem-lighting-amg-dashboard-add-on-01.jpg"
+    ],
+    "collectionIds": [
+      "pcol_01KCFZ6WQEQP9BYKY0ECR0HYT6"
+    ],
+    "collections": [
+      "OEM Ambient Lighting"
+    ],
+    "variants": [
+      {
+        "id": "variant_01M43GJ2908X81YFQ7VCZDN349",
+        "title": "AMG Dashboard",
+        "price": 21999,
+        "available": true
+      }
+    ],
+    "purchasable": true,
+    "available": true,
+    "updatedAt": "2026-10-04T13:09:55.000Z",
+    "kind": "addon",
+    "family": "ambient-lighting",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes C-Class W205 saloon or C205 coupé; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class"
+      ],
+      "chassisCodes": [
+        "W205",
+        "C205"
+      ]
+    },
+    "comparisonGroup": null,
+    "specTier": null,
+    "mediaKey": "mercedes-c-class-w205-c205-oem-lighting-amg-dashboard-add-on"
+  },
+  {
+    "id": "prod_01M43GJ291T7WETX9HJ3W1FZ42",
+    "slug": "mercedes-c-class-w205-c205-oem-lighting-front-vents-add-on",
+    "title": "Mercedes C-Class Front vents Lighting (Add-On)",
+    "subtitle": null,
+    "ribbonText": null,
+    "descriptionHtml": "<p>Front vents lighting for the Mercedes C-Class W205/C205 OEM Ambient Lighting package, controlled through your infotainment screen with the same 64 colour options.</p><p><em>Note: This is an optional add-on for the Mercedes C-Class OEM Ambient Lighting package and can only be added from that package's builder.</em></p><p>Choose either Front vents or Front and rear vents, not both.</p><p>Includes a 1-Year Warranty.</p>",
+    "images": [
+      "/images/products/mercedes-c-class-w205-c205-oem-lighting-front-vents-add-on-01.jpeg"
+    ],
+    "collectionIds": [
+      "pcol_01KCFZ6WQEQP9BYKY0ECR0HYT6"
+    ],
+    "collections": [
+      "OEM Ambient Lighting"
+    ],
+    "variants": [
+      {
+        "id": "variant_01M43GJ2917HQVCPS59DNYW367",
+        "title": "Front vents",
+        "price": 19999,
+        "available": true
+      }
+    ],
+    "purchasable": true,
+    "available": true,
+    "updatedAt": "2026-10-04T13:09:55.000Z",
+    "kind": "addon",
+    "family": "ambient-lighting",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes C-Class W205 saloon or C205 coupé; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class"
+      ],
+      "chassisCodes": [
+        "W205",
+        "C205"
+      ]
+    },
+    "comparisonGroup": null,
+    "specTier": null,
+    "mediaKey": "mercedes-c-class-w205-c205-oem-lighting-front-vents-add-on"
+  },
+  {
+    "id": "prod_01M43GJ2924FAM33VG1SY8JDQN",
+    "slug": "mercedes-c-class-w205-c205-oem-lighting-front-and-rear-vents-add-on",
+    "title": "Mercedes C-Class Front and rear vents Lighting (Add-On)",
+    "subtitle": null,
+    "ribbonText": null,
+    "descriptionHtml": "<p>Front and rear vents lighting for the Mercedes C-Class W205/C205 OEM Ambient Lighting package, controlled through your infotainment screen with the same 64 colour options.</p><p><em>Note: This is an optional add-on for the Mercedes C-Class OEM Ambient Lighting package and can only be added from that package's builder.</em></p><p>Choose either Front vents or Front and rear vents, not both.</p><p>Includes a 1-Year Warranty.</p>",
+    "images": [
+      "/images/products/mercedes-c-class-w205-c205-oem-lighting-front-and-rear-vents-add-on-01.jpg"
+    ],
+    "collectionIds": [
+      "pcol_01KCFZ6WQEQP9BYKY0ECR0HYT6"
+    ],
+    "collections": [
+      "OEM Ambient Lighting"
+    ],
+    "variants": [
+      {
+        "id": "variant_01M43GJ29244258NFEYNSQGNJ0",
+        "title": "Front and rear vents",
+        "price": 21999,
+        "available": true
+      }
+    ],
+    "purchasable": true,
+    "available": true,
+    "updatedAt": "2026-10-04T13:09:55.000Z",
+    "kind": "addon",
+    "family": "ambient-lighting",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes C-Class W205 saloon or C205 coupé; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class"
+      ],
+      "chassisCodes": [
+        "W205",
+        "C205"
+      ]
+    },
+    "comparisonGroup": null,
+    "specTier": null,
+    "mediaKey": "mercedes-c-class-w205-c205-oem-lighting-front-and-rear-vents-add-on"
+  },
+  {
+    "id": "prod_01M43GJ293T2A5MH0FF973DHTB",
+    "slug": "mercedes-c-class-w205-c205-oem-lighting-3d-speakers-front-add-on",
+    "title": "Mercedes C-Class 3D speakers (front) Lighting (Add-On)",
+    "subtitle": null,
+    "ribbonText": null,
+    "descriptionHtml": "<p>3D speakers (front) lighting for the Mercedes C-Class W205/C205 OEM Ambient Lighting package, controlled through your infotainment screen with the same 64 colour options.</p><p><em>Note: This is an optional add-on for the Mercedes C-Class OEM Ambient Lighting package and can only be added from that package's builder.</em></p><p>Includes a 1-Year Warranty.</p>",
+    "images": [
+      "/images/products/mercedes-c-class-w205-c205-oem-lighting-3d-speakers-front-add-on-01.jpeg"
+    ],
+    "collectionIds": [
+      "pcol_01KCFZ6WQEQP9BYKY0ECR0HYT6"
+    ],
+    "collections": [
+      "OEM Ambient Lighting"
+    ],
+    "variants": [
+      {
+        "id": "variant_01M43GJ293EN56PSRWEPNCRZVJ",
+        "title": "3D speakers (front)",
+        "price": 19999,
+        "available": true
+      }
+    ],
+    "purchasable": true,
+    "available": true,
+    "updatedAt": "2026-10-04T13:09:55.000Z",
+    "kind": "addon",
+    "family": "ambient-lighting",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes C-Class W205 saloon or C205 coupé; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class"
+      ],
+      "chassisCodes": [
+        "W205",
+        "C205"
+      ]
+    },
+    "comparisonGroup": null,
+    "specTier": null,
+    "mediaKey": "mercedes-c-class-w205-c205-oem-lighting-3d-speakers-front-add-on"
+  },
+  {
+    "id": "prod_01M43GJ2948X0SX0WSST55MJ53",
+    "slug": "mercedes-c-class-w205-c205-oem-lighting-speaker-light-covers-all-doors-add-on",
+    "title": "Mercedes C-Class Speaker light covers (all doors) Lighting (Add-On)",
+    "subtitle": null,
+    "ribbonText": null,
+    "descriptionHtml": "<p>Speaker light covers (all doors) lighting for the Mercedes C-Class W205/C205 OEM Ambient Lighting package, controlled through your infotainment screen with the same 64 colour options.</p><p><em>Note: This is an optional add-on for the Mercedes C-Class OEM Ambient Lighting package and can only be added from that package's builder.</em></p><p>Includes a 1-Year Warranty.</p>",
+    "images": [
+      "/images/products/mercedes-c-class-w205-c205-oem-lighting-speaker-light-covers-all-doors-add-on-01.jpg"
+    ],
+    "collectionIds": [
+      "pcol_01KCFZ6WQEQP9BYKY0ECR0HYT6"
+    ],
+    "collections": [
+      "OEM Ambient Lighting"
+    ],
+    "variants": [
+      {
+        "id": "variant_01M43GJ294MMHQS10QQPK7PJWP",
+        "title": "Speaker light covers (all doors)",
+        "price": 9999,
+        "available": true
+      }
+    ],
+    "purchasable": true,
+    "available": true,
+    "updatedAt": "2026-10-04T13:09:55.000Z",
+    "kind": "addon",
+    "family": "ambient-lighting",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes C-Class W205 saloon or C205 coupé; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class"
+      ],
+      "chassisCodes": [
+        "W205",
+        "C205"
+      ]
+    },
+    "comparisonGroup": null,
+    "specTier": null,
+    "mediaKey": "mercedes-c-class-w205-c205-oem-lighting-speaker-light-covers-all-doors-add-on"
   },
   {
     "id": "prod_01KRGY8J6KK956RF83F6VCCBKA",

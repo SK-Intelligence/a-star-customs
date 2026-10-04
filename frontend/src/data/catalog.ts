@@ -47,6 +47,14 @@ export interface AddOnDefinition {
   label: string;
   description: string;
   appliesToFamilies: ProductFamily[];
+  /**
+   * When set, only these base products offer the add-on, and they offer only their
+   * product-scoped add-ons. This holds even when every scoped add-on is disabled:
+   * such a product then offers no extras rather than falling back to the family list.
+   */
+  appliesToProducts?: string[] | null;
+  /** At most one add-on per exclusive group may be attached to a single build. */
+  exclusiveGroup?: string | null;
   productId: string | null;
   variantId: string | null;
 }
@@ -123,8 +131,17 @@ export function productMinimumPrice(product: Product): number {
 export function getProductAddOnOptions(product: Product): readonly ProductAddOnOption[] {
   if (product.kind !== "main") return [];
 
-  return addOnDefinitions
-    .filter((definition) => definition.appliesToFamilies.includes(product.family))
+  const matchingDefinitions = addOnDefinitions.filter(
+    (definition) =>
+      definition.appliesToFamilies.includes(product.family) &&
+      (definition.appliesToProducts == null ||
+        definition.appliesToProducts.includes(product.id)),
+  );
+  const productScopedDefinitions = matchingDefinitions.filter(
+    (definition) => definition.appliesToProducts != null,
+  );
+
+  return (productScopedDefinitions.length > 0 ? productScopedDefinitions : matchingDefinitions)
     .map((definition): ProductAddOnOption => {
       const addOnProduct = definition.productId
         ? products.find((candidate) => candidate.id === definition.productId) ?? null
@@ -149,6 +166,20 @@ export function getProductAddOnOptions(product: Product): readonly ProductAddOnO
         isAvailable: false,
       };
     });
+}
+
+/** Options that cannot share a build with `definition` because they belong to its exclusive group. */
+export function exclusiveSiblingDefinitions(
+  options: readonly ProductAddOnOption[],
+  definition: AddOnDefinition,
+): readonly AddOnDefinition[] {
+  if (definition.exclusiveGroup == null) return [];
+  return options
+    .map((option) => option.definition)
+    .filter(
+      (candidate) =>
+        candidate.id !== definition.id && candidate.exclusiveGroup === definition.exclusiveGroup,
+    );
 }
 
 function normalizedFitmentValues(values: readonly string[]): Set<string> {

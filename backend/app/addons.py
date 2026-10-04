@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from collections import Counter
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
@@ -29,11 +30,31 @@ class AddOnOption(BaseModel):
     label: str = Field(min_length=1)
     description: str = Field(min_length=1)
     appliesToFamilies: list[ProductFamily] = Field(min_length=1)
+    # When set, the add-on is offered only on these base products, and those
+    # products then offer only their product-scoped add-ons. Precedence holds even
+    # when every scoped add-on is disabled: the product then offers no extras
+    # instead of falling back to the family-wide list (the generic list was wrong
+    # for the C-Class, per the client).
+    appliesToProducts: list[str] | None = None
+    # At most one add-on per exclusive group may be attached to a single build.
+    exclusiveGroup: str | None = Field(default=None, pattern=r"^[a-z0-9][a-z0-9-]*$")
     productId: str | None
     variantId: str | None
 
     @model_validator(mode="after")
     def validate_availability(self) -> "AddOnOption":
+        for optional_field in ("appliesToProducts", "exclusiveGroup"):
+            if (
+                optional_field in self.model_fields_set
+                and getattr(self, optional_field) is None
+            ):
+                raise ValueError(f"{optional_field} must be omitted rather than null")
+        if self.appliesToProducts is not None and (
+            not self.appliesToProducts
+            or any(not product_id.strip() for product_id in self.appliesToProducts)
+            or len(set(self.appliesToProducts)) != len(self.appliesToProducts)
+        ):
+            raise ValueError("product-scoped add-ons require unique, non-blank product IDs")
         if self.status == "active" and (not self.productId or not self.variantId):
             raise ValueError("active add-ons require product and variant IDs")
         if self.status == "disabled" and (
@@ -41,6 +62,22 @@ class AddOnOption(BaseModel):
         ):
             raise ValueError("disabled add-ons cannot reference catalog IDs")
         return self
+
+
+def add_ons_for_product(
+    add_ons: list[AddOnOption],
+    product_id: str,
+    family: ProductFamily,
+) -> list[AddOnOption]:
+    """Product-scoped add-ons take precedence over family-wide add-ons."""
+    matching = [
+        option
+        for option in add_ons
+        if family in option.appliesToFamilies
+        and (option.appliesToProducts is None or product_id in option.appliesToProducts)
+    ]
+    product_scoped = [option for option in matching if option.appliesToProducts is not None]
+    return product_scoped or matching
 
 
 class AddOnConfigurationError(RuntimeError):
@@ -68,5 +105,12 @@ def load_add_ons() -> list[AddOnOption]:
     if len(set(catalog_ids)) != len(catalog_ids):
         raise AddOnConfigurationError(
             "The add-on configuration contains duplicate catalog entries."
+        )
+    group_sizes = Counter(
+        option.exclusiveGroup for option in add_ons if option.exclusiveGroup is not None
+    )
+    if any(size < 2 for size in group_sizes.values()):
+        raise AddOnConfigurationError(
+            "Every add-on exclusive group needs at least two members."
         )
     return add_ons

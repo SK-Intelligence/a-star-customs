@@ -4,6 +4,7 @@ import { formatPrice, products } from '../data/catalog';
 import { useDialogFocus } from '../hooks/useDialogFocus';
 import { cartSubtotal, useCartStore } from '../store/cart';
 import { QuantityControl } from './QuantityControl';
+import { RemovedAddOnNotice } from './RemovedAddOnNotice';
 
 export function CartDrawer() {
   const isOpen = useCartStore((state) => state.isOpen);
@@ -52,6 +53,8 @@ export function CartDrawer() {
             <X aria-hidden="true" />
           </button>
         </div>
+
+        <RemovedAddOnNotice />
 
         {resolvedLines.length === 0 ? (
           <div className="empty-cart">

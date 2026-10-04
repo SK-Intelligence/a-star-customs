@@ -5,7 +5,7 @@ import { ImageLightbox } from '../components/ImageLightbox';
 import { QuantityControl } from '../components/QuantityControl';
 import { ReviewPanel } from '../components/ReviewPanel';
 import { Seo } from '../components/Seo';
-import { formatPrice, getDiscoveryProducts, getProductAddOnOptions, getProductFamilyLabel, isAddOnProduct, productBySlug, type AvailableProductAddOnOption } from '../data/catalog';
+import { exclusiveSiblingDefinitions, formatPrice, getDiscoveryProducts, getProductAddOnOptions, getProductFamilyLabel, isAddOnProduct, productBySlug, type AddOnDefinition, type AvailableProductAddOnOption } from '../data/catalog';
 import { whatsappUrl } from '../data/site';
 import { useCartStore } from '../store/cart';
 import { NotFoundPage } from './NotFoundPage';
@@ -69,11 +69,14 @@ export function ProductPage() {
   );
   const buildTotal = (selectedVariant.price + addOnTotal) * quantity;
 
-  const toggleAddOn = (addOnId: string) => {
+  const toggleAddOn = (definition: AddOnDefinition) => {
+    const exclusiveIds = exclusiveSiblingDefinitions(addOnOptions, definition).map(
+      (sibling) => sibling.id,
+    );
     setSelectedAddOnIds((current) =>
-      current.includes(addOnId)
-        ? current.filter((id) => id !== addOnId)
-        : [...current, addOnId],
+      current.includes(definition.id)
+        ? current.filter((id) => id !== definition.id)
+        : [...current.filter((id) => !exclusiveIds.includes(id)), definition.id],
     );
   };
 
@@ -192,7 +195,7 @@ export function ProductPage() {
                               key={definition.id}
                               className={isSelected ? 'build-extra is-selected' : 'build-extra'}
                               aria-pressed={isSelected}
-                              onClick={() => toggleAddOn(definition.id)}
+                              onClick={() => toggleAddOn(definition)}
                             >
                               {addOn ? (
                                 <img

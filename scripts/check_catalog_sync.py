@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import hashlib
+import re
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +16,7 @@ FRONTEND_ADD_ONS = ROOT / "frontend" / "src" / "data" / "add-ons.json"
 BACKEND_ADD_ONS = ROOT / "backend" / "app" / "add-ons.json"
 PUBLIC_DIR = ROOT / "frontend" / "public"
 MEDIA_REVIEW = ROOT / "scripts" / "media-review.json"
+EXCLUSIVE_GROUP_PATTERN = re.compile(r"[a-z0-9][a-z0-9-]*")
 PRODUCT_KINDS = {"main", "addon", "upgrade"}
 PRODUCT_FAMILIES = {
     "ambient-lighting",
@@ -173,6 +175,7 @@ def main() -> None:
 
     add_on_ids: set[str] = set()
     active_add_on_variants: set[tuple[str, str]] = set()
+    exclusive_group_sizes: dict[str, int] = {}
     for add_on in frontend_add_ons:
         add_on_id = add_on.get("id")
         status = add_on.get("status")
@@ -190,6 +193,35 @@ def main() -> None:
             raise SystemExit(f"Catalog check failed: add-on {add_on_id} has no label.")
         if not isinstance(description, str) or not description.strip():
             raise SystemExit(f"Catalog check failed: add-on {add_on_id} has no description.")
+        applicable_families = add_on.get("appliesToFamilies")
+        if "appliesToProducts" in add_on:
+            applicable_products = add_on["appliesToProducts"]
+            if (
+                not isinstance(applicable_products, list)
+                or not applicable_products
+                or len(set(map(str, applicable_products))) != len(applicable_products)
+                or not isinstance(applicable_families, list)
+                or any(
+                    not isinstance(base_id, str)
+                    or products_by_id.get(base_id, {}).get("kind") != "main"
+                    or products_by_id[base_id].get("family") not in applicable_families
+                    for base_id in applicable_products
+                )
+            ):
+                raise SystemExit(
+                    f"Catalog check failed: add-on {add_on_id} targets invalid base products."
+                )
+        if "exclusiveGroup" in add_on:
+            exclusive_group = add_on["exclusiveGroup"]
+            if not isinstance(exclusive_group, str) or not EXCLUSIVE_GROUP_PATTERN.fullmatch(
+                exclusive_group
+            ):
+                raise SystemExit(
+                    f"Catalog check failed: add-on {add_on_id} has an invalid exclusive group."
+                )
+            exclusive_group_sizes[exclusive_group] = (
+                exclusive_group_sizes.get(exclusive_group, 0) + 1
+            )
         if status == "disabled":
             if product_id is not None or variant_id is not None:
                 raise SystemExit(
@@ -211,7 +243,6 @@ def main() -> None:
             for variant in add_on_product["variants"]
             if variant.get("id") == variant_id
         )
-        applicable_families = add_on.get("appliesToFamilies")
         if (
             add_on_product.get("kind") != "addon"
             or not isinstance(applicable_families, list)
@@ -232,6 +263,11 @@ def main() -> None:
                 f"Catalog check failed: duplicate active catalog item for add-on {add_on_id}."
             )
         active_add_on_variants.add(catalog_pair)
+
+    if any(size < 2 for size in exclusive_group_sizes.values()):
+        raise SystemExit(
+            "Catalog check failed: every add-on exclusive group needs at least two members."
+        )
 
     print(
         f"Catalog check passed: {len(frontend)} products, "

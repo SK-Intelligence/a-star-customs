@@ -296,36 +296,6 @@
     ]
   },
   {
-    "productId": "prod_01KD61YEY0HMGATXME9EGEFCX9",
-    "mediaKey": "mercedes-a-class-oem-ambient-lighting-upgrade",
-    "reviewBasis": "SK Webminds gallery: A-Class OEM lighting images",
-    "fitment": {
-      "mode": "specific",
-      "label": "Mercedes A-Class; contact the workshop to confirm model year and trim before ordering.",
-      "makes": [
-        "Mercedes-Benz"
-      ],
-      "models": [
-        "A-Class"
-      ],
-      "chassisCodes": []
-    },
-    "images": [
-      {
-        "path": "/images/products/mercedes-a-class-oem-ambient-lighting-upgrade-01.jpeg",
-        "sha256": "012b8ab631ccf1832be0622e5c0f1abd75bd80a15ead46185bb7b518d25ef7e8"
-      },
-      {
-        "path": "/images/products/mercedes-a-class-oem-ambient-lighting-upgrade-02.jpeg",
-        "sha256": "66af59d95b41dabbf33fea282db80c1526ee5911a7b7c3ca0580965dbdce66da"
-      },
-      {
-        "path": "/images/products/mercedes-a-class-oem-ambient-lighting-upgrade-03.jpeg",
-        "sha256": "27939e7610e3e6d02cd4279786d191b57f90c797d3bd5e451fbd1a06a72c7866"
-      }
-    ]
-  },
-  {
     "productId": "prod_01KSAV8ZKHRFPFV67JZ656HNP8",
     "mediaKey": "car-interior-ambient-led-light-kit-audi-q3-2018-current",
     "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
@@ -627,6 +597,156 @@
       {
         "path": "/images/products/mercedes-c-class-w205-c205-oem-ambient-lighting-04.jpeg",
         "sha256": "8de4882edc3bc3f61cae33ef99b7c6f5f605f18d31b7f5e0dbf904932bb297d7"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M43GJ28Z7ED1SAW9MYAME13D",
+    "mediaKey": "mercedes-c-class-w205-c205-oem-lighting-dashboard-add-on",
+    "reviewBasis": "Representative image reused from C-Class W205 OEM listing photo showing the lit dashboard trim; no dedicated add-on photo supplied yet",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes C-Class W205 saloon or C205 coupé; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class"
+      ],
+      "chassisCodes": [
+        "W205",
+        "C205"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/mercedes-c-class-w205-c205-oem-lighting-dashboard-add-on-01.jpeg",
+        "sha256": "6b9b77b3c859a02f9ffd3da75e3830919a923fd4b53d9a5f155ee1681449b96a"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M43GJ290B3KS8X3C92SV2CMZ",
+    "mediaKey": "mercedes-c-class-w205-c205-oem-lighting-amg-dashboard-add-on",
+    "reviewBasis": "Representative image reused from C-Class OEM lighting gallery photo showing the lit dashboard; no dedicated add-on photo supplied yet",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes C-Class W205 saloon or C205 coupé; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class"
+      ],
+      "chassisCodes": [
+        "W205",
+        "C205"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/mercedes-c-class-w205-c205-oem-lighting-amg-dashboard-add-on-01.jpg",
+        "sha256": "b8414d90217d54d5a8c2bbd5b991eb5a45c8377f9e0fbb1554d7ec172e97c494"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M43GJ291T7WETX9HJ3W1FZ42",
+    "mediaKey": "mercedes-c-class-w205-c205-oem-lighting-front-vents-add-on",
+    "reviewBasis": "Representative image reused from C-Class W205 OEM listing photo showing the illuminated front vents; no dedicated add-on photo supplied yet",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes C-Class W205 saloon or C205 coupé; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class"
+      ],
+      "chassisCodes": [
+        "W205",
+        "C205"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/mercedes-c-class-w205-c205-oem-lighting-front-vents-add-on-01.jpeg",
+        "sha256": "67f11cffc70e1c7804218acc4548d6898dcd87de4a2a144d7722eddb978c25d3"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M43GJ2924FAM33VG1SY8JDQN",
+    "mediaKey": "mercedes-c-class-w205-c205-oem-lighting-front-and-rear-vents-add-on",
+    "reviewBasis": "Representative image reused from C-Class OEM lighting gallery photo showing the illuminated front vents; no dedicated add-on photo supplied yet",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes C-Class W205 saloon or C205 coupé; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class"
+      ],
+      "chassisCodes": [
+        "W205",
+        "C205"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/mercedes-c-class-w205-c205-oem-lighting-front-and-rear-vents-add-on-01.jpg",
+        "sha256": "c87666dc8467c3f27e5ceb5e142bde9103fc48f985a8b9d9c8d9cdee8dcab127"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M43GJ293T2A5MH0FF973DHTB",
+    "mediaKey": "mercedes-c-class-w205-c205-oem-lighting-3d-speakers-front-add-on",
+    "reviewBasis": "Representative image reused from C-Class W205 OEM listing photo showing the lit front door speaker; no dedicated add-on photo supplied yet",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes C-Class W205 saloon or C205 coupé; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class"
+      ],
+      "chassisCodes": [
+        "W205",
+        "C205"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/mercedes-c-class-w205-c205-oem-lighting-3d-speakers-front-add-on-01.jpeg",
+        "sha256": "64d6447f1bb4c54b5d501c9e28b3501063ab0677fa0918980631de497ae1882e"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M43GJ2948X0SX0WSST55MJ53",
+    "mediaKey": "mercedes-c-class-w205-c205-oem-lighting-speaker-light-covers-all-doors-add-on",
+    "reviewBasis": "Representative image reused from A Star Customs speaker light add-on photo showing a lit door speaker cover; no dedicated add-on photo supplied yet",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes C-Class W205 saloon or C205 coupé; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class"
+      ],
+      "chassisCodes": [
+        "W205",
+        "C205"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/mercedes-c-class-w205-c205-oem-lighting-speaker-light-covers-all-doors-add-on-01.jpg",
+        "sha256": "ca84aba0c76cef1f2af34f38ca711fca4d6de5483da57de03ec485b2c7ea6a2a"
       }
     ]
   },
