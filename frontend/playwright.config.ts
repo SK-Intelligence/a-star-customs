@@ -5,6 +5,10 @@ import path from 'node:path';
 const repositoryRoot = path.resolve(import.meta.dirname, '..');
 const virtualenvPython = path.resolve(repositoryRoot, 'backend/.venv/bin/python');
 const backendPython = existsSync(virtualenvPython) ? virtualenvPython : 'python';
+// E2E_TARGET=prod serves the production build (`npm run build` first) with `vite preview`, as the
+// Quality gate does; /api then goes through the preview proxy, like nginx in production. The
+// default is the dev server.
+const production = process.env.E2E_TARGET === 'prod';
 
 export default defineConfig({
   testDir: './e2e',
@@ -30,8 +34,28 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'chromium',
+      name: 'desktop-chromium',
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      // A 390 x 844 phone. The accessibility spec sets both widths itself, so it runs once, on
+      // the desktop project.
+      name: 'mobile-chromium',
+      use: { ...devices['Pixel 7'], viewport: { width: 390, height: 844 } },
+      testIgnore: ['accessibility.spec.ts'],
+      // Desktop journeys: they click the desktop category chips and header links, or reach the
+      // bag drawer's buttons while a first visit's cookie banner covers the bottom of a phone
+      // screen. Their phone equivalents are the explicit 320-430px tests in storefront.spec.ts.
+      grepInvert: new RegExp(
+        [
+          'catalog category query filters the product count',
+          'optional extras update the build total and remain removable cart lines',
+          'checkout can add and remove a compatible add-on for one build',
+          'checkout inserts an add-on beside the selected build when identical builds are stacked',
+          'invalid build checkout keeps the cart and asks for review',
+          'route navigation moves focus to the new page heading',
+        ].join('|'),
+      ),
     },
   ],
   webServer: [
@@ -53,15 +77,14 @@ export default defineConfig({
       },
     },
     {
-      command: 'npm run dev -- --host 127.0.0.1 --port 4173 --strictPort',
+      command: `npm run ${production ? 'preview' : 'dev'} -- --host 127.0.0.1 --port 4173 --strictPort`,
       cwd: path.resolve(repositoryRoot, 'frontend'),
       url: 'http://127.0.0.1:4173',
       reuseExistingServer: false,
       timeout: 30_000,
-      env: {
-        ...process.env,
-        VITE_API_BASE_URL: 'http://127.0.0.1:8001',
-      },
+      env: production
+        ? { ...process.env, API_PROXY_TARGET: 'http://127.0.0.1:8001' }
+        : { ...process.env, VITE_API_BASE_URL: 'http://127.0.0.1:8001' },
     },
   ],
 });
