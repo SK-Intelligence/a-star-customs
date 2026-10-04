@@ -271,7 +271,9 @@ def test_checkout_rejects_unknown_product() -> None:
     )
 
     assert response.status_code == 404
-    assert response.json() == {"detail": "Product not found: unknown."}
+    assert response.json() == {
+        "detail": {"code": "PRODUCT_NOT_FOUND", "message": "Product not found."}
+    }
 
 
 def test_checkout_rejects_variant_from_another_product() -> None:
@@ -292,8 +294,9 @@ def test_checkout_rejects_variant_from_another_product() -> None:
 
     assert response.status_code == 404
     assert response.json() == {
-        "detail": "Variant not found: variant_01KCFRCKV84EMEE32KZB4QF9MK."
+        "detail": {"code": "VARIANT_NOT_FOUND", "message": "Variant not found."}
     }
+    assert "variant_01KCFRCKV84EMEE32KZB4QF9MK" not in response.text
 
 
 def test_checkout_rejects_non_purchasable_catalog_item() -> None:
@@ -313,6 +316,83 @@ def test_checkout_rejects_non_purchasable_catalog_item() -> None:
     )
 
     assert response.status_code == 409
+    assert response.json() == {
+        "detail": {
+            "code": "ITEM_UNAVAILABLE",
+            "message": "Item is not available for online purchase.",
+        }
+    }
+    assert "variant_01KD6J6RBN25P22MN2J226EMWG" not in response.text
+
+
+def test_checkout_does_not_echo_an_unknown_product_id() -> None:
+    app.dependency_overrides[get_settings] = unconfigured_settings
+    marker = "prod_<script>alert(1)</script>_not_in_catalog"
+
+    response = client.post(
+        "/api/checkout/session",
+        json={
+            "items": [{"productId": marker, "variantId": "variant_x", "quantity": 1}]
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"]["code"] == "PRODUCT_NOT_FOUND"
+    assert marker not in response.text
+    assert "<script>" not in response.text
+
+
+def test_checkout_does_not_echo_an_oversized_product_id() -> None:
+    app.dependency_overrides[get_settings] = unconfigured_settings
+    oversized = "P" * 100_000
+
+    response = client.post(
+        "/api/checkout/session",
+        json={
+            "items": [{"productId": oversized, "variantId": "variant_x", "quantity": 1}]
+        },
+    )
+
+    assert response.status_code == 422
+    assert "P" * 100 not in response.text
+    assert len(response.content) < 1_000
+    errors = response.json()["detail"]
+    assert errors == [
+        {
+            "loc": ["body", "items", 0, "productId"],
+            "msg": "String should have at most 100 characters",
+            "type": "string_too_long",
+        }
+    ]
+
+
+def test_validation_errors_omit_input_ctx_and_long_field_names() -> None:
+    app.dependency_overrides[get_settings] = unconfigured_settings
+    oversized_key = "k" * 100_000
+
+    response = client.post(
+        "/api/checkout/session",
+        json={
+            "items": [
+                {
+                    "productId": "prod_x",
+                    "variantId": "variant_x",
+                    "quantity": 99,
+                    oversized_key: "secret-value-123",
+                }
+            ]
+        },
+    )
+
+    assert response.status_code == 422
+    assert "secret-value-123" not in response.text
+    assert "k" * 65 not in response.text
+    for error in response.json()["detail"]:
+        assert set(error) == {"loc", "msg", "type"}
+    assert {error["type"] for error in response.json()["detail"]} == {
+        "less_than_equal",
+        "extra_forbidden",
+    }
 
 
 def test_checkout_accepts_only_catalog_identifiers_and_quantity() -> None:

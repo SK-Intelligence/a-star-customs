@@ -9,7 +9,9 @@ from uuid import uuid4
 import httpx
 import stripe
 from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.addons import (
     AddOnConfigurationError,
@@ -45,6 +47,22 @@ BUILD_INVALID_DETAIL = {
     "code": "BUILD_INVALID",
     "message": "The configured product build is invalid.",
 }
+# Fixed error bodies: a response never repeats what the client sent.
+PRODUCT_NOT_FOUND_DETAIL = {
+    "code": "PRODUCT_NOT_FOUND",
+    "message": "Product not found.",
+}
+VARIANT_NOT_FOUND_DETAIL = {
+    "code": "VARIANT_NOT_FOUND",
+    "message": "Variant not found.",
+}
+ITEM_UNAVAILABLE_DETAIL = {
+    "code": "ITEM_UNAVAILABLE",
+    "message": "Item is not available for online purchase.",
+}
+# Longest location segment returned in a validation error (an unexpected field's name is
+# client input).
+VALIDATION_LOC_PART_LIMIT = 64
 
 app = FastAPI(title="A Star Customs API", version="1.0.0")
 
@@ -56,6 +74,28 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Stripe-Signature"],
 )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    """FastAPI's default 422 body echoes each rejected value (input, ctx); return only
+    where, what and why."""
+    errors = [
+        {
+            "loc": [
+                part[:VALIDATION_LOC_PART_LIMIT] if isinstance(part, str) else part
+                for part in error.get("loc", ())
+            ],
+            "msg": error.get("msg", ""),
+            "type": error.get("type", ""),
+        }
+        for error in exc.errors()
+    ]
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, content={"detail": errors}
+    )
 
 
 @app.get("/api/health")
@@ -253,7 +293,7 @@ async def create_checkout_session(
         if product is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Product not found: {item.productId}.",
+                detail=PRODUCT_NOT_FOUND_DETAIL,
             )
 
         variant = next(
@@ -262,7 +302,7 @@ async def create_checkout_session(
         if variant is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Variant not found: {item.variantId}.",
+                detail=VARIANT_NOT_FOUND_DETAIL,
             )
         if (
             not product.purchasable
@@ -272,7 +312,7 @@ async def create_checkout_session(
         ):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"Item is not available for online purchase: {item.variantId}.",
+                detail=ITEM_UNAVAILABLE_DETAIL,
             )
 
         line_metadata = {
