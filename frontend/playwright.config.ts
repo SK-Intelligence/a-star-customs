@@ -43,20 +43,11 @@ export default defineConfig({
       name: 'mobile-chromium',
       use: { ...devices['Pixel 7'], viewport: { width: 390, height: 844 } },
       testIgnore: ['accessibility.spec.ts'],
-      // Desktop journeys: they click the desktop category chips and header links, or reach the
-      // bag drawer's buttons while a first visit's cookie banner covers the bottom of a phone
-      // screen. Their phone equivalents are the explicit 320-430px tests in storefront.spec.ts.
-      grepInvert: new RegExp(
-        [
-          'catalog category query filters the product count',
-          'optional extras update the build total and remain removable cart lines',
-          'checkout can add and remove a compatible add-on for one build',
-          'checkout inserts an add-on beside the selected build when identical builds are stacked',
-          'invalid build checkout keeps the cart and asks for review',
-          'checkout swaps exclusive C-Class add-ons instead of stacking both',
-          'route navigation moves focus to the new page heading',
-        ].join('|'),
-      ),
+      // Two desktop-only journeys remain, for reasons unrelated to the cookie banner (the banner
+      // already has its own phone coverage): the first clicks the desktop category chip row, the
+      // second clicks the "Services" link in the desktop header nav, which a phone collapses into
+      // the menu. Their phone equivalents are the explicit 320-430px tests in storefront.spec.ts.
+      grepInvert: /catalog category query filters the product count|route navigation moves focus to the new page heading/,
     },
   ],
   webServer: [

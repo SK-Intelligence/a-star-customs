@@ -1028,3 +1028,77 @@ test('cookie choices remain fully reachable in short phone landscape', async ({ 
   expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(320);
   await expect(banner.getByRole('button', { name: 'Essentials only' })).toBeVisible();
 });
+
+test('first-visit phone: the bag is usable over the cookie banner, which returns afterwards', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/luxury-car-interior');
+
+  const banner = page.getByRole('region', { name: 'We use cookies' });
+  await expect(banner).toBeVisible();
+  // Compact on a phone: well under a quarter of the screen, with Accept all and Essentials only
+  // side by side at the same size and with 44px touch targets.
+  const bannerBox = await banner.boundingBox();
+  expect(bannerBox?.height ?? Infinity).toBeLessThan(844 * 0.3);
+  const acceptBox = await banner.getByRole('button', { name: 'Accept all' }).boundingBox();
+  const essentialsBox = await banner.getByRole('button', { name: 'Essentials only' }).boundingBox();
+  expect(acceptBox?.y).toBe(essentialsBox?.y);
+  expect(acceptBox?.height).toBeGreaterThanOrEqual(44);
+  expect(essentialsBox?.height).toBeGreaterThanOrEqual(44);
+  expect(acceptBox?.width).toBeCloseTo(essentialsBox?.width ?? 0, 0);
+
+  await page.getByRole("button", { name: /Add (build )?to bag/ }).first().click();
+  const drawer = page.getByRole('dialog', { name: 'Shopping bag' });
+  const checkout = drawer.getByRole('link', { name: /Review & checkout/ });
+  await expect(checkout).toBeVisible();
+
+  // The banner yields while the dialog is open: hidden, inert and not focusable.
+  await expect(banner).toBeHidden();
+  await expect(drawer.getByRole('button', { name: 'Close shopping bag' })).toBeFocused();
+
+  // The link is genuinely hit-testable: nothing sits above it.
+  const topmostIsCheckout = await checkout.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
+    return element.contains(hit);
+  });
+  expect(topmostIsCheckout).toBe(true);
+
+  // Escape closes the drawer; the banner is back, nothing was stored, and consent is not implied.
+  await page.keyboard.press('Escape');
+  await expect(drawer).toBeHidden();
+  await expect(banner).toBeVisible();
+  await expect(banner.getByRole('button', { name: 'Essentials only' })).toBeEnabled();
+  expect(await page.evaluate(() => localStorage.getItem('astar-cookie-preferences'))).toBeNull();
+
+  // Reopen and go to checkout without ever dismissing the banner.
+  await page.getByRole('button', { name: /Open shopping bag/ }).click();
+  await checkout.click();
+  await expect(page).toHaveURL(/\/checkout$/);
+  await expect(banner).toBeVisible();
+});
+
+test('first-visit phone: choosing Essentials only leaves no skip link or floating control over the page', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/mercedes-c-class-oem-ambient-lighting');
+
+  await page.getByRole('region', { name: 'We use cookies' }).getByRole('button', { name: 'Essentials only' }).click();
+  await expect(page.getByRole('region', { name: 'We use cookies' })).toBeHidden();
+
+  // Focus moves to the page content, not the skip link, and the skip link stays off-screen.
+  await expect(page.locator('#main-content')).toBeFocused();
+  const skipLink = page.getByRole('link', { name: 'Skip to content' });
+  await expect(skipLink).not.toBeInViewport();
+
+  // No fixed cookie control floats over the page; preferences stay reachable from the footer.
+  await expect(page.locator('.cookie-settings-button')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Open cookie preferences' }).click();
+  await expect(page.getByRole('dialog', { name: 'Cookie preferences' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog', { name: 'Cookie preferences' })).toBeHidden();
+
+  // The skip link still appears for keyboard users.
+  await page.reload();
+  await page.keyboard.press('Tab');
+  await expect(skipLink).toBeFocused();
+  await expect(skipLink).toBeInViewport();
+});

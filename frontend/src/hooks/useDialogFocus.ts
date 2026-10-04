@@ -1,4 +1,4 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { useEffect, useRef, useSyncExternalStore, type RefObject } from 'react';
 
 const FOCUSABLE_SELECTOR = [
   'a[href]',
@@ -12,6 +12,31 @@ const FOCUSABLE_SELECTOR = [
 let scrollLockCount = 0;
 let previousBodyOverflow = '';
 const activeDialogs: HTMLElement[] = [];
+const dialogListeners = new Set<() => void>();
+
+function notifyDialogListeners() {
+  dialogListeners.forEach((listener) => listener());
+}
+
+function subscribeToDialogs(listener: () => void) {
+  dialogListeners.add(listener);
+  return () => {
+    dialogListeners.delete(listener);
+  };
+}
+
+/**
+ * True while any modal using useDialogFocus (bag drawer, mobile menu, review form, cookie
+ * preferences) is open. Floating, non-modal UI such as the cookie banner uses it to step aside
+ * so it never covers a dialog's controls.
+ */
+export function useAnyDialogOpen(): boolean {
+  return useSyncExternalStore(
+    subscribeToDialogs,
+    () => activeDialogs.length > 0,
+    () => false,
+  );
+}
 
 function setScrollLock(locked: boolean) {
   if (locked) {
@@ -111,6 +136,7 @@ export function useDialogFocus<T extends HTMLElement>({
 
     setScrollLock(true);
     activeDialogs.push(container);
+    notifyDialogListeners();
     document.addEventListener('keydown', handleKeyDown, true);
 
     return () => {
@@ -119,6 +145,7 @@ export function useDialogFocus<T extends HTMLElement>({
       document.removeEventListener('keydown', handleKeyDown, true);
       const dialogIndex = activeDialogs.lastIndexOf(container);
       if (dialogIndex >= 0) activeDialogs.splice(dialogIndex, 1);
+      notifyDialogListeners();
       setScrollLock(false);
       if (previouslyFocused?.isConnected) {
         window.requestAnimationFrame(() => previouslyFocused.focus());

@@ -162,15 +162,20 @@ h3 {
   top: 12px;
   left: 12px;
   padding: 0.75rem 1rem;
-  transform: translateY(-160%);
+  transform: translateY(-200%);
   background: #fff;
   color: #000;
   font-weight: 800;
   transition: transform 180ms ease;
 }
 
-.skip-link:focus {
+/* Keyboard users only: a pointer click or script focus must never pin it over the page. */
+.skip-link:focus-visible {
   transform: translateY(0);
+}
+
+#main-content:focus {
+  outline: none;
 }
 
 .app-shell {
@@ -3394,15 +3399,26 @@ h3 {
 }
 
 /* Cookie controls */
+/* Stacking: header 60 < cookie banner 105 < bag backdrop 110 < bag drawer 120 < review and
+   cookie-preferences modals 190 < lightbox 200. The banner sits below the bag backdrop so a
+   dialog always wins, and it also goes inert and hidden (.is-yielding) while any dialog is open,
+   returning when it closes. */
 .cookie-banner-wrap {
   position: fixed;
-  z-index: 180;
+  z-index: 105;
+  transition: opacity 160ms ease, visibility 160ms;
   right: auto;
   bottom: max(1rem, env(safe-area-inset-bottom));
   left: max(1rem, env(safe-area-inset-left));
   max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+.cookie-banner-wrap.is-yielding {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .cookie-banner {
@@ -3481,29 +3497,18 @@ h3 {
   accent-color: var(--purple);
 }
 
-.cookie-settings-button {
-  position: fixed;
-  z-index: 80;
-  bottom: max(1rem, env(safe-area-inset-bottom));
-  left: max(1rem, env(safe-area-inset-left));
-  display: flex;
-  min-height: 2.8rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  padding-inline: 0.8rem;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  background: rgb(14 13 16 / 92%);
+/* Cookie preferences stay reachable from the footer's always-present link, not a floating
+   button: a floating control sat over prices, totals and primary buttons on phones. */
+.footer-cookie-button {
+  min-height: 2.75rem;
+  padding: 0 0.1rem;
+  border: 0;
+  border-bottom: 1px solid var(--purple);
+  background: transparent;
   color: #fff;
   cursor: pointer;
-  font-size: 0.68rem;
-  font-weight: 800;
-  box-shadow: 0 10px 25px rgb(0 0 0 / 25%);
-}
-
-.cookie-settings-button svg {
-  width: 1rem;
+  font: inherit;
+  letter-spacing: inherit;
 }
 
 /* Floating WhatsApp */
@@ -4165,6 +4170,46 @@ h3 {
     max-height: calc(100dvh - 1rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 
+  /* Compact phone banner: roughly a fifth of the screen instead of two fifths. Accept all and
+     Essentials only sit side by side at identical size; every control is >= 44px tall. */
+  .cookie-banner {
+    gap: 0.7rem;
+    padding: 0.85rem 0.9rem 0.6rem;
+  }
+
+  .cookie-banner h2 {
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+
+  .cookie-banner p:not(.eyebrow) {
+    margin-top: 0.3rem;
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+
+  .cookie-banner .cookie-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .cookie-banner .cookie-actions .button {
+    min-height: 2.75rem;
+    padding: 0.5rem 0.4rem;
+    font-size: 0.72rem;
+  }
+
+  .cookie-banner .cookie-actions .text-button {
+    grid-column: 1 / -1;
+    justify-content: center;
+    min-height: 2.75rem;
+    border-bottom: 0;
+    text-decoration: underline;
+    text-decoration-color: var(--purple);
+    text-underline-offset: 0.3em;
+  }
+
   .cookie-actions,
   .cookie-actions .button,
   .cookie-actions .text-button {
@@ -4181,17 +4226,6 @@ h3 {
     padding: 0;
   }
 
-  .cookie-settings-button {
-    right: max(1rem, env(safe-area-inset-right));
-    bottom: calc(4.9rem + env(safe-area-inset-bottom));
-    left: auto;
-    width: 3.25rem;
-    padding: 0;
-  }
-
-  .cookie-settings-button span {
-    display: none;
-  }
 }
 
 @media (max-height: 500px) and (min-width: 520px) and (max-width: 1200px) {
