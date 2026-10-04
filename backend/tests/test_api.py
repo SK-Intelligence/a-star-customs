@@ -517,3 +517,8 @@ def test_webhook_rejects_invalid_signature() -> None:
 
     assert response.status_code == 400
     assert response.json() == {"detail": "Invalid Stripe webhook signature."}
+
+
+@pytest.mark.parametrize("path", ["/docs", "/redoc", "/openapi.json"])
+def test_api_documentation_is_not_served_by_default(path: str) -> None:
+    assert client.get(path).status_code == 404

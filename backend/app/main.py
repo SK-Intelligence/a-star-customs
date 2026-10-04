@@ -66,9 +66,16 @@ UNEXPECTED_FIELD = "<unexpected field>"
 VALIDATION_LOC_PART_LIMIT = 64
 VALIDATION_ERROR_LIMIT = 20
 
-app = FastAPI(title="A Star Customs API", version="1.0.0")
-
 _startup_settings = get_settings()
+_api_docs = _startup_settings.enable_api_docs
+app = FastAPI(
+    title="A Star Customs API",
+    version="1.0.0",
+    docs_url="/docs" if _api_docs else None,
+    redoc_url="/redoc" if _api_docs else None,
+    openapi_url="/openapi.json" if _api_docs else None,
+)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_startup_settings.allowed_origins,

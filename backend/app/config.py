@@ -32,6 +32,8 @@ class Settings(BaseSettings):
         "http://localhost:5173/checkout/success?session_id={CHECKOUT_SESSION_ID}"
     )
     checkout_cancel_url: str = "http://localhost:5173/checkout"
+    # FastAPI's /docs, /redoc and /openapi.json. Off unless ENABLE_API_DOCS=true (local work only).
+    enable_api_docs: bool = False
     cors_origins: str = Field(default="http://localhost:5173,http://127.0.0.1:5173")
 
     @property
