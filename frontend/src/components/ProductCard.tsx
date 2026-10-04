@@ -2,6 +2,7 @@ import { ArrowRight, MessageCircle, SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatPrice, getProductAddOnOptions, isAddOnProduct, type Product } from '../data/catalog';
 import { whatsappUrl } from '../data/site';
+import { ResponsiveImage } from './ResponsiveImage';
 
 interface ProductCardProps {
   product: Product;
@@ -21,11 +22,11 @@ export function ProductCard({ product, returnTo, returnLabel }: ProductCardProps
     <article className="product-card">
       <Link className="product-card__media" to={`/${product.slug}`} state={{ returnTo, returnLabel }}>
         {product.ribbonText ? <span className="product-ribbon">{product.ribbonText}</span> : null}
-        <img
+        {/* Cover-cropped: a landscape photo renders wider than its card, hence the headroom. */}
+        <ResponsiveImage
           src={product.images[0] ?? '/images/site/hero.jpg'}
           alt={product.title}
-          loading="lazy"
-          decoding="async"
+          sizes="(max-width: 520px) 120vw, (max-width: 760px) 60vw, (max-width: 1200px) 40vw, 360px"
         />
         <span className="product-card__view">
           View details <ArrowRight aria-hidden="true" />

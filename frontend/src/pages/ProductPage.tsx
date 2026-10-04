@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { ImageLightbox } from '../components/ImageLightbox';
 import { QuantityControl } from '../components/QuantityControl';
+import { ResponsiveImage } from '../components/ResponsiveImage';
 import { ReviewPanel } from '../components/ReviewPanel';
 import { Seo } from '../components/Seo';
 import { exclusiveSiblingDefinitions, formatPrice, getDiscoveryProducts, getProductAddOnOptions, getProductFamilyLabel, isAddOnProduct, productBySlug, type AddOnDefinition, type AvailableProductAddOnOption } from '../data/catalog';
@@ -115,7 +116,12 @@ export function ProductPage() {
             <div className="product-gallery">
               <button className="product-gallery__main" type="button" onClick={() => setLightboxIndex(imageIndex)}>
                 {product.ribbonText ? <span className="product-ribbon">{product.ribbonText}</span> : null}
-                <img src={activeImage} alt={product.title} loading="eager" decoding="async" />
+                <ResponsiveImage
+                  src={activeImage}
+                  alt={product.title}
+                  sizes="(max-width: 980px) 100vw, (min-width: 1468px) 820px, 56vw"
+                  priority
+                />
                 <span>Click to expand</span>
               </button>
               {product.images.length > 1 ? (
@@ -128,7 +134,7 @@ export function ProductPage() {
                       onClick={() => setImageIndex(index)}
                       aria-label={`Show ${product.title} image ${index + 1}`}
                     >
-                      <img src={image} alt="" loading="lazy" decoding="async" />
+                      <ResponsiveImage src={image} alt="" sizes="(max-width: 520px) 64px, 160px" />
                     </button>
                   ))}
                 </div>
@@ -198,11 +204,10 @@ export function ProductPage() {
                               onClick={() => toggleAddOn(definition)}
                             >
                               {addOn ? (
-                                <img
+                                <ResponsiveImage
                                   src={addOn.images[0] ?? '/images/site/hero.jpg'}
                                   alt=""
-                                  loading="lazy"
-                                  decoding="async"
+                                  sizes="62px"
                                 />
                               ) : <Sparkles aria-hidden="true" />}
                               <span>
@@ -249,11 +254,10 @@ export function ProductPage() {
                               className="discovery-offer__media"
                               aria-label={`View ${item.title}`}
                             >
-                              <img
+                              <ResponsiveImage
                                 src={item.images[0] ?? '/images/site/hero.jpg'}
                                 alt={item.title}
-                                loading="lazy"
-                                decoding="async"
+                                sizes="110px"
                               />
                             </Link>
                             <div>

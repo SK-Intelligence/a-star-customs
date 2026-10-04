@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useDialogFocus } from '../hooks/useDialogFocus';
+import { ResponsiveImage } from './ResponsiveImage';
 import { socialLinks } from '../data/site';
 import { cartItemCount, useCartStore } from '../store/cart';
 import { productBySlug } from '../data/catalog';
@@ -50,7 +51,7 @@ export function Header() {
       <div className="site-header__main">
         <div className="container site-header__inner">
           <Link className="site-logo" to="/" aria-label="A Star Customs home">
-            <img src="/images/site/logo.png" alt="A Star Customs" />
+            <ResponsiveImage src="/images/site/logo.png" alt="A Star Customs" sizes="104px" loading="eager" />
           </Link>
 
           <nav className="desktop-nav" aria-label="Primary navigation">

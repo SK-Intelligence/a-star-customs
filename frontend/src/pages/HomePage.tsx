@@ -1,5 +1,6 @@
 import { ArrowRight, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { ResponsiveImage } from '../components/ResponsiveImage';
 import { Seo } from '../components/Seo';
 
 const aboutPoints = [
@@ -17,7 +18,10 @@ export function HomePage() {
       />
 
       <section className="home-hero">
-        <div className="home-hero__media" aria-hidden="true" />
+        <div className="home-hero__media" aria-hidden="true">
+          {/* Cover-cropped into a box taller than 4:3 on phones, so wider than the viewport there. */}
+          <ResponsiveImage src="/images/site/hero.jpg" alt="" sizes="(max-width: 760px) 120vw, 100vw" priority />
+        </div>
         <div className="home-hero__shade" aria-hidden="true" />
         <div className="container home-hero__content">
           <h1>Car needs an upgrade?</h1>
@@ -37,11 +41,10 @@ export function HomePage() {
         <div className="container">
           <div className="feature-duo">
             <Link className="feature-panel" to="/services">
-              <img
+              <ResponsiveImage
                 src="/images/site/service-ambient.jpg"
                 alt="Purple ambient lighting installed in a car"
-                loading="lazy"
-                decoding="async"
+                sizes="(max-width: 760px) 100vw, (min-width: 1468px) 700px, 50vw"
               />
               <div>
                 <h2>Services</h2>
@@ -55,11 +58,10 @@ export function HomePage() {
               </div>
             </Link>
             <Link className="feature-panel" to="/gallery">
-              <img
+              <ResponsiveImage
                 src="/images/site/gallery-stars-03.jpg"
                 alt="Detailed starlight headliner installation"
-                loading="lazy"
-                decoding="async"
+                sizes="(max-width: 760px) 100vw, (min-width: 1468px) 700px, 50vw"
               />
               <div>
                 <h2>Gallery</h2>
@@ -78,12 +80,11 @@ export function HomePage() {
 
       <section className="section about-section">
         <div className="container about-grid">
-          <img
+          <ResponsiveImage
             className="about-media"
             src="/images/site/gallery-ambient-02.jpeg"
             alt="Blue and purple ambient lighting fitted at A Star Customs"
-            loading="lazy"
-            decoding="async"
+            sizes="(max-width: 980px) 100vw, (min-width: 1468px) 700px, 50vw"
           />
           <div className="about-copy">
             <h2>About us</h2>
@@ -128,6 +129,12 @@ export function HomePage() {
       </section>
 
       <section className="home-showcase" aria-labelledby="home-showcase-title">
+        <ResponsiveImage
+          className="home-showcase__media"
+          src="/images/site/gallery-stars-06.jpeg"
+          alt=""
+          sizes="(max-width: 760px) 120vw, 100vw"
+        />
         <Link to="/gallery">
           <span>
             <small>Recent work</small>
