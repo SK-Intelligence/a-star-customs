@@ -42,6 +42,18 @@ updates:
         applies-to: version-updates
         update-types: [minor, patch]
 
+  # Base images in frontend/Dockerfile (python, node, nginx) and backend/Dockerfile (python),
+  # pinned by tag and digest; Dependabot updates both.
+  - package-ecosystem: docker
+    directories: [/frontend, /backend]
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 0
+    labels: [dependencies]
+
   # The workflows pin actions to commit SHAs with a "# vN" comment; Dependabot updates both.
   - package-ecosystem: github-actions
     directory: /

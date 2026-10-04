@@ -19,9 +19,9 @@ permissions:
   contents: read
 
 env:
-  # The same majors as the production images: node:20-alpine (frontend/Dockerfile) and
+  # The same majors as the production images: node:22-alpine (frontend/Dockerfile) and
   # python:3.12-slim (backend/Dockerfile).
-  NODE_VERSION: "20"
+  NODE_VERSION: "22"
   PYTHON_VERSION: "3.12"
   CI: "1"
 

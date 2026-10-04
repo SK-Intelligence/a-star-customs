@@ -1,4 +1,5 @@
-FROM python:3.12-slim AS catalog-check
+# Base images are pinned by digest (the tag documents it); Dependabot proposes updates.
+FROM python:3.12.15-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d AS catalog-check
 
 WORKDIR /workspace
 COPY scripts/check_catalog_sync.py scripts/media-review.json scripts/generic-add-on-approvals.json ./scripts/
@@ -7,7 +8,7 @@ COPY backend/app/catalog.json backend/app/add-ons.json ./backend/app/
 COPY frontend/public ./frontend/public
 RUN python scripts/check_catalog_sync.py && touch /catalog-check-passed
 
-FROM python:3.12-slim
+FROM python:3.12.15-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

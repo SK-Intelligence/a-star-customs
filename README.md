@@ -12,7 +12,7 @@ The repository contains the complete public storefront, all 37 migrated products
 
 ## Local development
 
-Requirements: Node.js 20+, npm, Python 3.12+.
+Requirements: Node.js 22 (the production build image), npm, Python 3.12.
 
 ```bash
 npm install
