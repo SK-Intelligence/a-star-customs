@@ -53,6 +53,7 @@ export default defineConfig({
           'checkout can add and remove a compatible add-on for one build',
           'checkout inserts an add-on beside the selected build when identical builds are stacked',
           'invalid build checkout keeps the cart and asks for review',
+          'checkout swaps exclusive C-Class add-ons instead of stacking both',
           'route navigation moves focus to the new page heading',
         ].join('|'),
       ),

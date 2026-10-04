@@ -12,11 +12,16 @@ const WIDTHS = [
 ];
 const PAGES = ['/', '/mercedes-c-class-oem-ambient-lighting', '/shop', '/contact-us'];
 
-async function expectNoSeriousViolations(page: Page, path: string) {
+async function expectNoSeriousViolations(
+  page: Page,
+  path: string,
+  prepare?: (page: Page) => Promise<void>,
+) {
   for (const size of WIDTHS) {
     await page.setViewportSize(size);
     await page.goto(path);
     await expect(page.locator('main h1').first()).toBeVisible();
+    if (prepare) await prepare(page);
     // Measure settled colours, not an element halfway through a transition.
     await expect
       .poll(
@@ -46,7 +51,7 @@ async function expectNoSeriousViolations(page: Page, path: string) {
             .map((node) => `${node.target.join(' ')} ${node.failureSummary ?? ''} ${node.html.slice(0, 120)}`)
             .join(' | ')}`,
       );
-    expect(serious, `${path} at ${size.width}px`).toEqual([]);
+    expect(serious, `${path}${prepare ? ' (prepared state)' : ''} at ${size.width}px`).toEqual([]);
   }
 }
 
@@ -78,4 +83,27 @@ test('@a11y checkout with an item in the bag', async ({ page }) => {
     );
   });
   await expectNoSeriousViolations(page, '/checkout');
+});
+
+test('@a11y bag drawer showing the removed add-on notice', async ({ page }) => {
+  // The stale saved bag from storefront.spec.ts ("a saved bag drops add-ons that no longer
+  // apply"): loading it drops the add-ons and shows RemovedAddOnNotice in the drawer.
+  const buildId = 'saved-c-class-build';
+  await page.addInitScript((lines) => {
+    window.localStorage.setItem(
+      'astar-customs-cart',
+      JSON.stringify({ state: { lines, checkoutSnapshots: [] }, version: 0 }),
+    );
+  }, [
+    { productId: 'prod_01KS68E0X8NM8FT2FXN6S0YXCF', variantId: 'variant_01KS68E0Z7ZWA7WJVATE0RXWHR', quantity: 1, buildId, lineType: 'base' },
+    { productId: 'prod_01KCFR1PBNK4HHMX64NN0BPCCK', variantId: 'variant_01KCFR1PF6SSFRX0GSDM2FDNDH', quantity: 1, buildId, lineType: 'addon' },
+    { productId: 'prod_01M43GJ28Z7ED1SAW9MYAME13D', variantId: 'variant_01M43GJ28ZTRKDR1ANEY1KMZCA', quantity: 1, buildId, lineType: 'addon' },
+    { productId: 'prod_01M43GJ290B3KS8X3C92SV2CMZ', variantId: 'variant_01M43GJ2908X81YFQ7VCZDN349', quantity: 1, buildId, lineType: 'addon' },
+    { productId: 'prod_01KCFRCKR5NV5VGCM7ZTKCZ5DE', variantId: 'variant_01KCFRCKV84EMEE32KZB4QF9MK', quantity: 1, buildId: 'missing-base-build', lineType: 'addon' },
+  ]);
+  await expectNoSeriousViolations(page, '/', async (current) => {
+    await current.getByRole('button', { name: /Open shopping bag/ }).click();
+    const drawer = current.getByRole('dialog', { name: 'Shopping bag' });
+    await expect(drawer.getByRole('status').filter({ hasText: /no longer apply/ })).toBeVisible();
+  });
 });
