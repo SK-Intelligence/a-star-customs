@@ -1,5 +1,6 @@
 # Backend coverage for the Quality gate's unit job: `pytest --cov --cov-report=xml`.
-# fail_under is the measured baseline rounded down (89.45% of 474 statements on 2026-10-04).
+# fail_under is the measured baseline rounded down (89.90% of 495 statements on 2026-10-04,
+# after the C-Class add-on change; 89.45% of 474 before it).
 # Raise it as tests are added; never lower it to make a change pass.
 [run]
 source = app
