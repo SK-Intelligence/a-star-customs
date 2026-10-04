@@ -92,6 +92,10 @@ npm run test:e2e
 
 `npm run verify:full` runs the build, catalog and backend gates followed by the browser suite. The current coverage includes contact-provider failures, trusted catalog pricing, multi-item/add-on checkout, shipping, durable orders, delayed and out-of-order payment events, signed/idempotent webhooks, cart snapshot safety, session verification, responsive navigation, cookie gates, and review moderation privacy.
 
+## CI/CD
+
+Every change goes through a pull request into `main`. The **Quality gate** workflow (`.github/workflows/ci.yml`) runs lint and types, backend tests with coverage, the catalog check, the production build with a bundle secret scan, Playwright E2E (desktop and phone), axe accessibility, Lighthouse, both Docker images, ShellCheck, security scans and SonarQube. Railway deploys `main` only after it passes. Run `npm run ci:fast` before pushing and `npm run setup:hooks` once per clone. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, every job and the live smoke check.
+
 ## Production with Docker
 
 ```bash

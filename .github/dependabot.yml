@@ -1,0 +1,58 @@
+# Security fixes only. Every Dependabot pull request runs the full Quality gate, plus another run
+# on merge, so routine version bumps are off: open-pull-requests-limit 0 disables version updates
+# while "Dependabot security updates" (on in the repository's Code security settings) still opens
+# a pull request for every vulnerable dependency. Merge when green (CONTRIBUTING.md). To turn
+# version updates back on, raise the limits below.
+version: 2
+updates:
+  # The npm workspaces (root package-lock.json covers frontend/).
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 0
+    labels: [dependencies]
+    # Wait 5 days after a release before proposing it (a hijacked release is usually pulled by then).
+    # Security updates are not delayed.
+    cooldown:
+      default-days: 5
+    groups:
+      # All minor and patch bumps in one pull request; majors stay separate.
+      minor-and-patch:
+        applies-to: version-updates
+        update-types: [minor, patch]
+
+  # The FastAPI backend (requirements.txt includes requirements-runtime.txt).
+  - package-ecosystem: pip
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 0
+    labels: [dependencies]
+    cooldown:
+      default-days: 5
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types: [minor, patch]
+
+  # The workflows pin actions to commit SHAs with a "# vN" comment; Dependabot updates both.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 0
+    labels: [dependencies]
+    groups:
+      # One pull request for all action updates: each pull request costs a full Quality gate run.
+      actions:
+        patterns: ["*"]
