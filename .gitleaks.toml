@@ -1,0 +1,26 @@
+# Secret scan for the Quality gate (gitleaks, default rules). Real secrets live only in Railway
+# variables, never in the repo. Each allowlist below extends one default rule and needs both the
+# file and the exact shape of the made-up value to match, so a real key pasted anywhere (a test
+# file included) is still reported.
+title = "A Star Customs gitleaks config"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "stripe-access-token"
+[[rules.allowlists]]
+description = "Backend tests: the literal made-up key sk_test_placeholder, never a real Stripe key"
+condition = "AND"
+paths = ['''^backend/tests/test_[a-z_]+\.py$''']
+regexTarget = "secret"
+regexes = ['''^sk_test_placeholder$''']
+
+[[rules]]
+id = "curl-auth-user"
+[[rules.allowlists]]
+description = "CI: SonarQube's documented first-boot admin:admin login, replaced by a random password in the same step"
+condition = "AND"
+paths = ['''^\.github/workflows/ci\.yml$''']
+regexTarget = "secret"
+regexes = ['''^admin:admin$''']
