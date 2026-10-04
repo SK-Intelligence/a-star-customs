@@ -1,0 +1,32 @@
+name: Live site smoke check
+
+# Checks the live site with curl (ops/smoke-test.sh): /api/health, the key pages, the www -> apex
+# redirect, that unknown products and invalid checkouts are refused (4xx, never 5xx, never a
+# Stripe session), and that the orders and reviews databases are never served. Read-only: a
+# failed check fails the run; nothing is ordered, sent or stored.
+#
+# Manual only (Actions -> Live site smoke check -> Run workflow), to save Actions minutes. Every
+# deploy is already checked automatically by Railway's health check (/api/health,
+# backend/railway.json): a release that fails it never goes live and the previous one keeps serving.
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Site to check
+        required: true
+        default: https://astarcustoms.com
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Smoke check (live site)
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with: { persist-credentials: false, sparse-checkout: ops }
+      - run: sh ops/smoke-test.sh "$SITE_URL"
+        env:
+          SITE_URL: ${{ inputs.url }}
