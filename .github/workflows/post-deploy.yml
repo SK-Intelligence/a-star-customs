@@ -6,7 +6,7 @@ name: Live site smoke check
 # failed check fails the run; nothing is ordered, sent or stored.
 #
 # Manual only (Actions -> Live site smoke check -> Run workflow), to save Actions minutes. Run it
-# after a release. Only the backend has a Railway health check (/api/health, backend/railway.json):
+# after a release. Only the backend has a Railway health check (/api/health, .railway/railway.ts):
 # a backend release that fails it never goes live and the previous one keeps serving. The
 # frontend (nginx) has none, so this check is what confirms the storefront after a deploy.
 on:

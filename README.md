@@ -96,7 +96,7 @@ npm run test:e2e
 
 Every change goes through a pull request into `main`. The **Quality gate** workflow (`.github/workflows/ci.yml`) runs ESLint, `tsc` and Ruff (lint and format), backend tests with a coverage floor, the catalogue check with its fitment heuristics, the production build with a bundle secret scan, Playwright E2E (desktop and phone), axe accessibility, Lighthouse, both Docker images, ShellCheck, npm audit, pip-audit, gitleaks, Semgrep and SonarQube. Run `npm run ci:fast` before pushing and `npm run setup:hooks` once per clone.
 
-Railway is required to connect both services to GitHub, use `frontend/railway.json` and `backend/railway.json`, and turn on Wait for CI, so that it deploys `main` only after the gate passes. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, every job, the required Railway setup and the live smoke check.
+`main` is protected by the GitHub ruleset "Protect main: Quality gate": a pull request and all 10 Quality gate checks are required, force-pushes and deletion are blocked, and org admins can bypass only via a pull request. Railway is configured as code in `.railway/railway.ts` (both services deploy `main`, with Wait for CI on as a second, deploy-time gate). See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, every job, the Railway setup and the live smoke check.
 
 ## Production with Docker
 

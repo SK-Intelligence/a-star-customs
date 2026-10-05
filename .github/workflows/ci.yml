@@ -3,7 +3,7 @@ name: Quality gate
 # Every job must pass before a change is merged or deployed. Free only: GitHub-hosted runners,
 # open-source tools, and SonarQube Community in a throwaway container. See CONTRIBUTING.md.
 # Feature branches are checked through their pull request (not twice); main runs on every push
-# because Railway deploys production from it ("Wait for CI").
+# because Railway deploys production from it (check suites / "Wait for CI", .railway/railway.ts).
 on:
   push:
     branches: [main]

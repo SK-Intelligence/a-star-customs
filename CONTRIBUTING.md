@@ -5,7 +5,7 @@ Everything reaches customers the same way. Nothing is pushed straight to `main`.
 1. **Branch** from `main`: `git switch -c short-description main`.
 2. **Check locally** (from the repository root): `npm run ci:fast` (ESLint, `tsc -b`, Ruff lint and format, forbidden text, backend tests, `check_catalog_sync.py --ci` and its self-tests). For UI, cart or checkout changes also `npm run build`, then `cd frontend && E2E_TARGET=prod npx playwright test` (the E2E and accessibility suites against the production build).
 3. **Open a pull request** into `main`. The **Quality gate** workflow (`.github/workflows/ci.yml`) runs every check below. All jobs must be green; a red job means the change is not ready.
-4. **Merge** the pull request into `main`. Railway deploys `main` only after the commit's checks pass ("Wait for CI").
+4. **Merge** the pull request into `main`. The GitHub ruleset below blocks the merge until all 10 Quality gate checks pass, and Railway also waits for the commit's check suites before deploying it ("Wait for CI").
 
 First-time setup is in `README.md` (`npm install`, and `backend/.venv` from the hashed lock with `pip install --require-hashes -r backend/requirements.txt`). Enable the pre-push hook once per clone with `npm run setup:hooks`: pushing `main` then runs `npm run ci:fast` first and is refused if it fails.
 
@@ -30,15 +30,18 @@ After a release, **Actions → Live site smoke check → Run workflow** runs `op
 
 ## Deploys
 
-Railway builds each service from its config-as-code file: `frontend/railway.json` (nginx + the built storefront, `frontend/Dockerfile`) and `backend/railway.json` (FastAPI, `backend/Dockerfile`, health check `/api/health`, rebuilt only when `backend/**` changes). Restart policy is left to each service's Railway settings. Both Docker builds run the structural catalogue check first, so a catalogue that is out of sync cannot deploy. A backend release that fails its health check never goes live and the previous one keeps serving; the frontend has no Railway health check, so run the live smoke check after a release.
+Railway builds each service as described by Infrastructure as Code in `.railway/railway.ts`: the frontend (nginx + the built storefront, `frontend/Dockerfile`) and the backend (FastAPI, `backend/Dockerfile`, health check `/api/health`, rebuilt only when `backend/**` changes, persistent volume at `/data`). Both services deploy `main` of `SK-Intelligence/a-star-customs` with check suites ("Wait for CI") on. Variables and secrets are not in the file; they stay in Railway. The deprecated `railway.json` files are gone. Restart policy is left to each service's Railway settings. Both Docker builds run the structural catalogue check first, so a catalogue that is out of sync cannot deploy. A backend release that fails its health check never goes live and the previous one keeps serving; the frontend has no Railway health check, so run the live smoke check after a release.
 
-**Required Railway setup** (once, by the project owner, before relying on this):
+**Branch protection.** The GitHub ruleset "Protect main: Quality gate" guards `main`. It requires a pull request and all 10 Quality gate checks to pass, blocks force-pushes and deletion of `main`, and lets organisation admins bypass it through a pull request only (never by pushing directly). Railway's Wait for CI is a second, deploy-time gate, not the only one.
+
+**Required Railway setup** (once, by the project owner):
 
 1. Connect **both** services (frontend and backend) to this GitHub repository, deploying `main`.
-2. In each service's settings, set the config-as-code path: `/frontend/railway.json` for the frontend, `/backend/railway.json` for the backend.
-3. Turn on **Wait for CI** for both services, so Railway deploys a commit only after its Quality gate passes and skips it if the gate fails.
+2. Preview the Infrastructure as Code with the Railway CLI (`railway link`, then `railway config plan` from the repository root) and check that only intended changes are listed.
+3. Apply it with `railway config apply`, which asks for confirmation. Planning is read-only; applying changes the live project, so review the plan first.
+4. Leave each service's old "Config file path" setting empty; the `railway.json` files no longer exist.
 
-Until all three are done, a push to `main` can deploy without the Quality gate.
+Until the services are connected, a push to `main` is not deployed at all; the ruleset keeps unreviewed changes off `main` either way.
 
 ## Dependency updates (Dependabot)
 
