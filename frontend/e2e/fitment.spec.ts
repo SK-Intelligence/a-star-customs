@@ -102,11 +102,16 @@ function parityDiscovery(page: Product, catalog: readonly Product[]): string[] {
       candidate.available &&
       parityCovers(page, candidate),
   );
-  const families = new Set<string>();
-  const onePerFamily = eligible.filter(
-    (candidate) =>
-      candidate.kind === 'main' && !families.has(candidate.family) && families.add(candidate.family),
-  );
+  // One slot per family, except starlights: the first-listed DIY kit (currently the cheapest) and one fitted package.
+  const slots = new Set<string>();
+  const onePerFamily = eligible.filter((candidate) => {
+    if (candidate.kind !== 'main') return false;
+    const slot =
+      candidate.family === 'starlights' && candidate.collections.includes('DIY')
+        ? 'starlights-diy'
+        : candidate.family;
+    return !slots.has(slot) && slots.add(slot);
+  });
   return [...eligible.filter((candidate) => candidate.kind === 'upgrade'), ...onePerFamily]
     .slice(0, 6)
     .map((candidate) => candidate.slug);

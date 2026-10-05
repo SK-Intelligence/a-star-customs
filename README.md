@@ -120,11 +120,10 @@ The production app reads only local JSON and local image/font files. It does not
 - `backend/app/catalog.json` is the server-authoritative pricing copy.
 - `frontend/src/data/add-ons.json` and `backend/app/add-ons.json` mirror the add-on availability rules used by the product builder and checkout validation.
 - `python scripts/check_catalog_sync.py` proves both catalog and add-on copies are in sync, validates explicit classification and fitment metadata, and verifies every image against the reviewed SHA-256 media manifest in `scripts/media-review.json`. It also runs the fitment guards: every discovery offer and vehicle-specific add-on must fit every vehicle of its base product (the same rule as `productFitmentsAreCompatible`), a generic add-on on a vehicle-specific product needs an entry in `scripts/generic-add-on-approvals.json`, listing text may not name a make, model or chassis code outside its fitment (or claim "most vehicles" on a specific product), and same-family listings with the same fitment and price fail as duplicates. Pending client questions are listed in `KNOWN_TEXT_EXCEPTIONS` and `DUPLICATE_ALLOWLIST` in the script.
-- `python scripts/import_hostinger_catalog.py --refresh-assets` refreshes the final source snapshot before Hostinger is retired. This is a migration utility, not a runtime dependency.
 
 Catalogue behavior is controlled by the explicit `kind` field, never title wording. `addon` products are attachment-only, `upgrade` products are standalone and contain no nested upsells, and purchasable `main` products expose every active stackable add-on. The backend independently verifies the product kinds, base/add-on grouping, matching quantity and trusted prices. Disabled add-on definitions stay unavailable until a trusted catalog product, variant and price are supplied.
 
-After cutover, edit the catalogue and add-on rules deliberately in source control and keep both frontend/backend copies identical. Any approved image or fitment change must update `scripts/media-review.json` in the same reviewed change. Both production Docker builds run the catalogue check automatically; run `npm run check:catalog` locally before every release as well.
+Edit the catalogue and add-on rules deliberately in source control and keep both frontend/backend copies identical. Any approved image or fitment change must update `scripts/media-review.json` in the same reviewed change. Both production Docker builds run the catalogue check automatically; run `npm run check:catalog` locally before every release as well.
 
 ## Review moderation
 
@@ -140,10 +139,9 @@ Use `--database /persistent/path/reviews.db` when the database is outside the de
 
 ## Cutover checklist
 
-- Run the final catalog/media import and `npm run verify`.
+- Run `npm run verify`.
 - Configure live Stripe and Web3Forms keys in the deployment secret store.
 - Register and test the production Stripe webhook.
 - Confirm the persistent data volume and backup schedule.
 - Test all navigation, cart, contact, review, checkout/cancel/success, cookie, map, and mobile flows on the production domain.
 - Point DNS only after the new domain passes those checks.
-- Keep the old Hostinger site available briefly for rollback, then remove it after order and analytics verification.

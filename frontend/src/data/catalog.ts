@@ -241,10 +241,15 @@ export function getDiscoveryProducts(product: Product): readonly Product[] {
   );
   const upgrades = sellable.filter((candidate) => candidate.kind === "upgrade");
   const mainCandidates = sellable.filter((candidate) => candidate.kind === "main");
-  const seenFamilies = new Set<ProductFamily>();
+  // One slot per family, except starlights: the first-listed DIY kit (currently the cheapest) and one fitted package.
+  const seenSlots = new Set<string>();
   const diverseMainProducts = mainCandidates.filter((candidate) => {
-    if (seenFamilies.has(candidate.family)) return false;
-    seenFamilies.add(candidate.family);
+    const slot =
+      candidate.family === "starlights" && candidate.collections.includes("DIY")
+        ? "starlights-diy"
+        : candidate.family;
+    if (seenSlots.has(slot)) return false;
+    seenSlots.add(slot);
     return true;
   });
 
