@@ -1063,23 +1063,5 @@
         "sha256": "27939e7610e3e6d02cd4279786d191b57f90c797d3bd5e451fbd1a06a72c7866"
       }
     ]
-  },
-  {
-    "productId": "prod_01KCFYNY97DJ0SBEYP5GG6XQ4B",
-    "mediaKey": "twinkle-starlights-800-pieces",
-    "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
-    "fitment": {
-      "mode": "confirm",
-      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
-      "makes": [],
-      "models": [],
-      "chassisCodes": []
-    },
-    "images": [
-      {
-        "path": "/images/products/twinkle-starlights-800-pieces-01.jpeg",
-        "sha256": "e95358e6ffab6b6be1d97d6f89569bdb979c9e3ddb4dc39a5e639895ac00739e"
-      }
-    ]
   }
 ]

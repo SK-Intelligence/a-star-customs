@@ -1908,47 +1908,5 @@
     "comparisonGroup": null,
     "specTier": null,
     "mediaKey": "mercedes-a-class-cla-gla-oem-ambient-lighting-upgrade"
-  },
-  {
-    "id": "prod_01KCFYNY97DJ0SBEYP5GG6XQ4B",
-    "slug": "twinkle-starlights-800-pieces-",
-    "title": "Shooting Stars + Twinkle Starlight (800 Pieces)",
-    "subtitle": null,
-    "ribbonText": "Premium Choice",
-    "descriptionHtml": "<p><strong> Shooting Stars Package (Twinkle + Motion)</strong></p><p>Experience a truly dynamic night sky inside your vehicle. This premium package combines the gentle shimmer of twinkling stars with the breathtaking motion of shooting meteor effects, creating a deep, immersive, and eye-catching display.</p><ul><li><p> <strong>Twinkle Effect:</strong> Soft, realistic shimmering stars for a calming vibe.</p></li><li><p>️ <strong>Shooting Stars:</strong> Dynamic meteors streak across the headliner.</p></li><li><p> <strong>Motion &amp; Depth:</strong> Adds a layer of movement for a cinematic feel.</p></li><li><p> <strong>Peace of Mind:</strong> Includes a <strong>1-Year Warranty</strong>.</p></li></ul><p> All packages include a 1-Year Warranty for complete peace of mind.</p>",
-    "images": [
-      "/images/products/twinkle-starlights-800-pieces-01.jpeg"
-    ],
-    "collectionIds": [
-      "pcol_01KCFNY9B69TCCMR45GSH79Q2W",
-      "pcol_01KCFVV0Z6W3FXV53594CPA5CB"
-    ],
-    "collections": [
-      "Supplied & Fitted",
-      "Shooting Stars + Twinkle Starlight"
-    ],
-    "variants": [
-      {
-        "id": "variant_01KCFYNYBVV3KFV4SVMTN1A10Y",
-        "title": "Shooting Stars + Twinkle Starlight (800 Pieces)",
-        "price": 92499,
-        "available": true
-      }
-    ],
-    "purchasable": true,
-    "available": true,
-    "updatedAt": "2025-12-23T21:55:56.821Z",
-    "kind": "main",
-    "family": "starlights",
-    "fitment": {
-      "mode": "confirm",
-      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
-      "makes": [],
-      "models": [],
-      "chassisCodes": []
-    },
-    "comparisonGroup": null,
-    "specTier": null,
-    "mediaKey": "twinkle-starlights-800-pieces"
   }
 ]
