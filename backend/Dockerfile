@@ -1,13 +1,16 @@
-FROM python:3.12-slim AS catalog-check
+# Base images are pinned by digest (the tag documents it); Dependabot proposes updates.
+FROM python:3.12.15-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d AS catalog-check
 
 WORKDIR /workspace
-COPY scripts/check_catalog_sync.py scripts/media-review.json ./scripts/
+COPY scripts/check_catalog_sync.py scripts/media-review.json scripts/generic-add-on-approvals.json ./scripts/
 COPY frontend/src/data/catalog.json frontend/src/data/add-ons.json ./frontend/src/data/
 COPY backend/app/catalog.json backend/app/add-ons.json ./backend/app/
 COPY frontend/public ./frontend/public
+# Structural catalogue checks only; the text and duplicate heuristics (--ci) run in the
+# Quality gate, so a judgement call never blocks a deploy build.
 RUN python scripts/check_catalog_sync.py && touch /catalog-check-passed
 
-FROM python:3.12-slim
+FROM python:3.12.15-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -16,8 +19,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# The fully locked runtime tree (backend/requirements-runtime.in -> .txt with hashes).
 COPY backend/requirements-runtime.txt ./requirements-runtime.txt
-RUN pip install --no-cache-dir -r requirements-runtime.txt \
+RUN pip install --no-cache-dir --require-hashes -r requirements-runtime.txt \
     && useradd --uid 10001 --create-home --shell /usr/sbin/nologin appuser
 
 COPY --chown=appuser:appuser backend/app ./app

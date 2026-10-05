@@ -1,6 +1,7 @@
 import { ArrowRight, CheckCircle2, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHero } from '../components/PageHero';
+import { ResponsiveImage } from '../components/ResponsiveImage';
 import { Seo } from '../components/Seo';
 import { serviceCards, whatsappUrl } from '../data/site';
 
@@ -41,7 +42,11 @@ export function ServicesPage() {
             {serviceCards.map((service, index) => (
               <article className="service-card" key={service.id}>
                 <Link className="service-card__media" to={service.href}>
-                  <img src={service.image} alt={service.title} loading="lazy" />
+                  <ResponsiveImage
+                    src={service.image}
+                    alt={service.title}
+                    sizes="(max-width: 760px) 100vw, (max-width: 980px) 50vw, (min-width: 1468px) 460px, 33vw"
+                  />
                   <span>{String(index + 1).padStart(2, '0')}</span>
                 </Link>
                 <div>

@@ -1,0 +1,19 @@
+{
+  "ci": {
+    "collect": {
+      "startServerCommand": "sh -c 'cd ../backend && ORDERS_DATABASE_PATH=/tmp/astar-lhci-orders.db REVIEWS_DATABASE_PATH=/tmp/astar-lhci-reviews.db python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8010 & i=0; until curl -sf http://127.0.0.1:8010/api/health >/dev/null; do i=$((i+1)); [ $i -gt 60 ] && exit 1; sleep 0.5; done; API_PROXY_TARGET=http://127.0.0.1:8010 exec npx vite preview --host 127.0.0.1 --port 4180 --strictPort'",
+      "startServerReadyPattern": "Local",
+      "url": ["http://127.0.0.1:4180/", "http://127.0.0.1:4180/mercedes-c-class-oem-ambient-lighting"],
+      "numberOfRuns": 3,
+      "settings": { "chromeFlags": "--no-sandbox --headless=new" }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 0.8, "aggregationMethod": "median-run" }],
+        "categories:accessibility": ["error", { "minScore": 0.95, "aggregationMethod": "median-run" }],
+        "categories:best-practices": ["error", { "minScore": 0.9, "aggregationMethod": "median-run" }]
+      }
+    },
+    "upload": { "target": "filesystem", "outputDir": ".lighthouseci" }
+  }
+}

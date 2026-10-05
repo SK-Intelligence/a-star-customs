@@ -88,7 +88,9 @@ def test_load_add_ons_rejects_single_member_exclusive_group(
 
 def test_disabled_product_scoped_add_ons_do_not_fall_back_to_family_add_ons() -> None:
     disabled_add_ons = [
-        option.model_copy(update={"status": "disabled", "productId": None, "variantId": None})
+        option.model_copy(
+            update={"status": "disabled", "productId": None, "variantId": None}
+        )
         if option.appliesToProducts is not None
         else option
         for option in load_add_ons()

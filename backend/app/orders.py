@@ -221,13 +221,17 @@ def process_stripe_event(
                 f"No order matches Checkout Session {stripe_session_id}."
             )
         if order_reference and order["order_reference"] != order_reference:
-            raise StripeEventOrderMismatchError("Stripe order reference does not match.")
+            raise StripeEventOrderMismatchError(
+                "Stripe order reference does not match."
+            )
         if (
             mode != "payment"
             or currency != order["currency"]
             or amount_total != order["amount_total"]
         ):
-            raise StripeEventOrderMismatchError("Stripe order amount or currency does not match.")
+            raise StripeEventOrderMismatchError(
+                "Stripe order amount or currency does not match."
+            )
 
         if new_status == "paid":
             connection.execute(

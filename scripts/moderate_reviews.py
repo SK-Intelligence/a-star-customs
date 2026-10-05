@@ -67,7 +67,9 @@ def parse_args() -> argparse.Namespace:
         "--status", choices=("pending", "approved", "rejected"), default="pending"
     )
     for command in ("approve", "reject"):
-        command_parser = subparsers.add_parser(command, help=f"{command.title()} a pending review")
+        command_parser = subparsers.add_parser(
+            command, help=f"{command.title()} a pending review"
+        )
         command_parser.add_argument("review_id", type=int)
     return parser.parse_args()
 
@@ -78,7 +80,11 @@ def main() -> None:
         if args.command == "list":
             list_reviews(connection, args.status)
         else:
-            update_review(connection, args.review_id, "approved" if args.command == "approve" else "rejected")
+            update_review(
+                connection,
+                args.review_id,
+                "approved" if args.command == "approve" else "rejected",
+            )
 
 
 if __name__ == "__main__":

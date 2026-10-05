@@ -71,7 +71,9 @@ def test_webhook_durably_updates_order_and_deduplicates(
             "SELECT stripe_session_id, status FROM orders WHERE order_reference = ?",
             ("asc_test_order",),
         ).fetchone()
-        event_count = connection.execute("SELECT COUNT(*) FROM stripe_events").fetchone()
+        event_count = connection.execute(
+            "SELECT COUNT(*) FROM stripe_events"
+        ).fetchone()
     assert order_status == ("cs_test_paid", "paid")
     assert event_count == (1,)
 
@@ -198,7 +200,9 @@ def test_handled_unknown_order_is_retryable_and_event_is_not_consumed(
 
     assert response.status_code == 503
     with sqlite3.connect(database_path) as connection:
-        assert connection.execute("SELECT COUNT(*) FROM stripe_events").fetchone() == (0,)
+        assert connection.execute("SELECT COUNT(*) FROM stripe_events").fetchone() == (
+            0,
+        )
 
 
 def test_mismatched_total_is_retryable_and_does_not_mark_order_paid(
@@ -246,6 +250,8 @@ def test_mismatched_total_is_retryable_and_does_not_mark_order_paid(
             "SELECT stripe_session_id, status FROM orders WHERE order_reference = ?",
             ("asc_total_check",),
         ).fetchone()
-        event_count = connection.execute("SELECT COUNT(*) FROM stripe_events").fetchone()
+        event_count = connection.execute(
+            "SELECT COUNT(*) FROM stripe_events"
+        ).fetchone()
     assert order == (None, "pending")
     assert event_count == (0,)

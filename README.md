@@ -12,13 +12,13 @@ The repository contains the complete public storefront, all 37 migrated products
 
 ## Local development
 
-Requirements: Node.js 20+, npm, Python 3.12+.
+Requirements: Node.js 22 (the production build image), npm, Python 3.12.
 
 ```bash
 npm install
 
 python3 -m venv backend/.venv
-backend/.venv/bin/pip install -r backend/requirements.txt
+backend/.venv/bin/pip install --require-hashes -r backend/requirements.txt
 
 cp .env.example backend/.env
 ```
@@ -85,12 +85,18 @@ Create a Web3Forms access key for the company inbox and add it as `WEB3FORMS_ACC
 ## Verification
 
 ```bash
+npm run ci:fast
 npm run verify
-npm audit --omit=dev
 npm run test:e2e
 ```
 
 `npm run verify:full` runs the build, catalog and backend gates followed by the browser suite. The current coverage includes contact-provider failures, trusted catalog pricing, multi-item/add-on checkout, shipping, durable orders, delayed and out-of-order payment events, signed/idempotent webhooks, cart snapshot safety, session verification, responsive navigation, cookie gates, and review moderation privacy.
+
+## CI/CD
+
+Every change goes through a pull request into `main`. The **Quality gate** workflow (`.github/workflows/ci.yml`) runs ESLint, `tsc` and Ruff (lint and format), backend tests with a coverage floor, the catalogue check with its fitment heuristics, the production build with a bundle secret scan, Playwright E2E (desktop and phone), axe accessibility, Lighthouse, both Docker images, ShellCheck, npm audit, pip-audit, gitleaks, Semgrep and SonarQube. Run `npm run ci:fast` before pushing and `npm run setup:hooks` once per clone.
+
+Railway is required to connect both services to GitHub, use `frontend/railway.json` and `backend/railway.json`, and turn on Wait for CI, so that it deploys `main` only after the gate passes. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, every job, the required Railway setup and the live smoke check.
 
 ## Production with Docker
 
@@ -113,7 +119,7 @@ The production app reads only local JSON and local image/font files. It does not
 - `frontend/src/data/catalog.json` drives the storefront.
 - `backend/app/catalog.json` is the server-authoritative pricing copy.
 - `frontend/src/data/add-ons.json` and `backend/app/add-ons.json` mirror the add-on availability rules used by the product builder and checkout validation.
-- `python scripts/check_catalog_sync.py` proves both catalog and add-on copies are in sync, validates explicit classification and fitment metadata, and verifies every image against the reviewed SHA-256 media manifest in `scripts/media-review.json`.
+- `python scripts/check_catalog_sync.py` proves both catalog and add-on copies are in sync, validates explicit classification and fitment metadata, and verifies every image against the reviewed SHA-256 media manifest in `scripts/media-review.json`. It also runs the fitment guards: every discovery offer and vehicle-specific add-on must fit every vehicle of its base product (the same rule as `productFitmentsAreCompatible`), a generic add-on on a vehicle-specific product needs an entry in `scripts/generic-add-on-approvals.json`, listing text may not name a make, model or chassis code outside its fitment (or claim "most vehicles" on a specific product), and same-family listings with the same fitment and price fail as duplicates. Pending client questions are listed in `KNOWN_TEXT_EXCEPTIONS` and `DUPLICATE_ALLOWLIST` in the script.
 - `python scripts/import_hostinger_catalog.py --refresh-assets` refreshes the final source snapshot before Hostinger is retired. This is a migration utility, not a runtime dependency.
 
 Catalogue behavior is controlled by the explicit `kind` field, never title wording. `addon` products are attachment-only, `upgrade` products are standalone and contain no nested upsells, and purchasable `main` products expose every active stackable add-on. The backend independently verifies the product kinds, base/add-on grouping, matching quantity and trusted prices. Disabled add-on definitions stay unavailable until a trusted catalog product, variant and price are supplied.

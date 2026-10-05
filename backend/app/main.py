@@ -9,7 +9,9 @@ from uuid import uuid4
 import httpx
 import stripe
 from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.addons import (
     AddOnConfigurationError,
@@ -45,10 +47,35 @@ BUILD_INVALID_DETAIL = {
     "code": "BUILD_INVALID",
     "message": "The configured product build is invalid.",
 }
-
-app = FastAPI(title="A Star Customs API", version="1.0.0")
+# Fixed error bodies: a response never repeats what the client sent.
+PRODUCT_NOT_FOUND_DETAIL = {
+    "code": "PRODUCT_NOT_FOUND",
+    "message": "Product not found.",
+}
+VARIANT_NOT_FOUND_DETAIL = {
+    "code": "VARIANT_NOT_FOUND",
+    "message": "Variant not found.",
+}
+ITEM_UNAVAILABLE_DETAIL = {
+    "code": "ITEM_UNAVAILABLE",
+    "message": "Item is not available for online purchase.",
+}
+# Validation errors: the name of an unexpected field is client input, so it is replaced; other
+# location parts are schema names, capped as a backstop. At most this many errors are returned.
+UNEXPECTED_FIELD = "<unexpected field>"
+VALIDATION_LOC_PART_LIMIT = 64
+VALIDATION_ERROR_LIMIT = 20
 
 _startup_settings = get_settings()
+_api_docs = _startup_settings.enable_api_docs
+app = FastAPI(
+    title="A Star Customs API",
+    version="1.0.0",
+    docs_url="/docs" if _api_docs else None,
+    redoc_url="/redoc" if _api_docs else None,
+    openapi_url="/openapi.json" if _api_docs else None,
+)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_startup_settings.allowed_origins,
@@ -56,6 +83,28 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Stripe-Signature"],
 )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    """FastAPI's default 422 body echoes each rejected value (input, ctx); return only
+    where, what and why, for at most VALIDATION_ERROR_LIMIT errors."""
+    errors = []
+    for error in exc.errors()[:VALIDATION_ERROR_LIMIT]:
+        loc = [
+            part[:VALIDATION_LOC_PART_LIMIT] if isinstance(part, str) else part
+            for part in error.get("loc", ())
+        ]
+        if error.get("type") == "extra_forbidden" and loc:
+            loc[-1] = UNEXPECTED_FIELD
+        errors.append(
+            {"loc": loc, "msg": error.get("msg", ""), "type": error.get("type", "")}
+        )
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, content={"detail": errors}
+    )
 
 
 @app.get("/api/health")
@@ -72,7 +121,9 @@ def _validate_product(product_id: str) -> None:
             detail="The product catalog is temporarily unavailable.",
         ) from exc
     if not product_exists:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=PRODUCT_NOT_FOUND_DETAIL
+        )
 
 
 @app.get("/api/reviews/{product_id}", response_model=ReviewListResponse)
@@ -251,14 +302,16 @@ async def create_checkout_session(
         if product is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Product not found: {item.productId}.",
+                detail=PRODUCT_NOT_FOUND_DETAIL,
             )
 
-        variant = next((entry for entry in product.variants if entry.id == item.variantId), None)
+        variant = next(
+            (entry for entry in product.variants if entry.id == item.variantId), None
+        )
         if variant is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Variant not found: {item.variantId}.",
+                detail=VARIANT_NOT_FOUND_DETAIL,
             )
         if (
             not product.purchasable
@@ -268,7 +321,7 @@ async def create_checkout_session(
         ):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"Item is not available for online purchase: {item.variantId}.",
+                detail=ITEM_UNAVAILABLE_DETAIL,
             )
 
         line_metadata = {
@@ -311,7 +364,9 @@ async def create_checkout_session(
         )
 
     order_reference = f"asc_{uuid4().hex}"
-    cart_reference = hashlib.sha256("|".join(cart_identity_parts).encode()).hexdigest()[:20]
+    cart_reference = hashlib.sha256("|".join(cart_identity_parts).encode()).hexdigest()[
+        :20
+    ]
     try:
         await asyncio.to_thread(
             create_pending_order,
@@ -353,7 +408,13 @@ async def create_checkout_session(
                 "cart_reference": cart_reference,
                 "line_count": str(len(stripe_line_items)),
                 "build_count": str(
-                    len({item.buildId for item in cart.items if item.buildId is not None})
+                    len(
+                        {
+                            item.buildId
+                            for item in cart.items
+                            if item.buildId is not None
+                        }
+                    )
                 ),
             },
         )
@@ -461,7 +522,9 @@ async def get_checkout_session_status(
             detail="Order status is temporarily unavailable.",
         ) from exc
     if order is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Order not found."
+        )
     return CheckoutStatusResponse(
         orderReference=order.order_reference,
         status=_verified_checkout_status(session, order.status),
@@ -528,7 +591,9 @@ async def stripe_webhook(
     new_status = status_by_event.get(event_type)
     if event_type == "checkout.session.completed":
         payment_status = _stripe_value(session, "payment_status")
-        new_status = "paid" if payment_status in {"paid", "no_payment_required"} else "pending"
+        new_status = (
+            "paid" if payment_status in {"paid", "no_payment_required"} else "pending"
+        )
     if not isinstance(stripe_session_id, str):
         stripe_session_id = None
     if new_status is not None and stripe_session_id is None:

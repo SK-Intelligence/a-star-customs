@@ -99,6 +99,18 @@ svg {
 
 img {
   max-width: 100%;
+  /* Lets an <img width height> keep its aspect ratio wherever CSS sets only the width. */
+  height: auto;
+}
+
+/* ResponsiveImage wraps its <img> in a <picture>; the <img> lays out as if it stood alone. The
+   <source> is not hidden by default and would otherwise become an empty grid or flex item. */
+picture {
+  display: contents;
+}
+
+picture > source {
+  display: none;
 }
 
 p,
@@ -162,15 +174,20 @@ h3 {
   top: 12px;
   left: 12px;
   padding: 0.75rem 1rem;
-  transform: translateY(-160%);
+  transform: translateY(-200%);
   background: #fff;
   color: #000;
   font-weight: 800;
   transition: transform 180ms ease;
 }
 
-.skip-link:focus {
+/* Keyboard users only: a pointer click or script focus must never pin it over the page. */
+.skip-link:focus-visible {
   transform: translateY(0);
+}
+
+#main-content:focus {
+  outline: none;
 }
 
 .app-shell {
@@ -633,6 +650,7 @@ h3 {
 }
 
 .footer-nav > a,
+.footer-nav > button,
 .footer-contact > a,
 .footer-contact > p {
   width: fit-content;
@@ -642,7 +660,18 @@ h3 {
   transition: color 180ms ease;
 }
 
+.footer-nav > button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.87rem;
+  text-align: left;
+}
+
 .footer-nav > a:hover,
+.footer-nav > button:hover,
 .footer-contact > a:hover {
   color: var(--purple-bright);
 }
@@ -653,7 +682,8 @@ h3 {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding-block: 1.25rem;
+  /* Bottom clearance keeps the copyright line clear of the fixed WhatsApp bubble. */
+  padding-block: 1.25rem calc(4.75rem + env(safe-area-inset-bottom));
   border-top: 1px solid var(--line);
   color: #7d7882;
   font-size: 0.69rem;
@@ -676,9 +706,15 @@ h3 {
 }
 
 .home-hero__media {
-  background: url("/images/site/hero.jpg") center 54% / cover no-repeat;
   transform: scale(1.015);
   animation: hero-arrive 1.2s cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+.home-hero__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 54%;
 }
 
 .home-hero__shade {
@@ -735,7 +771,7 @@ h3 {
   content: "";
 }
 
-.feature-panel > img {
+.feature-panel img {
   position: absolute;
   z-index: -2;
   inset: 0;
@@ -745,7 +781,7 @@ h3 {
   transition: transform 650ms cubic-bezier(0.2, 0.65, 0.25, 1), filter 300ms ease;
 }
 
-.feature-panel:hover > img {
+.feature-panel:hover img {
   transform: scale(1.045);
   filter: saturate(1.15);
 }
@@ -864,10 +900,27 @@ h3 {
 }
 
 .home-showcase {
+  position: relative;
   min-height: clamp(560px, 72vh, 760px);
-  background:
-    linear-gradient(0deg, rgb(3 3 4 / 72%), rgb(3 3 4 / 10%) 65%),
-    url("/images/site/gallery-stars-06.jpeg") center 40% / cover no-repeat;
+  isolation: isolate;
+}
+
+.home-showcase::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(0deg, rgb(3 3 4 / 72%), rgb(3 3 4 / 10%) 65%);
+  content: "";
+}
+
+.home-showcase__media {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
 }
 
 .home-showcase > a {
@@ -957,9 +1010,25 @@ h3 {
   position: relative;
   min-height: 500px;
   overflow: hidden;
-  background:
-    linear-gradient(90deg, rgb(6 5 8 / 94%) 0%, rgb(6 5 8 / 70%) 48%, rgb(6 5 8 / 24%) 100%),
-    var(--page-hero-image, linear-gradient(135deg, #18131e, #060607)) center / cover no-repeat;
+  background: linear-gradient(135deg, #18131e, #060607);
+  isolation: isolate;
+}
+
+.page-hero::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(6 5 8 / 94%) 0%, rgb(6 5 8 / 70%) 48%, rgb(6 5 8 / 24%) 100%);
+  content: "";
+}
+
+.page-hero__media {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .page-hero__content {
@@ -1281,7 +1350,7 @@ h3 {
   content: "";
 }
 
-.collaboration-card > img {
+.collaboration-card img {
   position: absolute;
   z-index: -2;
   inset: 0;
@@ -1291,7 +1360,7 @@ h3 {
   transition: transform 600ms ease;
 }
 
-.collaboration-card:hover > img {
+.collaboration-card:hover img {
   transform: scale(1.045);
 }
 
@@ -2015,7 +2084,7 @@ h3 {
   transform: none;
 }
 
-.build-extra > img,
+.build-extra img,
 .build-extra > svg {
   width: 62px;
   height: 62px;
@@ -2932,7 +3001,7 @@ h3 {
   background: #111014;
 }
 
-.checkout-items article > img {
+.checkout-items article img {
   width: 130px;
   height: 130px;
   object-fit: cover;
@@ -3394,15 +3463,26 @@ h3 {
 }
 
 /* Cookie controls */
+/* Stacking: header 60 < cookie banner 105 < bag backdrop 110 < bag drawer 120 < review and
+   cookie-preferences modals 190 < lightbox 200. The banner sits below the bag backdrop so a
+   dialog always wins, and it also goes inert and hidden (.is-yielding) while any dialog is open,
+   returning when it closes. */
 .cookie-banner-wrap {
   position: fixed;
-  z-index: 180;
+  z-index: 105;
+  transition: opacity 160ms ease, visibility 160ms;
   right: auto;
   bottom: max(1rem, env(safe-area-inset-bottom));
   left: max(1rem, env(safe-area-inset-left));
   max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+.cookie-banner-wrap.is-yielding {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .cookie-banner {
@@ -3479,31 +3559,6 @@ h3 {
   width: 1.2rem;
   height: 1.2rem;
   accent-color: var(--purple);
-}
-
-.cookie-settings-button {
-  position: fixed;
-  z-index: 80;
-  bottom: max(1rem, env(safe-area-inset-bottom));
-  left: max(1rem, env(safe-area-inset-left));
-  display: flex;
-  min-height: 2.8rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  padding-inline: 0.8rem;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  background: rgb(14 13 16 / 92%);
-  color: #fff;
-  cursor: pointer;
-  font-size: 0.68rem;
-  font-weight: 800;
-  box-shadow: 0 10px 25px rgb(0 0 0 / 25%);
-}
-
-.cookie-settings-button svg {
-  width: 1rem;
 }
 
 /* Floating WhatsApp */
@@ -3677,8 +3732,8 @@ h3 {
     align-items: center;
   }
 
-  .home-hero__media {
-    background-position: 62% center;
+  .home-hero__media img {
+    object-position: 62% center;
   }
 
   .home-hero__shade {
@@ -4067,7 +4122,7 @@ h3 {
     gap: 0.65rem;
   }
 
-  .build-extra > img,
+  .build-extra img,
   .build-extra > svg {
     width: 52px;
     height: 52px;
@@ -4122,7 +4177,7 @@ h3 {
     align-items: start;
   }
 
-  .checkout-items article > img {
+  .checkout-items article img {
     width: 88px;
     height: 100px;
   }
@@ -4165,6 +4220,47 @@ h3 {
     max-height: calc(100dvh - 1rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 
+  /* Compact phone banner: roughly a fifth of the screen instead of two fifths. Accept all and
+     Essentials only sit side by side at identical size; every control is >= 44px tall. */
+  .cookie-banner {
+    width: 100%;
+    gap: 0.7rem;
+    padding: 0.85rem 0.9rem 0.6rem;
+  }
+
+  .cookie-banner h2 {
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+
+  .cookie-banner p:not(.eyebrow) {
+    margin-top: 0.3rem;
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+
+  .cookie-banner .cookie-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .cookie-banner .cookie-actions .button {
+    min-height: 2.75rem;
+    padding: 0.5rem 0.4rem;
+    font-size: 0.72rem;
+  }
+
+  .cookie-banner .cookie-actions .text-button {
+    grid-column: 1 / -1;
+    justify-content: center;
+    min-height: 2.75rem;
+    border-bottom: 0;
+    text-decoration: underline;
+    text-decoration-color: var(--purple);
+    text-underline-offset: 0.3em;
+  }
+
   .cookie-actions,
   .cookie-actions .button,
   .cookie-actions .text-button {
@@ -4175,23 +4271,18 @@ h3 {
     display: none;
   }
 
+  .whatsapp-button.is-behind-banner {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
   .whatsapp-button {
     width: 3.25rem;
     justify-content: center;
     padding: 0;
   }
 
-  .cookie-settings-button {
-    right: max(1rem, env(safe-area-inset-right));
-    bottom: calc(4.9rem + env(safe-area-inset-bottom));
-    left: auto;
-    width: 3.25rem;
-    padding: 0;
-  }
-
-  .cookie-settings-button span {
-    display: none;
-  }
 }
 
 @media (max-height: 500px) and (min-width: 520px) and (max-width: 1200px) {
@@ -4218,6 +4309,7 @@ h3 {
 @media (pointer: coarse) {
   .back-link,
   .footer-nav > a,
+  .footer-nav > button,
   .footer-contact > a,
   .catalog-categories button,
   .checkout-items article > div > div > button {
@@ -4225,6 +4317,7 @@ h3 {
   }
 
   .footer-nav > a,
+  .footer-nav > button,
   .footer-contact > a,
   .checkout-items article > div > div > button {
     display: inline-flex;
@@ -4276,5 +4369,63 @@ h3 {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Short landscape phone: the banner would take most of the height as a single column, so it
+   spreads into two columns (text left, actions right), about 150px tall. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .cookie-banner-wrap {
+    right: max(0.5rem, env(safe-area-inset-right));
+    bottom: max(0.5rem, env(safe-area-inset-bottom));
+    left: max(0.5rem, env(safe-area-inset-left));
+    max-height: calc(100dvh - 1rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+
+  .cookie-banner {
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem);
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    width: 100%;
+    padding: 0.7rem 1rem;
+  }
+
+  .cookie-banner h2 {
+    font-size: 1.3rem;
+  }
+
+  .cookie-banner p:not(.eyebrow) {
+    max-width: none;
+    margin-top: 0.25rem;
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+
+  .cookie-banner .cookie-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+  }
+
+  .cookie-banner .cookie-actions .button {
+    min-height: 2.75rem;
+    padding: 0.4rem;
+    font-size: 0.72rem;
+  }
+
+  .cookie-banner .cookie-actions .text-button {
+    grid-column: 1 / -1;
+    justify-content: center;
+    min-height: 2.75rem;
+    border-bottom: 0;
+    text-decoration: underline;
+    text-decoration-color: var(--purple);
+    text-underline-offset: 0.3em;
+  }
+
+  .whatsapp-button.is-behind-banner {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
   }
 }

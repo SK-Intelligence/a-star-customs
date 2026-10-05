@@ -2,6 +2,7 @@ import { Expand } from 'lucide-react';
 import { useState } from 'react';
 import { ImageLightbox } from '../components/ImageLightbox';
 import { PageHero } from '../components/PageHero';
+import { ResponsiveImage } from '../components/ResponsiveImage';
 import { Seo } from '../components/Seo';
 import { galleryGroups } from '../data/site';
 
@@ -9,6 +10,14 @@ interface ActiveGallery {
   images: readonly string[];
   index: number;
   alt: string;
+}
+
+// Mosaic tiles: a 12-column grid (the first tile 7 columns by 2 rows, the next two 5, the rest 4);
+// on phones two columns, the first tile spanning both.
+function gallerySizes(index: number): string {
+  if (index === 0) return '(max-width: 760px) 100vw, (min-width: 1468px) 830px, 58vw';
+  if (index < 3) return '(max-width: 760px) 50vw, (min-width: 1468px) 590px, 42vw';
+  return '(max-width: 760px) 50vw, (min-width: 1468px) 475px, 34vw';
 }
 
 export function GalleryPage() {
@@ -52,7 +61,11 @@ export function GalleryPage() {
                     }
                     aria-label={`Open ${group.title} image ${imageIndex + 1}`}
                   >
-                    <img src={image} alt={`${group.title} example ${imageIndex + 1}`} loading="lazy" />
+                    <ResponsiveImage
+                      src={image}
+                      alt={`${group.title} example ${imageIndex + 1}`}
+                      sizes={gallerySizes(imageIndex)}
+                    />
                     <span><Expand aria-hidden="true" /></span>
                   </button>
                 ))}

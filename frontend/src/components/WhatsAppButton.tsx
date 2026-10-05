@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { useCookieBannerPending } from '../hooks/cookiePreferencesEvents';
 import { whatsappUrl } from '../data/site';
 
 export function WhatsAppButton() {
   const { pathname } = useLocation();
   const [isObscured, setIsObscured] = useState(false);
+  const bannerPending = useCookieBannerPending();
 
   useEffect(() => {
     const targets = Array.from(
@@ -33,7 +35,12 @@ export function WhatsAppButton() {
 
   return (
     <a
-      className={isObscured ? 'whatsapp-button is-obscured' : 'whatsapp-button'}
+      className={[
+        'whatsapp-button',
+        isObscured ? 'is-obscured' : '',
+        // Hidden by CSS only where the banner would overlap it (phones, short landscape).
+        bannerPending ? 'is-behind-banner' : '',
+      ].filter(Boolean).join(' ')}
       href={whatsappUrl}
       target="_blank"
       rel="noreferrer"

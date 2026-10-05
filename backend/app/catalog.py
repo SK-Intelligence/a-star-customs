@@ -58,5 +58,7 @@ def load_catalog() -> dict[str, CatalogProduct]:
 
     catalog = {product.id: product for product in products}
     if len(catalog) != len(products):
-        raise CatalogConfigurationError("The product catalog contains duplicate product IDs.")
+        raise CatalogConfigurationError(
+            "The product catalog contains duplicate product IDs."
+        )
     return catalog

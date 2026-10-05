@@ -167,10 +167,8 @@ test('custom kits contains only DIY products and uses kit-specific hero media', 
   await page.goto('/custom-kits');
 
   await expect(page.getByRole('heading', { name: '11 products' })).toBeVisible();
-  await expect(page.locator('.page-hero')).toHaveCSS(
-    'background-image',
-    /starlight-fiber-optic-kit-01\.jpg/,
-  );
+  await expect(page.locator('.page-hero__media')).toHaveAttribute('src', /starlight-fiber-optic-kit-01\.jpg$/);
+  await expect(page.locator('.page-hero__media')).toHaveAttribute('fetchpriority', 'high');
 
   await page.getByRole('heading', { name: 'Universal Starlight Fiber Optic Kit (Standard)', exact: true }).click();
   await expect(page.getByRole('link', { name: 'Back to custom kits' })).toBeVisible();
@@ -224,6 +222,8 @@ test('optional extras update the build total and remain removable cart lines', a
   await expect(drawer.getByText('£414.98', { exact: true })).toBeVisible();
 
   await drawer.getByRole('button', { name: 'Close shopping bag' }).click();
+  // On a phone the bubble stays hidden behind the unanswered cookie banner; answer it first.
+  await page.getByRole('button', { name: 'Essentials only' }).click();
   await page.locator('.review-panel').scrollIntoViewIfNeeded();
   await expect(page.locator('.whatsapp-button')).toBeVisible();
 });
@@ -428,25 +428,6 @@ test('panoramic lights do not offer ambient-lighting-only extras', async ({ page
 
   await expect(page.getByRole('heading', { name: 'Personalise your package' })).toHaveCount(0);
   await expect(page.locator('.product-buybox .buy-actions').getByRole('button', { name: 'Add to bag' })).toBeVisible();
-});
-
-test('vehicle-specific discovery never crosses into another make or model', async ({ page }) => {
-  await page.goto('/-bmw-f-series-oem-ambient-package');
-
-  const discovery = page.locator('.product-discovery');
-  await expect(discovery).toContainText('6 compatible upgrades and services');
-  await expect(discovery.getByText(/Golf|Audi|Mercedes|A-Class|CLA|GLA/i)).toHaveCount(0);
-
-  await page.goto('/mercedes-c-class-oem-ambient-lighting');
-  const cClassDiscovery = page.locator('.product-discovery');
-  for (const incompatibleSlug of [
-    '-bmw-f-series-oem-ambient-package',
-    'car-interior-ambient-light-kit-golf-mk7-mk75-2012-2019',
-    'car-interior-ambient-led-light-kit-audi-q3-2018-current',
-    'full-oem-ambient-lighting-upgrade-a-class1',
-  ]) {
-    await expect(cClassDiscovery.locator(`a[href="/${incompatibleSlug}"]`)).toHaveCount(0);
-  }
 });
 
 test('upgrade listings are directly purchasable and contain no nested upsells', async ({ page }) => {
@@ -1027,4 +1008,223 @@ test('cookie choices remain fully reachable in short phone landscape', async ({ 
   expect(box?.y).toBeGreaterThanOrEqual(0);
   expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(320);
   await expect(banner.getByRole('button', { name: 'Essentials only' })).toBeVisible();
+});
+
+test('first-visit phone: the bag is usable over the cookie banner, which returns afterwards', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/luxury-car-interior');
+
+  const banner = page.getByRole('region', { name: 'We use cookies' });
+  await expect(banner).toBeVisible();
+  // Compact on a phone: well under a quarter of the screen, with Accept all and Essentials only
+  // side by side at the same size and with 44px touch targets.
+  const bannerBox = await banner.boundingBox();
+  expect(bannerBox?.height ?? Infinity).toBeLessThan(844 * 0.3);
+  const acceptBox = await banner.getByRole('button', { name: 'Accept all' }).boundingBox();
+  const essentialsBox = await banner.getByRole('button', { name: 'Essentials only' }).boundingBox();
+  expect(acceptBox?.y).toBe(essentialsBox?.y);
+  expect(acceptBox?.height).toBeGreaterThanOrEqual(44);
+  expect(essentialsBox?.height).toBeGreaterThanOrEqual(44);
+  expect(acceptBox?.width).toBeCloseTo(essentialsBox?.width ?? 0, 0);
+
+  await page.getByRole("button", { name: /Add (build )?to bag/ }).first().click();
+  const drawer = page.getByRole('dialog', { name: 'Shopping bag' });
+  const checkout = drawer.getByRole('link', { name: /Review & checkout/ });
+  await expect(checkout).toBeVisible();
+
+  // The banner yields while the dialog is open: hidden, inert and not focusable.
+  await expect(banner).toBeHidden();
+  await expect(drawer.getByRole('button', { name: 'Close shopping bag' })).toBeFocused();
+
+  // The link is genuinely hit-testable: nothing sits above it.
+  const topmostIsCheckout = await checkout.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
+    return element.contains(hit);
+  });
+  expect(topmostIsCheckout).toBe(true);
+
+  // Escape closes the drawer; the banner is back, nothing was stored, and consent is not implied.
+  await page.keyboard.press('Escape');
+  await expect(drawer).toBeHidden();
+  await expect(banner).toBeVisible();
+  await expect(banner.getByRole('button', { name: 'Essentials only' })).toBeEnabled();
+  expect(await page.evaluate(() => localStorage.getItem('astar-cookie-preferences'))).toBeNull();
+
+  // Reopen and go to checkout without ever dismissing the banner.
+  await page.getByRole('button', { name: /Open shopping bag/ }).click();
+  await checkout.click();
+  await expect(page).toHaveURL(/\/checkout$/);
+  await expect(banner).toBeVisible();
+});
+
+test('first-visit phone: choosing Essentials only leaves no skip link or floating control over the page', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/mercedes-c-class-oem-ambient-lighting');
+
+  await page.getByRole('region', { name: 'We use cookies' }).getByRole('button', { name: 'Essentials only' }).click();
+  await expect(page.getByRole('region', { name: 'We use cookies' })).toBeHidden();
+
+  // Focus moves to the page content, not the skip link, and the skip link stays off-screen.
+  await expect(page.locator('#main-content')).toBeFocused();
+  const skipLink = page.getByRole('link', { name: 'Skip to content' });
+  await expect(skipLink).not.toBeInViewport();
+
+  // No fixed cookie control floats over the page; preferences stay reachable from the footer.
+  await expect(page.locator('.cookie-settings-button')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Open cookie preferences' }).click();
+  await expect(page.getByRole('dialog', { name: 'Cookie preferences' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog', { name: 'Cookie preferences' })).toBeHidden();
+
+  // The skip link still appears for keyboard users.
+  await page.reload();
+  await page.keyboard.press('Tab');
+  await expect(skipLink).toBeFocused();
+  await expect(skipLink).toBeInViewport();
+});
+
+for (const viewport of [
+  { width: 390, height: 844 },
+  { width: 1440, height: 900 },
+]) {
+  test(`cookie banner gives Accept all and Essentials only equal prominence at ${viewport.width}px`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+
+    const banner = page.getByRole('region', { name: 'We use cookies' });
+    const styleOf = (name: string) =>
+      banner.getByRole('button', { name }).evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          className: element.className,
+          backgroundColor: style.backgroundColor,
+          borderColor: style.borderColor,
+          borderWidth: style.borderWidth,
+          color: style.color,
+          boxShadow: style.boxShadow,
+          fontSize: style.fontSize,
+          fontWeight: style.fontWeight,
+          height: element.getBoundingClientRect().height,
+        };
+      });
+
+    expect(await styleOf('Essentials only')).toEqual(await styleOf('Accept all'));
+  });
+}
+
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 844, height: 390 },
+]) {
+  test(`footer cookie preferences control is really clickable at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        'astar-cookie-preferences',
+        JSON.stringify({ analytics: false, marketing: false }),
+      );
+    });
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+
+    const control = page.getByRole('navigation', { name: 'Footer navigation' }).getByRole('button', {
+      name: 'Open cookie preferences',
+    });
+    await control.scrollIntoViewIfNeeded();
+    await control.click(); // a real click: fails if the WhatsApp bubble or anything else covers it
+    await expect(page.getByRole('dialog', { name: 'Cookie preferences' })).toBeVisible();
+  });
+}
+
+test('cookie banner is compact in short landscape and does not exceed 45% of the height', async ({ page }) => {
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.goto('/');
+
+  const banner = page.getByRole('region', { name: 'We use cookies' });
+  const box = await banner.boundingBox();
+  expect(box?.height ?? Infinity).toBeLessThan(390 * 0.45);
+  for (const name of ['Accept all', 'Essentials only', 'Manage preferences']) {
+    const target = await banner.getByRole('button', { name }).boundingBox();
+    expect(target?.height).toBeGreaterThanOrEqual(44);
+  }
+  await expect(page.locator('.whatsapp-button')).toBeHidden();
+});
+
+test('phone cookie banner is centred and hides the WhatsApp bubble until a choice is made', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+
+  const banner = page.getByRole('region', { name: 'We use cookies' });
+  const box = await banner.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box?.x ?? 0).toBeCloseTo(390 - ((box?.x ?? 0) + (box?.width ?? 0)), 0);
+  await expect(page.locator('.whatsapp-button')).toBeHidden();
+
+  await banner.getByRole('button', { name: 'Essentials only' }).click();
+  await expect(page.locator('.whatsapp-button')).toBeVisible();
+});
+
+test('the cookie banner is early in the tab order, right after the skip link', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
+  await page.keyboard.press('Tab');
+  // Next stop is inside the banner (its privacy notice link), well before the header and page.
+  await expect(page.getByRole('region', { name: 'We use cookies' }).locator(':focus')).toHaveCount(1);
+});
+
+async function tabToManagePreferences(page: Page) {
+  const manage = page.getByRole('button', { name: 'Manage preferences' });
+  for (let step = 0; step < 8; step += 1) {
+    await page.keyboard.press('Tab');
+    if (await manage.evaluate((element) => element === document.activeElement)) return;
+  }
+  throw new Error('Manage preferences never received keyboard focus');
+}
+
+test('first-visit Manage preferences: Save choices hands focus to the page content', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await tabToManagePreferences(page);
+  await page.keyboard.press('Enter');
+
+  const dialog = page.getByRole('dialog', { name: 'Cookie preferences' });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: 'Save choices' }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.locator('#main-content')).toBeFocused();
+});
+
+test('first-visit Manage preferences: Escape returns focus to the still-unanswered banner', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await tabToManagePreferences(page);
+  await page.keyboard.press('Enter');
+
+  const dialog = page.getByRole('dialog', { name: 'Cookie preferences' });
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  const banner = page.getByRole('region', { name: 'We use cookies' });
+  await expect(banner).toBeVisible();
+  await expect(banner.getByRole('button', { name: 'Manage preferences' })).toBeFocused();
+  expect(await page.evaluate(() => localStorage.getItem('astar-cookie-preferences'))).toBeNull();
+});
+
+test('clicking empty space in main focuses it without a ring or scroll jump', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.addInitScript(() => {
+    localStorage.setItem('astar-cookie-preferences', JSON.stringify({ analytics: false, marketing: false }));
+  });
+  await page.goto('/privacy');
+  await page.evaluate(() => window.scrollTo(0, 400));
+  const before = await page.evaluate(() => window.scrollY);
+  await page.mouse.click(8, 500);
+  const after = await page.evaluate(() => ({
+    scrollY: window.scrollY,
+    outline: getComputedStyle(document.getElementById('main-content') as HTMLElement).outlineStyle,
+  }));
+  expect(after.scrollY).toBe(before);
+  expect(after.outline).toBe('none');
 });

@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Cookie, ShieldCheck, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ShieldCheck, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useDialogFocus } from '../hooks/useDialogFocus';
+import { OPEN_COOKIE_PREFERENCES_EVENT, setCookieBannerPending } from '../hooks/cookiePreferencesEvents';
+import { useAnyDialogOpen, useDialogFocus } from '../hooks/useDialogFocus';
 
 const STORAGE_KEY = 'astar-cookie-preferences';
 const EVENT_NAME = 'astar-cookie-preferences-changed';
@@ -98,12 +99,38 @@ export function CookieConsent() {
     analytics: false,
     marketing: false,
   });
-  const closePreferences = () => setIsManaging(false);
+  const manageButtonRef = useRef<HTMLButtonElement>(null);
+  const closePreferences = () => {
+    setIsManaging(false);
+    // First visit: the banner is still showing, unanswered. The "Manage preferences" button that
+    // opened the dialog was unmounted with it, so put focus back on its replacement.
+    if (preferences === null) {
+      window.requestAnimationFrame(() => manageButtonRef.current?.focus());
+    }
+  };
   const preferencesRef = useDialogFocus<HTMLElement>({
     isOpen: isManaging,
     onClose: closePreferences,
     initialFocusSelector: '.cookie-modal__close, .cookie-options input:not([disabled])',
   });
+
+  // While another modal (bag drawer, mobile menu, review form) is open the banner steps aside:
+  // inert and invisible, so it neither covers that dialog's controls nor takes focus. It is
+  // still mounted, so it is back, unanswered, the moment the dialog closes. Consent is never
+  // implied by this: nothing is stored until the visitor picks a choice.
+  const otherDialogOpen = useAnyDialogOpen();
+  const yielding = otherDialogOpen && !isManaging;
+  const wrapRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (wrapRef.current) wrapRef.current.inert = yielding;
+  }, [yielding]);
+
+  // Lets the floating WhatsApp bubble step aside while the unanswered banner is showing.
+  const bannerShowing = preferences === null && !isManaging;
+  useEffect(() => {
+    setCookieBannerPending(bannerShowing);
+    return () => setCookieBannerPending(false);
+  }, [bannerShowing]);
 
   useEffect(() => {
     const handleChange = (event: Event) => {
@@ -118,31 +145,45 @@ export function CookieConsent() {
     return () => window.removeEventListener(EVENT_NAME, handleChange);
   }, []);
 
-  if (preferences && !isManaging) {
-    return (
-      <button
-        className="cookie-settings-button"
-        type="button"
-        aria-label="Open cookie preferences"
-        onClick={() => {
-          setDraft(preferences);
-          setIsManaging(true);
-        }}
-      >
-        <Cookie aria-hidden="true" />
-        <span>Cookies</span>
-      </button>
-    );
-  }
+  const latestPreferences = useRef(preferences);
+  latestPreferences.current = preferences;
+  useEffect(() => {
+    const handleOpen = () => {
+      setDraft(latestPreferences.current ?? { analytics: false, marketing: false });
+      setIsManaging(true);
+    };
+    window.addEventListener(OPEN_COOKIE_PREFERENCES_EVENT, handleOpen);
+    return () => window.removeEventListener(OPEN_COOKIE_PREFERENCES_EVENT, handleOpen);
+  }, []);
+
+  if (preferences && !isManaging) return null;
 
   const accept = (next: CookiePreferences) => {
+    // First visit: whichever control held focus (Accept all, Essentials only, or Save choices in
+    // the dialog opened from "Manage preferences") unmounts with the banner. Hand focus to the
+    // page content rather than letting it fall to <body> or onto the skip link.
+    const firstVisit = preferences === null;
     savePreferences(next);
     setPreferences(next);
     setIsManaging(false);
+    if (firstVisit) {
+      window.requestAnimationFrame(() => {
+        document.getElementById('main-content')?.focus({ preventScroll: true });
+      });
+    }
   };
 
   return (
-    <div className={isManaging ? 'cookie-modal-backdrop' : 'cookie-banner-wrap'}>
+    <div
+      ref={wrapRef}
+      className={
+        isManaging
+          ? 'cookie-modal-backdrop'
+          : yielding
+            ? 'cookie-banner-wrap is-yielding'
+            : 'cookie-banner-wrap'
+      }
+    >
       <section
         ref={preferencesRef}
         className={isManaging ? 'cookie-modal' : 'cookie-banner'}
@@ -231,12 +272,13 @@ export function CookieConsent() {
               </button>
               <button
                 type="button"
-                className="button button--ghost"
+                className="button button--primary"
                 onClick={() => accept({ analytics: false, marketing: false })}
               >
                 Essentials only
               </button>
               <button
+                ref={manageButtonRef}
                 type="button"
                 className="text-button"
                 onClick={() => {

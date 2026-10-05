@@ -9,14 +9,14 @@ export function Layout() {
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">Skip to content</a>
+      <CookieConsent />
       <Header />
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1}>
         <Outlet />
       </main>
       <Footer />
       <WhatsAppButton />
       <CartDrawer />
-      <CookieConsent />
     </div>
   );
 }

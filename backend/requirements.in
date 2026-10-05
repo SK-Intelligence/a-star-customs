@@ -1,0 +1,12 @@
+# Runtime plus test and lint tools. Locked with hashes in requirements.txt at the same runtime
+# versions as requirements-runtime.txt (the -c constraint). After editing either .in file:
+#   (cd backend && pip-compile --generate-hashes --allow-unsafe --strip-extras \
+#     requirements.in -o requirements.txt)
+-r requirements-runtime.in
+-c requirements-runtime.txt
+pytest==9.1.1
+pytest-asyncio==1.4.0
+pytest-cov==7.1.0
+ruff==0.16.10
+# Starlette's TestClient prefers httpx2 (with plain httpx it warns that support is deprecated).
+httpx2==2.13.1

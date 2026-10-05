@@ -17,3 +17,9 @@ output/
 .env.*
 !.env.example
 .DS_Store
+backend/.coverage
+backend/coverage.xml
+.ruff_cache/
+frontend/.lighthouseci/
+.scannerwork/
+frontend/test/.generated/
