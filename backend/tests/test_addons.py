@@ -86,7 +86,7 @@ def test_load_add_ons_rejects_single_member_exclusive_group(
         load_add_ons.cache_clear()
 
 
-def test_disabled_product_scoped_add_ons_do_not_fall_back_to_family_add_ons() -> None:
+def test_disabled_c_class_add_ons_leave_the_c_class_without_generic_add_ons() -> None:
     disabled_add_ons = [
         option.model_copy(
             update={"status": "disabled", "productId": None, "variantId": None}
@@ -102,3 +102,31 @@ def test_disabled_product_scoped_add_ons_do_not_fall_back_to_family_add_ons() ->
     assert len(options) == 6
     assert all(option.appliesToProducts == [C_CLASS_ID] for option in options)
     assert all(option.status == "disabled" for option in options)
+
+
+def unscoped_option(option_id: str, **overrides: object) -> AddOnOption:
+    fields = scoped_option(
+        id=option_id,
+        productId=f"prod_{option_id}",
+        variantId=f"variant_{option_id}",
+        **overrides,
+    )
+    del fields["exclusiveGroup"]
+    if fields["appliesToProducts"] is None:
+        del fields["appliesToProducts"]
+    return AddOnOption.model_validate(fields)
+
+
+def test_a_product_gets_the_union_of_its_scoped_and_family_wide_add_ons() -> None:
+    options = [
+        unscoped_option("first"),
+        unscoped_option("family-wide", appliesToProducts=None),
+        unscoped_option("second", appliesToProducts=["prod_other", C_CLASS_ID]),
+        unscoped_option("elsewhere", appliesToProducts=["prod_other"]),
+        unscoped_option("other-family", appliesToFamilies=["starlights"]),
+    ]
+
+    assert [
+        option.id
+        for option in add_ons_for_product(options, C_CLASS_ID, "ambient-lighting")
+    ] == ["first", "family-wide", "second"]

@@ -169,7 +169,11 @@ BMW_F32 = {
     ("fitment", "text", "outside"),
     [
         # A "not ..." list names what the listing does not fit.
-        (MERCEDES_C_CLASS, "Mercedes C-Class W205 and GLC X253; not CLA or GLA.", set()),
+        (
+            MERCEDES_C_CLASS,
+            "Mercedes C-Class W205 and GLC X253; not CLA or GLA.",
+            set(),
+        ),
         (MERCEDES_C_CLASS, "Mercedes C-Class; not for the A-Class, CLA or GLA", set()),
         # Without "not" the same names are still caught.
         (
@@ -198,3 +202,60 @@ def test_text_against_fitment_reads_negations_and_generations(
     listing = _listing(fitment, text)
     terms = check.vehicle_terms(check.listing_text(listing))
     assert check.terms_outside_fitment(listing, terms) == outside
+
+
+@pytest.mark.parametrize(
+    ("slug", "expected"),
+    [
+        (
+            "-bmw-f-series-oem-ambient-package",
+            [
+                "speaker-lights",
+                "premium-animation-pack",
+                "bmw-tweeter-speakers",
+                "bmw-door-speakers",
+                "bmw-illuminated-door-handles",
+            ],
+        ),
+        (
+            "full-oem-ambient-lighting-upgrade-a-class1",
+            ["a-class-oem-vents", "a-class-oem-dashboard", "a-class-oem-speakers"],
+        ),
+        ("ambient-lighting-upgrade", ["speaker-lights", "premium-animation-pack"]),
+        ("car-interior-ambient-led-light-kit-audi-q3-2018-current", []),
+        ("calipers", ["caliper-decals"]),
+        ("caliper-decals-add-on", []),
+    ],
+)
+def test_add_on_port_offers_the_union_scoped_to_each_listing(
+    catalog: list[dict[str, Any]],
+    add_ons: list[dict[str, Any]],
+    slug: str,
+    expected: list[str],
+) -> None:
+    by_id = {p["id"]: p for p in catalog}
+    base = next(p for p in catalog if p["slug"] == slug)
+    assert [a["id"] for a, _ in check.add_on_options(base, add_ons, by_id)] == expected
+
+
+def test_c_class_keeps_exactly_its_six_add_ons(
+    catalog: list[dict[str, Any]], add_ons: list[dict[str, Any]]
+) -> None:
+    by_id = {p["id"]: p for p in catalog}
+    base = next(
+        p for p in catalog if p["slug"] == "mercedes-c-class-oem-ambient-lighting"
+    )
+    ids = [a["id"] for a, _ in check.add_on_options(base, add_ons, by_id)]
+    assert len(ids) == 6 and all(i.startswith("c-class-") for i in ids)
+
+
+def test_a_family_wide_generic_add_on_trips_the_approval_guard(
+    catalog: list[dict[str, Any]], add_ons: list[dict[str, Any]]
+) -> None:
+    planted = copy.deepcopy(add_ons)
+    del next(a for a in planted if a["id"] == "speaker-lights")["appliesToProducts"]
+
+    with pytest.raises(
+        SystemExit, match="generic add-on speaker-lights on vehicle-specific"
+    ):
+        check.check_fitment_guards(catalog, planted, heuristics=False)

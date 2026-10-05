@@ -5,6 +5,7 @@
     "label": "4x Speaker Lights",
     "description": "Add illuminated speaker accents to your ambient lighting installation.",
     "appliesToFamilies": ["ambient-lighting"],
+    "appliesToProducts": ["prod_01KRGY8J6KK956RF83F6VCCBKA", "prod_01KRGYB92HFEDJ2669V89535NR", "prod_01K6GY7W0PTTBFMH5DHF9Z75EN", "prod_01KRGYEY3SV5BS05BV5XHWKTNX"],
     "productId": "prod_01KCFR1PBNK4HHMX64NN0BPCCK",
     "variantId": "variant_01KCFR1PF6SSFRX0GSDM2FDNDH"
   },
@@ -14,6 +15,7 @@
     "label": "Premium Pack: 25+ Animations & Start-Up Effects",
     "description": "Add an expanded set of animations and start-up effects.",
     "appliesToFamilies": ["ambient-lighting"],
+    "appliesToProducts": ["prod_01KRGY8J6KK956RF83F6VCCBKA", "prod_01KRGYB92HFEDJ2669V89535NR", "prod_01K6GY7W0PTTBFMH5DHF9Z75EN", "prod_01KRGYEY3SV5BS05BV5XHWKTNX"],
     "productId": "prod_01KCFRCKR5NV5VGCM7ZTKCZ5DE",
     "variantId": "variant_01KCFRCKV84EMEE32KZB4QF9MK"
   },
@@ -107,5 +109,75 @@
     "appliesToProducts": ["prod_01KS68E0X8NM8FT2FXN6S0YXCF"],
     "productId": "prod_01M43GJ2948X0SX0WSST55MJ53",
     "variantId": "variant_01M43GJ294MMHQS10QQPK7PJWP"
+  },
+  {
+    "id": "bmw-tweeter-speakers",
+    "status": "active",
+    "label": "Tweeter speakers",
+    "description": "Illuminated tweeter speakers, lit with the rest of your ambient lighting.",
+    "appliesToFamilies": ["ambient-lighting"],
+    "appliesToProducts": ["prod_01KRGY8J6KK956RF83F6VCCBKA"],
+    "productId": "prod_01M46HV2D03AVSQPF311V91PE5",
+    "variantId": "variant_01M46HV2D0ZSEQ9GDPJ55CNEPF"
+  },
+  {
+    "id": "bmw-door-speakers",
+    "status": "active",
+    "label": "Door speakers",
+    "description": "Illuminated door speakers, lit with the rest of your ambient lighting.",
+    "appliesToFamilies": ["ambient-lighting"],
+    "appliesToProducts": ["prod_01KRGY8J6KK956RF83F6VCCBKA"],
+    "productId": "prod_01M46HV2D14ZCW4PRZ2ZQVER7R",
+    "variantId": "variant_01M46HV2D13VCRZ159HXMF0XC9"
+  },
+  {
+    "id": "bmw-illuminated-door-handles",
+    "status": "active",
+    "label": "Illuminated door handles",
+    "description": "Illuminated door handles, lit with the rest of your ambient lighting.",
+    "appliesToFamilies": ["ambient-lighting"],
+    "appliesToProducts": ["prod_01KRGY8J6KK956RF83F6VCCBKA"],
+    "productId": "prod_01M46HV2D1KPGMP1GN7AB30J2Z",
+    "variantId": "variant_01M46HV2D14NV7SE507K8M1XTB"
+  },
+  {
+    "id": "a-class-oem-vents",
+    "status": "active",
+    "label": "Vents",
+    "description": "Ambient lighting for the air vents.",
+    "appliesToFamilies": ["ambient-lighting"],
+    "appliesToProducts": ["prod_01KRGY3PHXF5GRNQCA1V2D52Q0"],
+    "productId": "prod_01M46HV2D29MDEFHGRFE2PJ8DQ",
+    "variantId": "variant_01M46HV2D2QG6751J3DWJZVY1G"
+  },
+  {
+    "id": "a-class-oem-dashboard",
+    "status": "active",
+    "label": "Dashboard",
+    "description": "Ambient lighting across the dashboard trim.",
+    "appliesToFamilies": ["ambient-lighting"],
+    "appliesToProducts": ["prod_01KRGY3PHXF5GRNQCA1V2D52Q0"],
+    "productId": "prod_01M46HV2D32S15H078CA3T0JEG",
+    "variantId": "variant_01M46HV2D34NFSWW0TDZ12ARPW"
+  },
+  {
+    "id": "a-class-oem-speakers",
+    "status": "active",
+    "label": "Speakers",
+    "description": "Illuminated speakers, lit with the rest of your ambient lighting.",
+    "appliesToFamilies": ["ambient-lighting"],
+    "appliesToProducts": ["prod_01KRGY3PHXF5GRNQCA1V2D52Q0"],
+    "productId": "prod_01M46HV2D45P6MTQA9FE5YDPQM",
+    "variantId": "variant_01M46HV2D4VZ7NR1T37CSH5KCA"
+  },
+  {
+    "id": "caliper-decals",
+    "status": "active",
+    "label": "Caliper Decals",
+    "description": "Decals for your sprayed calipers.",
+    "appliesToFamilies": ["rims-calipers"],
+    "appliesToProducts": ["prod_01KD6HD11AB8QPBW5ZF1XTYSHY"],
+    "productId": "prod_01M46HV2D43XD6DVKM84SE0G1M",
+    "variantId": "variant_01M46HV2D46Q4H4YGSJRMN1AYZ"
   }
 ]

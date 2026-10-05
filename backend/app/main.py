@@ -243,7 +243,7 @@ def _validate_builds(
             _raise_build_invalid()
         base = base_lines[0]
         base_product = catalog.get(base.productId)
-        if base_product is None or base_product.kind != "main":
+        if base_product is None or base_product.kind == "addon":
             _raise_build_invalid()
         add_on_ids = [
             (add_on_line.productId, add_on_line.variantId)

@@ -1063,5 +1063,176 @@
         "sha256": "27939e7610e3e6d02cd4279786d191b57f90c797d3bd5e451fbd1a06a72c7866"
       }
     ]
+  },
+  {
+    "productId": "prod_01M46HV2D03AVSQPF311V91PE5",
+    "mediaKey": "bmw-f-series-oem-ambient-tweeter-speakers-add-on",
+    "reviewBasis": "Stand-in image: copied from the BMW F-Series OEM Ambient Package listing photo (lit door and dashboard); no dedicated tweeter speaker photo supplied yet",
+    "fitment": {
+      "mode": "specific",
+      "label": "BMW 4-Series F32 coupé and F33 convertible, and 3-Series Gran Turismo F34; confirm year and trim before fitting.",
+      "makes": [
+        "BMW"
+      ],
+      "models": [
+        "3-Series",
+        "4-Series"
+      ],
+      "chassisCodes": [
+        "F32",
+        "F33",
+        "F34"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/bmw-f-series-oem-ambient-tweeter-speakers-add-on-01.jpeg",
+        "sha256": "3f0c186976449ab35e3d3f7bd246256125956488ba26e28864580ef1a8279637"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M46HV2D14ZCW4PRZ2ZQVER7R",
+    "mediaKey": "bmw-f-series-oem-ambient-door-speakers-add-on",
+    "reviewBasis": "Stand-in image: copied from the BMW F-Series OEM Ambient Package listing photo showing a lit door speaker ring; no dedicated door speaker photo supplied yet",
+    "fitment": {
+      "mode": "specific",
+      "label": "BMW 4-Series F32 coupé and F33 convertible, and 3-Series Gran Turismo F34; confirm year and trim before fitting.",
+      "makes": [
+        "BMW"
+      ],
+      "models": [
+        "3-Series",
+        "4-Series"
+      ],
+      "chassisCodes": [
+        "F32",
+        "F33",
+        "F34"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/bmw-f-series-oem-ambient-door-speakers-add-on-01.jpeg",
+        "sha256": "5b1b445442658f700f61be4857d460e394a98ccbf9a4da0d8e3d96596b8de71c"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M46HV2D1KPGMP1GN7AB30J2Z",
+    "mediaKey": "bmw-f-series-oem-ambient-illuminated-door-handles-add-on",
+    "reviewBasis": "Stand-in image: copied from the BMW F-Series OEM Ambient Package listing photo showing the lit door trim; no dedicated door handle photo supplied yet",
+    "fitment": {
+      "mode": "specific",
+      "label": "BMW 4-Series F32 coupé and F33 convertible, and 3-Series Gran Turismo F34; confirm year and trim before fitting.",
+      "makes": [
+        "BMW"
+      ],
+      "models": [
+        "3-Series",
+        "4-Series"
+      ],
+      "chassisCodes": [
+        "F32",
+        "F33",
+        "F34"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/bmw-f-series-oem-ambient-illuminated-door-handles-add-on-01.jpeg",
+        "sha256": "836d1390e9ba2ac7d777497f37c767f2e198770b0f5366e7665144c63b3adc3e"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M46HV2D29MDEFHGRFE2PJ8DQ",
+    "mediaKey": "mercedes-a-class-cla-gla-oem-lighting-vents-add-on",
+    "reviewBasis": "Stand-in image: copied from the A-Class/CLA/GLA OEM upgrade listing photo showing the lit front vents; no dedicated add-on photo supplied yet",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes A-Class, CLA or GLA; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "A-Class",
+        "CLA",
+        "GLA"
+      ],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/mercedes-a-class-cla-gla-oem-lighting-vents-add-on-01.jpeg",
+        "sha256": "27939e7610e3e6d02cd4279786d191b57f90c797d3bd5e451fbd1a06a72c7866"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M46HV2D32S15H078CA3T0JEG",
+    "mediaKey": "mercedes-a-class-cla-gla-oem-lighting-dashboard-add-on",
+    "reviewBasis": "Stand-in image: copied from the A-Class/CLA/GLA OEM upgrade listing photo showing the lit dashboard trim; no dedicated add-on photo supplied yet",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes A-Class, CLA or GLA; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "A-Class",
+        "CLA",
+        "GLA"
+      ],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/mercedes-a-class-cla-gla-oem-lighting-dashboard-add-on-01.jpeg",
+        "sha256": "66af59d95b41dabbf33fea282db80c1526ee5911a7b7c3ca0580965dbdce66da"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M46HV2D45P6MTQA9FE5YDPQM",
+    "mediaKey": "mercedes-a-class-cla-gla-oem-lighting-speakers-add-on",
+    "reviewBasis": "Stand-in image: copied from the A-Class/CLA/GLA OEM upgrade listing photo of the lit cabin; no dedicated speaker photo supplied yet",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes A-Class, CLA or GLA; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "A-Class",
+        "CLA",
+        "GLA"
+      ],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/mercedes-a-class-cla-gla-oem-lighting-speakers-add-on-01.jpeg",
+        "sha256": "012b8ab631ccf1832be0622e5c0f1abd75bd80a15ead46185bb7b518d25ef7e8"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M46HV2D43XD6DVKM84SE0G1M",
+    "mediaKey": "caliper-decals-add-on",
+    "reviewBasis": "Stand-in image: copied from the Calipers listing photo showing a lettered decal on a sprayed caliper; no dedicated decal photo supplied yet",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "images": [
+      {
+        "path": "/images/products/caliper-decals-add-on-01.jpeg",
+        "sha256": "305ac03d7c7fc33722f1ce174cfec0f52f995c739f3737b2925a9a4b5ff1f3d4"
+      }
+    ]
   }
 ]

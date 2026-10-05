@@ -48,9 +48,8 @@ export interface AddOnDefinition {
   description: string;
   appliesToFamilies: ProductFamily[];
   /**
-   * When set, only these base products offer the add-on, and they offer only their
-   * product-scoped add-ons. This holds even when every scoped add-on is disabled:
-   * such a product then offers no extras rather than falling back to the family list.
+   * When set, only these base products offer the add-on. A base product offers the union of
+   * every add-on scoped to it plus any family-wide (unscoped) add-on of its family.
    */
   appliesToProducts?: string[] | null;
   /** At most one add-on per exclusive group may be attached to a single build. */
@@ -128,20 +127,20 @@ export function productMinimumPrice(product: Product): number {
   return positivePrices.length > 0 ? Math.min(...positivePrices) : 0;
 }
 
+/**
+ * Add-ons a main or upgrade listing offers: every definition of its family that is either
+ * scoped to it (`appliesToProducts`) or family-wide. Add-on products offer none.
+ */
 export function getProductAddOnOptions(product: Product): readonly ProductAddOnOption[] {
-  if (product.kind !== "main") return [];
+  if (product.kind === "addon") return [];
 
-  const matchingDefinitions = addOnDefinitions.filter(
-    (definition) =>
-      definition.appliesToFamilies.includes(product.family) &&
-      (definition.appliesToProducts == null ||
-        definition.appliesToProducts.includes(product.id)),
-  );
-  const productScopedDefinitions = matchingDefinitions.filter(
-    (definition) => definition.appliesToProducts != null,
-  );
-
-  return (productScopedDefinitions.length > 0 ? productScopedDefinitions : matchingDefinitions)
+  return addOnDefinitions
+    .filter(
+      (definition) =>
+        definition.appliesToFamilies.includes(product.family) &&
+        (definition.appliesToProducts == null ||
+          definition.appliesToProducts.includes(product.id)),
+    )
     .map((definition): ProductAddOnOption => {
       const addOnProduct = definition.productId
         ? products.find((candidate) => candidate.id === definition.productId) ?? null

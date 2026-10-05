@@ -167,6 +167,14 @@ test.describe('fitment parity', () => {
     for (const [page, offer] of leaks) {
       expect(discoverySlugs(page), `${offer} on ${page}`).not.toContain(offer);
     }
+    // The confirmed vent-kit fitment (2026-10-05): the front kit is MFA2-only (not C-Class), and
+    // the rear kit lists the C-Class W205/C205, so it is still suggested on the C-Class OEM page.
+    expect(discoverySlugs('mercedes-c-class-oem-ambient-lighting')).toContain(
+      'dual-car-air-vent-ambient-light-kit',
+    );
+    expect(discoverySlugs('mercedes-c-class-oem-ambient-lighting')).not.toContain(
+      'mercedes-benz-led-air-vent-kit-vents-for-c-classclagla-2012-2026-front',
+    );
     // A wider listing that covers every vehicle of the page is still offered.
     expect(discoverySlugs('car-led-ambient-light-kit-cla-gla-2018-2026')).toContain(
       'full-oem-ambient-lighting-upgrade-a-class1',

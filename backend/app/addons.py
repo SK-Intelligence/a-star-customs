@@ -30,11 +30,9 @@ class AddOnOption(BaseModel):
     label: str = Field(min_length=1)
     description: str = Field(min_length=1)
     appliesToFamilies: list[ProductFamily] = Field(min_length=1)
-    # When set, the add-on is offered only on these base products, and those
-    # products then offer only their product-scoped add-ons. Precedence holds even
-    # when every scoped add-on is disabled: the product then offers no extras
-    # instead of falling back to the family-wide list (the generic list was wrong
-    # for the C-Class, per the client).
+    # When set, the add-on is offered only on these base products. A base product
+    # offers the union of the add-ons scoped to it and any family-wide (unscoped)
+    # add-on of its family; see add_ons_for_product.
     appliesToProducts: list[str] | None = None
     # At most one add-on per exclusive group may be attached to a single build.
     exclusiveGroup: str | None = Field(default=None, pattern=r"^[a-z0-9][a-z0-9-]*$")
@@ -71,17 +69,16 @@ def add_ons_for_product(
     product_id: str,
     family: ProductFamily,
 ) -> list[AddOnOption]:
-    """Product-scoped add-ons take precedence over family-wide add-ons."""
-    matching = [
+    """Every add-on of the family that is scoped to this product or family-wide.
+
+    Mirrors getProductAddOnOptions in frontend/src/data/catalog.ts (which also offers
+    nothing on add-on products; _validate_builds rejects those as bases)."""
+    return [
         option
         for option in add_ons
         if family in option.appliesToFamilies
         and (option.appliesToProducts is None or product_id in option.appliesToProducts)
     ]
-    product_scoped = [
-        option for option in matching if option.appliesToProducts is not None
-    ]
-    return product_scoped or matching
 
 
 class AddOnConfigurationError(RuntimeError):

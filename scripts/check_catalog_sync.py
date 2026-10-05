@@ -26,6 +26,7 @@ MEDIA_REVIEW = ROOT / "scripts" / "media-review.json"
 GENERIC_ADD_ON_APPROVALS = ROOT / "scripts" / "generic-add-on-approvals.json"
 EXCLUSIVE_GROUP_PATTERN = re.compile(r"[a-z0-9][a-z0-9-]*")
 PRODUCT_KINDS = {"main", "addon", "upgrade"}
+BASE_KINDS = {"main", "upgrade"}  # listings that can carry add-ons
 PRODUCT_FAMILIES = {
     "ambient-lighting",
     "starlights",
@@ -256,8 +257,9 @@ def add_on_options(
     add_ons: list[dict[str, Any]],
     products_by_id: dict[str, dict[str, Any]],
 ) -> list[tuple[dict[str, Any], dict[str, Any]]]:
-    """Port of getProductAddOnOptions: the (definition, add-on product) pairs on sale."""
-    if base["kind"] != "main":
+    """Port of getProductAddOnOptions: the (definition, add-on product) pairs on sale. A
+    main or upgrade listing gets every add-on of its family scoped to it or family-wide."""
+    if base["kind"] == "addon":
         return []
     matching = [
         add_on
@@ -268,11 +270,8 @@ def add_on_options(
             or base["id"] in add_on["appliesToProducts"]
         )
     ]
-    scoped = [
-        add_on for add_on in matching if add_on.get("appliesToProducts") is not None
-    ]
     options = []
-    for add_on in scoped or matching:
+    for add_on in matching:
         product = products_by_id.get(add_on["productId"] or "")
         variant = next(
             (
@@ -469,8 +468,10 @@ def terms_outside_fitment(product: dict[str, Any], terms: set[str]) -> set[str]:
         elif kind == "generation":
             # "F-Series" fits a listing whose chassis codes are all F-codes (F32, F33...).
             make, _, letter = value.partition("/")
-            if make not in makes or not chassis or any(
-                not code.startswith(letter) for code in chassis
+            if (
+                make not in makes
+                or not chassis
+                or any(not code.startswith(letter) for code in chassis)
             ):
                 outside.add(term)
     return outside
@@ -486,7 +487,7 @@ def check_fitment_guards(
     errors: list[str] = []
     warnings: list[str] = []
     products_by_id = {product["id"]: product for product in catalog}
-    bases = [product for product in catalog if product["kind"] == "main"]
+    bases = [product for product in catalog if product["kind"] != "addon"]
 
     # 1. Add-ons: a vehicle-specific add-on must fit every vehicle of its base; a generic
     #    (confirm-first, no make) add-on on a vehicle-specific base needs an explicit approval.
@@ -523,9 +524,9 @@ def check_fitment_guards(
         for add_on_id, slug in sorted(approved - used_approvals, key=str)
     )
 
-    # 2. Discovery: every offer the product page shows (the port, which filters the candidates
+    # 2. Discovery (main listings only): every offer the product page shows (the port, which filters the candidates
     #    with `covers`) must fit every vehicle of the page by the independent rule.
-    for base in bases:
+    for base in (product for product in bases if product["kind"] == "main"):
         offered = discovery_products(base, catalog)
         candidate_ids = {c["id"] for c in discovery_candidates(base, catalog)}
         errors.extend(
@@ -820,7 +821,7 @@ def main(argv: list[str] | None = None) -> None:
                 or not isinstance(applicable_families, list)
                 or any(
                     not isinstance(base_id, str)
-                    or products_by_id.get(base_id, {}).get("kind") != "main"
+                    or products_by_id.get(base_id, {}).get("kind") not in BASE_KINDS
                     or products_by_id[base_id].get("family") not in applicable_families
                     for base_id in applicable_products
                 )
@@ -838,6 +839,12 @@ def main(argv: list[str] | None = None) -> None:
                 )
             exclusive_group_sizes[exclusive_group] = (
                 exclusive_group_sizes.get(exclusive_group, 0) + 1
+            )
+        if status == "active" and "appliesToProducts" not in add_on:
+            # Family-wide add-ons would reach every listing of the family (the C-Class
+            # included), so each active add-on names the listings it is offered on.
+            raise SystemExit(
+                f"Catalog check failed: active add-on {add_on_id} has no appliesToProducts."
             )
         if status == "disabled":
             if product_id is not None or variant_id is not None:
