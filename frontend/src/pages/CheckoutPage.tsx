@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { QuantityControl } from '../components/QuantityControl';
 import { RemovedAddOnNotice } from '../components/RemovedAddOnNotice';
+import { ResponsiveImage } from '../components/ResponsiveImage';
 import { Seo } from '../components/Seo';
 import { formatPrice, getProductAddOnOptions, products } from '../data/catalog';
 import { cartSubtotal, useCartStore } from '../store/cart';
@@ -115,10 +116,12 @@ export function CheckoutPage() {
               return (
                 <div className={`checkout-build-line checkout-build-line--${line.lineType}`} key={`${line.buildId ?? 'standalone'}:${line.lineType}:${line.productId}:${line.variantId}`}>
                   <article>
-                    <img
+                    <ResponsiveImage
                       src={product.images[0] ?? '/images/site/hero.jpg'}
                       alt={product.title}
-                      decoding="async"
+                      sizes="(max-width: 520px) 88px, 130px"
+                      coverAspect={88 / 100}
+                      loading="eager"
                     />
                     <div>
                       {line.lineType === 'addon' ? <p className="eyebrow">Build add-on</p> : null}

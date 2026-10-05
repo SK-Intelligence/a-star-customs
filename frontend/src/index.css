@@ -992,9 +992,25 @@ h3 {
   position: relative;
   min-height: 500px;
   overflow: hidden;
-  background:
-    linear-gradient(90deg, rgb(6 5 8 / 94%) 0%, rgb(6 5 8 / 70%) 48%, rgb(6 5 8 / 24%) 100%),
-    var(--page-hero-image, linear-gradient(135deg, #18131e, #060607)) center / cover no-repeat;
+  background: linear-gradient(135deg, #18131e, #060607);
+  isolation: isolate;
+}
+
+.page-hero::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(6 5 8 / 94%) 0%, rgb(6 5 8 / 70%) 48%, rgb(6 5 8 / 24%) 100%);
+  content: "";
+}
+
+.page-hero__media {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .page-hero__content {
@@ -1316,7 +1332,7 @@ h3 {
   content: "";
 }
 
-.collaboration-card > img {
+.collaboration-card img {
   position: absolute;
   z-index: -2;
   inset: 0;
@@ -1326,7 +1342,7 @@ h3 {
   transition: transform 600ms ease;
 }
 
-.collaboration-card:hover > img {
+.collaboration-card:hover img {
   transform: scale(1.045);
 }
 
@@ -2967,7 +2983,7 @@ h3 {
   background: #111014;
 }
 
-.checkout-items article > img {
+.checkout-items article img {
   width: 130px;
   height: 130px;
   object-fit: cover;
@@ -4157,7 +4173,7 @@ h3 {
     align-items: start;
   }
 
-  .checkout-items article > img {
+  .checkout-items article img {
     width: 88px;
     height: 100px;
   }

@@ -1,6 +1,7 @@
 import { ExternalLink } from 'lucide-react';
 import { ConsentGate } from '../components/CookieConsent';
 import { PageHero } from '../components/PageHero';
+import { ResponsiveImage } from '../components/ResponsiveImage';
 import { Seo } from '../components/Seo';
 import { collaborations } from '../data/site';
 
@@ -69,7 +70,12 @@ export function CollaborationsPage() {
           <div className="collaboration-grid">
             {collaborations.map((collaboration, index) => (
               <article className="collaboration-card" key={collaboration.id}>
-                <img src={collaboration.image} alt={`${collaboration.name} collaboration`} loading="lazy" />
+                {/* Cover-cropped into a card at least 540px tall: 3:4 photos render at least 405px wide. */}
+                <ResponsiveImage
+                  src={collaboration.image}
+                  alt={`${collaboration.name} collaboration`}
+                  sizes="(max-width: 760px) max(100vw, 405px), 460px"
+                />
                 <span>{String(index + 1).padStart(2, '0')}</span>
                 <div>
                   <h3>{collaboration.name}</h3>

@@ -1,6 +1,7 @@
 import { ArrowLeft, ArrowRight, Check, MessageCircle, Plus, ShieldCheck, ShoppingBag, Sparkles, Wrench } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
+import { images } from 'virtual:responsive-images';
 import { ImageLightbox } from '../components/ImageLightbox';
 import { QuantityControl } from '../components/QuantityControl';
 import { ResponsiveImage } from '../components/ResponsiveImage';
@@ -10,6 +11,35 @@ import { exclusiveSiblingDefinitions, formatPrice, getDiscoveryProducts, getProd
 import { whatsappUrl } from '../data/site';
 import { useCartStore } from '../store/cart';
 import { NotFoundPage } from './NotFoundPage';
+
+// Thumbnail columns: 64px buttons at 520px and below; 5 across the full-width gallery to 760px and
+// 6 to 980px; above that 6 across the gallery column (about 60% of the container).
+/**
+ * Discovery tiles: a 76px column (96px at 520px and below) as tall as the offer text beside it,
+ * which measures up to 148px to 980px, 225px to 1299px and 179px above. The photo is cover-cropped,
+ * so it renders at that height times its aspect ratio. Sized for the tallest row, so no tile
+ * under-fetches; shorter rows of the same page fetch up to about 1.4x.
+ */
+function discoverySizes(src: string): string {
+  const [width = 3, height = 4] = Object.hasOwn(images, src) ? images[src]! : [];
+  const rendered = (columnWidth: number, rowHeight: number) =>
+    `${Math.max(columnWidth, Math.ceil((rowHeight * width) / height))}px`;
+  return [
+    `(max-width: 520px) ${rendered(96, 148)}`,
+    `(max-width: 980px) ${rendered(76, 148)}`,
+    `(max-width: 1299px) ${rendered(76, 225)}`,
+    rendered(76, 179),
+  ].join(', ');
+}
+
+const THUMBNAIL_SIZES = [
+  '(max-width: 520px) 64px',
+  '(max-width: 760px) calc((100vw - 67px) / 5)',
+  '(max-width: 980px) calc((100vw - 92px) / 6)',
+  '(min-width: 1300px) 125px',
+  '(min-width: 1140px) 110px',
+  '95px',
+].join(', ');
 
 export function ProductPage() {
   const { slug = '' } = useParams();
@@ -134,7 +164,7 @@ export function ProductPage() {
                       onClick={() => setImageIndex(index)}
                       aria-label={`Show ${product.title} image ${index + 1}`}
                     >
-                      <ResponsiveImage src={image} alt="" sizes="(max-width: 520px) 64px, 160px" />
+                      <ResponsiveImage src={image} alt="" sizes={THUMBNAIL_SIZES} coverAspect={1} />
                     </button>
                   ))}
                 </div>
@@ -207,7 +237,8 @@ export function ProductPage() {
                                 <ResponsiveImage
                                   src={addOn.images[0] ?? '/images/site/hero.jpg'}
                                   alt=""
-                                  sizes="62px"
+                                  sizes="(max-width: 520px) 52px, 62px"
+                                  coverAspect={1}
                                 />
                               ) : <Sparkles aria-hidden="true" />}
                               <span>
@@ -257,7 +288,7 @@ export function ProductPage() {
                               <ResponsiveImage
                                 src={item.images[0] ?? '/images/site/hero.jpg'}
                                 alt={item.title}
-                                sizes="110px"
+                                sizes={discoverySizes(item.images[0] ?? '/images/site/hero.jpg')}
                               />
                             </Link>
                             <div>
