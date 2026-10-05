@@ -334,11 +334,19 @@ def discovery_products(
         if covers(base, candidate)
     ]
     upgrades = [candidate for candidate in admitted if candidate["kind"] == "upgrade"]
-    seen_families: set[str] = set()
+    # One slot per family, except starlights: the first-listed DIY kit (currently the cheapest) and one fitted package.
+    seen_slots: set[str] = set()
     diverse = []
     for candidate in admitted:
-        if candidate["kind"] == "main" and candidate["family"] not in seen_families:
-            seen_families.add(candidate["family"])
+        if candidate["kind"] != "main":
+            continue
+        slot = (
+            "starlights-diy"
+            if candidate["family"] == "starlights" and "DIY" in candidate["collections"]
+            else candidate["family"]
+        )
+        if slot not in seen_slots:
+            seen_slots.add(slot)
             diverse.append(candidate)
     return [*upgrades, *diverse][:6]
 

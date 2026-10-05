@@ -12,8 +12,7 @@
 //   the browser posts to /api/contact and never talks to Web3Forms or holds a key. Naming
 //   Web3Forms and linking its privacy page (PrivacyPage, ContactPage) is fine.
 // - The catalogue and media are served from this repository; Hostinger's store API and its
-//   Zyro-based site builder CDNs must not appear (scripts/import_hostinger_catalog.py is a
-//   migration utility outside the bundle).
+//   Zyro-based site builder CDNs must not appear.
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join, relative } from "node:path";
 
