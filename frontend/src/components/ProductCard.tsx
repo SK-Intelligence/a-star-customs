@@ -2,14 +2,30 @@ import { ArrowRight, MessageCircle, SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatPrice, getProductAddOnOptions, isAddOnProduct, type Product } from '../data/catalog';
 import { whatsappUrl } from '../data/site';
+import { ResponsiveImage } from './ResponsiveImage';
 
 interface ProductCardProps {
   product: Product;
   returnTo: string;
   returnLabel: string;
+  /** The catalogue grid without the category sidebar (wider cards). */
+  fullWidth?: boolean;
 }
 
-export function ProductCard({ product, returnTo, returnLabel }: ProductCardProps) {
+/**
+ * Card width per breakpoint of .product-grid: 4 columns, 3 at 1200px and below, 2 at 760px, 1 at
+ * 520px; beside the 250px category sidebar unless fullWidth (the sidebar stacks at 760px).
+ */
+const CARD_SIZES = [
+  '(min-width: 1468px) 266px, (min-width: 1201px) calc(24vw - 86px), (min-width: 761px) calc(32vw - 110px)',
+  '(min-width: 521px) calc(50vw - 24px), calc(100vw - 32px)',
+].join(', ');
+const FULL_WIDTH_CARD_SIZES = [
+  '(min-width: 1468px) 343px, (min-width: 1201px) calc(25vw - 24px), (min-width: 761px) calc(33.4vw - 26px)',
+  '(min-width: 521px) calc(50vw - 24px), calc(100vw - 32px)',
+].join(', ');
+
+export function ProductCard({ product, returnTo, returnLabel, fullWidth = false }: ProductCardProps) {
   const firstVariant = product.variants[0];
   const prices = product.variants.map((variant) => variant.price).filter((price) => price > 0);
   const minimumPrice = prices.length > 0 ? Math.min(...prices) : 0;
@@ -21,11 +37,11 @@ export function ProductCard({ product, returnTo, returnLabel }: ProductCardProps
     <article className="product-card">
       <Link className="product-card__media" to={`/${product.slug}`} state={{ returnTo, returnLabel }}>
         {product.ribbonText ? <span className="product-ribbon">{product.ribbonText}</span> : null}
-        <img
+        <ResponsiveImage
           src={product.images[0] ?? '/images/site/hero.jpg'}
           alt={product.title}
-          loading="lazy"
-          decoding="async"
+          sizes={fullWidth ? FULL_WIDTH_CARD_SIZES : CARD_SIZES}
+          coverAspect={1 / 1.05}
         />
         <span className="product-card__view">
           View details <ArrowRight aria-hidden="true" />

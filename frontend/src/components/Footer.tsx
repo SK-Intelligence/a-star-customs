@@ -2,6 +2,7 @@ import { Facebook, Instagram, Mail, MapPin, Music2, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { openCookiePreferences } from '../hooks/cookiePreferencesEvents';
 import { contactDetails, socialLinks } from '../data/site';
+import { ResponsiveImage } from './ResponsiveImage';
 
 const footerLinks = [
   ['Services', '/services'],
@@ -18,7 +19,7 @@ export function Footer() {
     <footer className="site-footer">
       <div className="container footer-grid">
         <div className="footer-brand">
-          <img src="/images/site/logo.png" alt="A Star Customs" loading="lazy" decoding="async" />
+          <ResponsiveImage src="/images/site/logo.png" alt="A Star Customs" sizes="150px" />
           <p>
             Car lighting, technology and interior upgrades fitted in Hounslow,
             London.

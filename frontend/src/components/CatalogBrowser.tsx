@@ -183,6 +183,7 @@ export function CatalogBrowser({
                 product={product}
                 returnTo={returnTo}
                 returnLabel={returnLabel}
+                fullWidth={!showCategories}
                 key={product.id}
               />
             ))}

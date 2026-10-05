@@ -55,6 +55,11 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
+      - run: npm ci
+      # The responsive image pipeline (frontend/test/responsive-images.test.mjs, node:test).
+      - run: npm run test:unit
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with: { python-version: "${{ env.PYTHON_VERSION }}", cache: pip, cache-dependency-path: backend/requirements.txt }
       - run: pip install --require-hashes -r backend/requirements.txt
@@ -81,6 +86,13 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
       - run: npm ci
+      # WebP variants from frontend/responsive-images.ts; entries are keyed by source bytes and
+      # encoder settings, so a stale restore only costs re-encoding.
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: frontend/node_modules/.cache/responsive-images
+          key: "responsive-images-${{ runner.os }}-${{ hashFiles('frontend/responsive-images.ts', 'frontend/responsive-image-names.ts', 'package-lock.json', 'frontend/public/images/**') }}"
+          restore-keys: "responsive-images-${{ runner.os }}-"
       # As Railway builds it (frontend/Dockerfile): no VITE_API_BASE_URL, /api on the same origin.
       - run: npm run build
       # The built bundle too: no provider secret or Hostinger URL may reach a customer's browser.
@@ -175,10 +187,10 @@ jobs:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with: { name: frontend-dist, path: frontend/dist }
       # Budgets in frontend/lighthouserc.json (median of 3 runs): accessibility >= 0.95, best
-      # practices >= 0.9, performance >= 0.75. Performance is the measured level (medians 0.79 on
-      # / and 0.76 on the product page, 2026-10-04), not 0.8: the full-size hero and product
-      # photos put LCP at 5-9 s on a throttled phone. Raise it to 0.8 once the images are
-      # responsive (srcset/WebP). Uses the runner's preinstalled Chrome.
+      # practices >= 0.9, performance >= 0.8. With responsive WebP images (responsive-images.ts)
+      # the local medians were 0.93 on / and 0.95 on the product page (LCP 3.1 s and 2.9 s,
+      # 2026-10-05; 0.75 and 0.75 before). The budget stays well below them because runner
+      # medians vary by several points. Uses the runner's preinstalled Chrome.
       # @lhci/cli 0.15.1 from the lockfile (root devDependencies).
       - run: npx lhci autorun
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

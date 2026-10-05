@@ -5,6 +5,7 @@ import { useDialogFocus } from '../hooks/useDialogFocus';
 import { cartSubtotal, useCartStore } from '../store/cart';
 import { QuantityControl } from './QuantityControl';
 import { RemovedAddOnNotice } from './RemovedAddOnNotice';
+import { ResponsiveImage } from './ResponsiveImage';
 
 export function CartDrawer() {
   const isOpen = useCartStore((state) => state.isOpen);
@@ -74,11 +75,11 @@ export function CartDrawer() {
                   key={`${line.buildId ?? 'standalone'}:${line.lineType}:${line.productId}:${line.variantId}`}
                 >
                   <Link to={`/${product.slug}`} onClick={closeCart}>
-                    <img
+                    <ResponsiveImage
                       src={product.images[0] ?? '/images/site/hero.jpg'}
                       alt={product.title}
-                      loading="lazy"
-                      decoding="async"
+                      sizes="(max-width: 520px) 84px, 105px"
+                      coverAspect={105 / 115}
                     />
                   </Link>
                   <div className="cart-line__copy">

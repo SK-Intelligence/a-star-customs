@@ -167,10 +167,8 @@ test('custom kits contains only DIY products and uses kit-specific hero media', 
   await page.goto('/custom-kits');
 
   await expect(page.getByRole('heading', { name: '11 products' })).toBeVisible();
-  await expect(page.locator('.page-hero')).toHaveCSS(
-    'background-image',
-    /starlight-fiber-optic-kit-01\.jpg/,
-  );
+  await expect(page.locator('.page-hero__media')).toHaveAttribute('src', /starlight-fiber-optic-kit-01\.jpg$/);
+  await expect(page.locator('.page-hero__media')).toHaveAttribute('fetchpriority', 'high');
 
   await page.getByRole('heading', { name: 'Universal Starlight Fiber Optic Kit (Standard)', exact: true }).click();
   await expect(page.getByRole('link', { name: 'Back to custom kits' })).toBeVisible();

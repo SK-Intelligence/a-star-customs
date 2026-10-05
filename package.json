@@ -16,9 +16,10 @@
     "test:scripts": "backend/.venv/bin/python -m pytest -q -p no:cacheprovider scripts/tests",
     "test:backend": "cd backend && .venv/bin/pytest -q",
     "test:coverage": "cd backend && .venv/bin/pytest -q --cov --cov-report=term --cov-report=xml",
+    "test:unit": "npm --workspace frontend run test:unit",
     "test:e2e": "npm --workspace frontend run test:e2e",
     "test:a11y": "npm --workspace frontend run test:a11y",
-    "ci:fast": "npm run lint && npm run typecheck && npm run check:text && npm run test:backend && npm run check:catalog && npm run test:scripts",
+    "ci:fast": "npm run lint && npm run typecheck && npm run check:text && npm run test:backend && npm run test:unit && npm run check:catalog && npm run test:scripts",
     "setup:hooks": "git config core.hooksPath .githooks && echo \"Git hooks enabled: pushing main now runs npm run ci:fast first.\"",
     "verify": "npm run build && npm run check:catalog && npm run test:backend",
     "verify:full": "npm run verify && npm run test:e2e"

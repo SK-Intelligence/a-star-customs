@@ -99,6 +99,18 @@ svg {
 
 img {
   max-width: 100%;
+  /* Lets an <img width height> keep its aspect ratio wherever CSS sets only the width. */
+  height: auto;
+}
+
+/* ResponsiveImage wraps its <img> in a <picture>; the <img> lays out as if it stood alone. The
+   <source> is not hidden by default and would otherwise become an empty grid or flex item. */
+picture {
+  display: contents;
+}
+
+picture > source {
+  display: none;
 }
 
 p,
@@ -694,9 +706,15 @@ h3 {
 }
 
 .home-hero__media {
-  background: url("/images/site/hero.jpg") center 54% / cover no-repeat;
   transform: scale(1.015);
   animation: hero-arrive 1.2s cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+.home-hero__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 54%;
 }
 
 .home-hero__shade {
@@ -753,7 +771,7 @@ h3 {
   content: "";
 }
 
-.feature-panel > img {
+.feature-panel img {
   position: absolute;
   z-index: -2;
   inset: 0;
@@ -763,7 +781,7 @@ h3 {
   transition: transform 650ms cubic-bezier(0.2, 0.65, 0.25, 1), filter 300ms ease;
 }
 
-.feature-panel:hover > img {
+.feature-panel:hover img {
   transform: scale(1.045);
   filter: saturate(1.15);
 }
@@ -882,10 +900,27 @@ h3 {
 }
 
 .home-showcase {
+  position: relative;
   min-height: clamp(560px, 72vh, 760px);
-  background:
-    linear-gradient(0deg, rgb(3 3 4 / 72%), rgb(3 3 4 / 10%) 65%),
-    url("/images/site/gallery-stars-06.jpeg") center 40% / cover no-repeat;
+  isolation: isolate;
+}
+
+.home-showcase::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(0deg, rgb(3 3 4 / 72%), rgb(3 3 4 / 10%) 65%);
+  content: "";
+}
+
+.home-showcase__media {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
 }
 
 .home-showcase > a {
@@ -975,9 +1010,25 @@ h3 {
   position: relative;
   min-height: 500px;
   overflow: hidden;
-  background:
-    linear-gradient(90deg, rgb(6 5 8 / 94%) 0%, rgb(6 5 8 / 70%) 48%, rgb(6 5 8 / 24%) 100%),
-    var(--page-hero-image, linear-gradient(135deg, #18131e, #060607)) center / cover no-repeat;
+  background: linear-gradient(135deg, #18131e, #060607);
+  isolation: isolate;
+}
+
+.page-hero::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(6 5 8 / 94%) 0%, rgb(6 5 8 / 70%) 48%, rgb(6 5 8 / 24%) 100%);
+  content: "";
+}
+
+.page-hero__media {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .page-hero__content {
@@ -1299,7 +1350,7 @@ h3 {
   content: "";
 }
 
-.collaboration-card > img {
+.collaboration-card img {
   position: absolute;
   z-index: -2;
   inset: 0;
@@ -1309,7 +1360,7 @@ h3 {
   transition: transform 600ms ease;
 }
 
-.collaboration-card:hover > img {
+.collaboration-card:hover img {
   transform: scale(1.045);
 }
 
@@ -2033,7 +2084,7 @@ h3 {
   transform: none;
 }
 
-.build-extra > img,
+.build-extra img,
 .build-extra > svg {
   width: 62px;
   height: 62px;
@@ -2950,7 +3001,7 @@ h3 {
   background: #111014;
 }
 
-.checkout-items article > img {
+.checkout-items article img {
   width: 130px;
   height: 130px;
   object-fit: cover;
@@ -3681,8 +3732,8 @@ h3 {
     align-items: center;
   }
 
-  .home-hero__media {
-    background-position: 62% center;
+  .home-hero__media img {
+    object-position: 62% center;
   }
 
   .home-hero__shade {
@@ -4071,7 +4122,7 @@ h3 {
     gap: 0.65rem;
   }
 
-  .build-extra > img,
+  .build-extra img,
   .build-extra > svg {
     width: 52px;
     height: 52px;
@@ -4126,7 +4177,7 @@ h3 {
     align-items: start;
   }
 
-  .checkout-items article > img {
+  .checkout-items article img {
     width: 88px;
     height: 100px;
   }
