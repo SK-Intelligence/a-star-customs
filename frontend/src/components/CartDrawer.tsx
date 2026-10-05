@@ -4,7 +4,7 @@ import { formatPrice, products } from '../data/catalog';
 import { useDialogFocus } from '../hooks/useDialogFocus';
 import { cartSubtotal, useCartStore } from '../store/cart';
 import { QuantityControl } from './QuantityControl';
-import { RemovedAddOnNotice } from './RemovedAddOnNotice';
+import { RemovedItemsNotice } from './RemovedItemsNotice';
 import { ResponsiveImage } from './ResponsiveImage';
 
 export function CartDrawer() {
@@ -55,7 +55,7 @@ export function CartDrawer() {
           </button>
         </div>
 
-        <RemovedAddOnNotice />
+        <RemovedItemsNotice />
 
         {resolvedLines.length === 0 ? (
           <div className="empty-cart">

@@ -46,32 +46,32 @@
   {
     "id": "prod_01KCRZ1AXP7H0VHJ04JTDN0D0J",
     "slug": "shooting-stars-twinkle-starlight-800-pieces",
-    "title": "Shooting Stars + Twinkle Starlight 800+ Pieces (MUST CONTACT FIRST)",
-    "subtitle": "Custom quote available",
-    "ribbonText": "Custom Pricing",
-    "descriptionHtml": "<p><strong> Shooting Stars Package (Twinkle + Motion)</strong></p><p>Experience a truly dynamic night sky inside your vehicle. This premium package combines the gentle shimmer of twinkling stars with the breathtaking motion of shooting meteor effects, creating a deep, immersive, and eye-catching display.</p><ul><li><p> <strong>Twinkle Effect:</strong> Soft, realistic shimmering stars for a calming vibe.</p></li><li><p>️ <strong>Shooting Stars:</strong> Dynamic meteors streak across the headliner.</p></li><li><p> <strong>Motion &amp; Depth:</strong> Adds a layer of movement for a cinematic feel.</p></li><li><p> <strong>Peace of Mind:</strong> Includes a <strong>1-Year Warranty</strong>.</p></li></ul><p>Please do <strong>NOT</strong> place an order, contact the team first and we will discuss pricing accordingly. The base price is £974.99 however this just a placeholder so do <strong>NOT </strong>order before contacting us first!</p>",
+    "title": "Shooting Stars + Twinkle Starlight (800 Pieces)",
+    "subtitle": null,
+    "ribbonText": null,
+    "descriptionHtml": "<p><strong> Shooting Stars Package (Twinkle + Motion)</strong></p><p>Experience a truly dynamic night sky inside your vehicle. This premium package combines the gentle shimmer of twinkling stars with the breathtaking motion of shooting meteor effects, creating a deep, immersive, and eye-catching display.</p><ul><li><p> <strong>Twinkle Effect:</strong> Soft, realistic shimmering stars for a calming vibe.</p></li><li><p>️ <strong>Shooting Stars:</strong> Dynamic meteors streak across the headliner.</p></li><li><p> <strong>Motion &amp; Depth:</strong> Adds a layer of movement for a cinematic feel.</p></li><li><p> <strong>Peace of Mind:</strong> Includes a <strong>1-Year Warranty</strong>.</p></li></ul><p></p>",
     "images": [
       "/images/products/shooting-stars-twinkle-starlight-800-pieces-01.jpg",
       "/images/products/shooting-stars-twinkle-starlight-800-pieces-02.jpg"
     ],
     "collectionIds": [
       "pcol_01KCFVV0Z6W3FXV53594CPA5CB",
-      "pcol_01KCS0PFCZJAJSGRAMVB3EPYE5"
+      "pcol_01KCFNY9B69TCCMR45GSH79Q2W"
     ],
     "collections": [
       "Shooting Stars + Twinkle Starlight",
-      "Custom Fittings"
+      "Supplied & Fitted"
     ],
     "variants": [
       {
         "id": "variant_01KCRZ1B0AK5TCXKDYK0S6HRGF",
-        "title": "Shooting Stars + Twinkle Starlight 800+ Pieces (MUST CONTACT FIRST)",
-        "price": 0,
+        "title": "Shooting Stars + Twinkle Starlight (800 Pieces)",
+        "price": 97499,
         "available": true
       }
     ],
-    "purchasable": false,
-    "available": false,
+    "purchasable": true,
+    "available": true,
     "updatedAt": "2025-12-23T22:19:13.770Z",
     "kind": "main",
     "family": "starlights",
@@ -89,10 +89,10 @@
   {
     "id": "prod_01KSD0914ZFT86256G4WN1AECM",
     "slug": "dual-car-air-vent-ambient-light-kit",
-    "title": "Dual Car Air Vent Ambient Light Kit - Vents for C class/CLA/GLA 2012-2026 Back",
+    "title": "Dual Rear Air Vent Ambient Light Kit – Rear Console Vents for Mercedes C-Class W205/C205 / GLC X253",
     "subtitle": "LED Lighting Accessory for Car Interiors",
     "ribbonText": "New",
-    "descriptionHtml": "<p>Upgrade your car’s interior with this Dual Car Air Vent Ambient Light Kit. Designed for stylish and functional airflow, it features integrated LED lighting rings and a complete wiring harness for easy installation. Perfect for those seeking to enhance their driving experience with modern aesthetics, this kit combines efficient ventilation with customizable ambient lighting.</p>",
+    "descriptionHtml": "<p>Upgrade the rear centre-console vents of your Mercedes C-Class W205 saloon, C205 coupé or GLC X253 with this Dual Rear Air Vent Ambient Light Kit. It replaces the two rear console vents with vents that have integrated LED lighting rings, and comes with a complete wiring harness for easy installation. It combines efficient ventilation with customizable ambient lighting.</p>",
     "images": [
       "/images/products/dual-car-air-vent-ambient-light-kit-01.jpg"
     ],
@@ -107,7 +107,7 @@
     "variants": [
       {
         "id": "variant_01KSD0917FWT95S2D0DFP9QJ6Q",
-        "title": "Dual Car Air Vent Ambient Light Kit - Vents for C class/CLA/GLA 2012-2026 Back",
+        "title": "Dual Rear Air Vent Ambient Light Kit – Rear Console Vents for Mercedes C-Class W205/C205 / GLC X253",
         "price": 3499,
         "available": true
       }
@@ -119,16 +119,19 @@
     "family": "ambient-lighting",
     "fitment": {
       "mode": "specific",
-      "label": "Mercedes C-Class, CLA or GLA (2012–2026); confirm vent shape and model year.",
+      "label": "Rear centre-console vents for Mercedes C-Class W205/C205 and GLC X253; not CLA or GLA.",
       "makes": [
         "Mercedes-Benz"
       ],
       "models": [
         "C-Class",
-        "CLA",
-        "GLA"
+        "GLC"
       ],
-      "chassisCodes": []
+      "chassisCodes": [
+        "W205",
+        "C205",
+        "X253"
+      ]
     },
     "comparisonGroup": null,
     "specTier": null,
@@ -460,10 +463,10 @@
   {
     "id": "prod_01KSD071WXFF7FNXR8MZHQAPBJ",
     "slug": "mercedes-benz-led-air-vent-kit-vents-for-c-classclagla-2012-2026-front",
-    "title": "Mercedes-Benz LED Air Vent Kit - Vents for C class/CLA/GLA 2012-2026 Front",
+    "title": "Mercedes-Benz LED Turbine Air Vent Kit – 5 Front Vents for A/B-Class, CLA, GLA, GLB (2018+)",
     "subtitle": "Custom Ambient Air Vents with Wiring Harness",
     "ribbonText": "New",
-    "descriptionHtml": "<p>Upgrade your vehicle's interior with this premium Mercedes-Benz LED Air Vent Kit. Designed to fit A/B/CLA/GLA models, this kit includes four modern turbine-style air vents with integrated ambient LED lighting and complete wiring harnesses for seamless installation. Enhance your driving experience with smart climate control and eye-catching illumination. Perfect for car enthusiasts seeking both style and functionality.</p>",
+    "descriptionHtml": "<p>Upgrade your vehicle's interior with this premium Mercedes-Benz LED Air Vent Kit. Designed for the 2018+ Mercedes A-Class, B-Class, CLA, GLA and GLB (W177/W247/C118/H247/X247), this kit includes five modern turbine-style air vents with integrated ambient LED lighting and complete wiring harnesses for seamless installation. Enhance your driving experience with smart climate control and eye-catching illumination. Perfect for car enthusiasts seeking both style and functionality.</p>",
     "images": [
       "/images/products/mercedes-benz-led-air-vent-kit-vents-for-c-classclagla-2012-2026-front-01.jpg"
     ],
@@ -478,7 +481,7 @@
     "variants": [
       {
         "id": "variant_01KSD071Z1BP9YKXTD6CA9SBG7",
-        "title": "Mercedes-Benz LED Air Vent Kit - Vents for C class/CLA/GLA 2012-2026 Front",
+        "title": "Mercedes-Benz LED Turbine Air Vent Kit – 5 Front Vents for A/B-Class, CLA, GLA, GLB (2018+)",
         "price": 12499,
         "available": true
       }
@@ -490,16 +493,25 @@
     "family": "ambient-lighting",
     "fitment": {
       "mode": "specific",
-      "label": "Mercedes C-Class, CLA or GLA (2012–2026); confirm vent shape and model year.",
+      "label": "Mercedes A-Class W177, B-Class W247, CLA C118/X118, GLA H247 and GLB X247 (2018+); front dashboard vents only, not C-Class.",
       "makes": [
         "Mercedes-Benz"
       ],
       "models": [
-        "C-Class",
+        "A-Class",
+        "B-Class",
         "CLA",
-        "GLA"
+        "GLA",
+        "GLB"
       ],
-      "chassisCodes": []
+      "chassisCodes": [
+        "W177",
+        "W247",
+        "C118",
+        "X118",
+        "H247",
+        "X247"
+      ]
     },
     "comparisonGroup": null,
     "specTier": null,
@@ -652,7 +664,7 @@
     "title": "Calipers",
     "subtitle": "You'd be suprised how much this brightens up your wheels!",
     "ribbonText": "Great Value",
-    "descriptionHtml": "<p>Price is for spraying all 4 calipers.</p><p> All packages include a 1-Year Warranty for complete peace of mind.</p><p></p><p><strong>Optional: </strong><em>(must be seperately added to cart)</em></p><p>Decals - £35 </p>",
+    "descriptionHtml": "<p>Price is for spraying all 4 calipers.</p><p> All packages include a 1-Year Warranty for complete peace of mind.</p><p></p><p><strong>Optional:</strong> Caliper Decals - £35. Add them to your calipers in the package builder; they cannot be bought separately.</p>",
     "images": [
       "/images/products/calipers-01.jpeg",
       "/images/products/calipers-02.jpeg",
@@ -688,6 +700,46 @@
     "comparisonGroup": null,
     "specTier": null,
     "mediaKey": "calipers"
+  },
+  {
+    "id": "prod_01M46HV2D43XD6DVKM84SE0G1M",
+    "slug": "caliper-decals-add-on",
+    "title": "Caliper Decals",
+    "subtitle": null,
+    "ribbonText": null,
+    "descriptionHtml": "<p>Decals for your sprayed calipers.</p><p><em>Note: This is an optional add-on for the Calipers package and can only be added from that package's builder.</em></p>",
+    "images": [
+      "/images/products/caliper-decals-add-on-01.jpeg"
+    ],
+    "collectionIds": [
+      "pcol_01K5PSTAES6MTV14NQY8PSAHWN"
+    ],
+    "collections": [
+      "Rims & Caliper"
+    ],
+    "variants": [
+      {
+        "id": "variant_01M46HV2D46Q4H4YGSJRMN1AYZ",
+        "title": "Caliper Decals",
+        "price": 3500,
+        "available": true
+      }
+    ],
+    "purchasable": true,
+    "available": true,
+    "updatedAt": "2026-10-05T12:00:00.000Z",
+    "kind": "addon",
+    "family": "rims-calipers",
+    "fitment": {
+      "mode": "confirm",
+      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
+      "makes": [],
+      "models": [],
+      "chassisCodes": []
+    },
+    "comparisonGroup": null,
+    "specTier": null,
+    "mediaKey": "caliper-decals-add-on"
   },
   {
     "id": "prod_01KSD0VCX6BQH6C8W6ANB7PKVP",
@@ -1396,10 +1448,10 @@
   {
     "id": "prod_01KRGY8J6KK956RF83F6VCCBKA",
     "slug": "-bmw-f-series-oem-ambient-package",
-    "title": "BMW F-Series OEM Ambient Package",
+    "title": "BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package",
     "subtitle": null,
     "ribbonText": "NEW",
-    "descriptionHtml": "<p> BMW F-Series OEM Ambient Package – £449.99 </p><p> 1 Year Warranty | Pro Install</p><p>Includes:</p><p>* Dashboard + Driver Side</p><p>* All Door Strips</p><p>* Door Handle Lights</p><p>* Door Bin Lights</p><p>* All Footwells</p><p>Features:</p><p> Controlled through iDrive + Phone App</p><p> Supports Two-Tone Colours</p><p> Full OEM Integration</p><p>Optional:</p><p> Tweeter Speakers – £149.99</p><p> Door Speakers – £99.99</p><p> Illuminated Door Handles – £149.99</p><p>Transform your drive </p><p>BMW F series F32/F33 F34</p>",
+    "descriptionHtml": "<p> BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package – £449.99 </p><p> 1 Year Warranty | Pro Install</p><p>Includes:</p><p>* Dashboard + Driver Side</p><p>* All Door Strips</p><p>* Door Handle Lights</p><p>* Door Bin Lights</p><p>* All Footwells</p><p>Features:</p><p> Controlled through iDrive + Phone App</p><p> Supports Two-Tone Colours</p><p> Full OEM Integration</p><p>Optional:</p><p> Tweeter Speakers – £149.99</p><p> Door Speakers – £99.99</p><p> Illuminated Door Handles – £149.99</p><p>Transform your drive </p><p>BMW F series F32/F33 F34</p>",
     "images": [
       "/images/products/bmw-f-series-oem-ambient-package-01.jpeg",
       "/images/products/bmw-f-series-oem-ambient-package-02.jpeg",
@@ -1417,7 +1469,7 @@
     "variants": [
       {
         "id": "variant_01KRGY8J8ZGY79PSESV1Z3ESPT",
-        "title": "BMW F-Series OEM Ambient Package",
+        "title": "BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package",
         "price": 44999,
         "available": true
       }
@@ -1429,18 +1481,176 @@
     "family": "ambient-lighting",
     "fitment": {
       "mode": "specific",
-      "label": "BMW F-Series; confirm model, year and trim before fitting.",
+      "label": "BMW 4-Series F32 coupé and F33 convertible, and 3-Series Gran Turismo F34; confirm year and trim before fitting.",
       "makes": [
         "BMW"
       ],
       "models": [
-        "F-Series"
+        "3-Series",
+        "4-Series"
       ],
-      "chassisCodes": []
+      "chassisCodes": [
+        "F32",
+        "F33",
+        "F34"
+      ]
     },
     "comparisonGroup": null,
     "specTier": null,
     "mediaKey": "bmw-f-series-oem-ambient-package"
+  },
+  {
+    "id": "prod_01M46HV2D03AVSQPF311V91PE5",
+    "slug": "bmw-f-series-oem-ambient-tweeter-speakers-add-on",
+    "title": "BMW F32/F33/F34 Tweeter Speakers (Add-On)",
+    "subtitle": null,
+    "ribbonText": null,
+    "descriptionHtml": "<p>Illuminated tweeter speakers for the BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package, lit in the same colours as the rest of your ambient lighting.</p><p><em>Note: This is an optional add-on for the BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package and can only be added from that package's builder.</em></p>",
+    "images": [
+      "/images/products/bmw-f-series-oem-ambient-tweeter-speakers-add-on-01.jpeg"
+    ],
+    "collectionIds": [
+      "pcol_01K5PSS5X3A249HKVEVSS0CG9K",
+      "pcol_01KCS0PFCZJAJSGRAMVB3EPYE5"
+    ],
+    "collections": [
+      "Ambient Lighting (Not OEM)",
+      "Custom Fittings"
+    ],
+    "variants": [
+      {
+        "id": "variant_01M46HV2D0ZSEQ9GDPJ55CNEPF",
+        "title": "Tweeter speakers",
+        "price": 14999,
+        "available": true
+      }
+    ],
+    "purchasable": true,
+    "available": true,
+    "updatedAt": "2026-10-05T12:00:00.000Z",
+    "kind": "addon",
+    "family": "ambient-lighting",
+    "fitment": {
+      "mode": "specific",
+      "label": "BMW 4-Series F32 coupé and F33 convertible, and 3-Series Gran Turismo F34; confirm year and trim before fitting.",
+      "makes": [
+        "BMW"
+      ],
+      "models": [
+        "3-Series",
+        "4-Series"
+      ],
+      "chassisCodes": [
+        "F32",
+        "F33",
+        "F34"
+      ]
+    },
+    "comparisonGroup": null,
+    "specTier": null,
+    "mediaKey": "bmw-f-series-oem-ambient-tweeter-speakers-add-on"
+  },
+  {
+    "id": "prod_01M46HV2D14ZCW4PRZ2ZQVER7R",
+    "slug": "bmw-f-series-oem-ambient-door-speakers-add-on",
+    "title": "BMW F32/F33/F34 Door Speakers (Add-On)",
+    "subtitle": null,
+    "ribbonText": null,
+    "descriptionHtml": "<p>Illuminated door speakers for the BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package, lit in the same colours as the rest of your ambient lighting.</p><p><em>Note: This is an optional add-on for the BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package and can only be added from that package's builder.</em></p>",
+    "images": [
+      "/images/products/bmw-f-series-oem-ambient-door-speakers-add-on-01.jpeg"
+    ],
+    "collectionIds": [
+      "pcol_01K5PSS5X3A249HKVEVSS0CG9K",
+      "pcol_01KCS0PFCZJAJSGRAMVB3EPYE5"
+    ],
+    "collections": [
+      "Ambient Lighting (Not OEM)",
+      "Custom Fittings"
+    ],
+    "variants": [
+      {
+        "id": "variant_01M46HV2D13VCRZ159HXMF0XC9",
+        "title": "Door speakers",
+        "price": 9999,
+        "available": true
+      }
+    ],
+    "purchasable": true,
+    "available": true,
+    "updatedAt": "2026-10-05T12:00:00.000Z",
+    "kind": "addon",
+    "family": "ambient-lighting",
+    "fitment": {
+      "mode": "specific",
+      "label": "BMW 4-Series F32 coupé and F33 convertible, and 3-Series Gran Turismo F34; confirm year and trim before fitting.",
+      "makes": [
+        "BMW"
+      ],
+      "models": [
+        "3-Series",
+        "4-Series"
+      ],
+      "chassisCodes": [
+        "F32",
+        "F33",
+        "F34"
+      ]
+    },
+    "comparisonGroup": null,
+    "specTier": null,
+    "mediaKey": "bmw-f-series-oem-ambient-door-speakers-add-on"
+  },
+  {
+    "id": "prod_01M46HV2D1KPGMP1GN7AB30J2Z",
+    "slug": "bmw-f-series-oem-ambient-illuminated-door-handles-add-on",
+    "title": "BMW F32/F33/F34 Illuminated Door Handles (Add-On)",
+    "subtitle": null,
+    "ribbonText": null,
+    "descriptionHtml": "<p>Illuminated door handles for the BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package, lit in the same colours as the rest of your ambient lighting.</p><p><em>Note: This is an optional add-on for the BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package and can only be added from that package's builder.</em></p>",
+    "images": [
+      "/images/products/bmw-f-series-oem-ambient-illuminated-door-handles-add-on-01.jpeg"
+    ],
+    "collectionIds": [
+      "pcol_01K5PSS5X3A249HKVEVSS0CG9K",
+      "pcol_01KCS0PFCZJAJSGRAMVB3EPYE5"
+    ],
+    "collections": [
+      "Ambient Lighting (Not OEM)",
+      "Custom Fittings"
+    ],
+    "variants": [
+      {
+        "id": "variant_01M46HV2D14NV7SE507K8M1XTB",
+        "title": "Illuminated door handles",
+        "price": 14999,
+        "available": true
+      }
+    ],
+    "purchasable": true,
+    "available": true,
+    "updatedAt": "2026-10-05T12:00:00.000Z",
+    "kind": "addon",
+    "family": "ambient-lighting",
+    "fitment": {
+      "mode": "specific",
+      "label": "BMW 4-Series F32 coupé and F33 convertible, and 3-Series Gran Turismo F34; confirm year and trim before fitting.",
+      "makes": [
+        "BMW"
+      ],
+      "models": [
+        "3-Series",
+        "4-Series"
+      ],
+      "chassisCodes": [
+        "F32",
+        "F33",
+        "F34"
+      ]
+    },
+    "comparisonGroup": null,
+    "specTier": null,
+    "mediaKey": "bmw-f-series-oem-ambient-illuminated-door-handles-add-on"
   },
   {
     "id": "prod_01KCFVQV2CB6Q1S1SY4NC1SEYC",
@@ -1701,10 +1911,10 @@
   {
     "id": "prod_01KRGYB92HFEDJ2669V89535NR",
     "slug": "ambient-lighting-package-",
-    "title": "Ambient Lighting Package VW GOLF MK7.75",
+    "title": "Ambient Lighting Package VW GOLF Mk7/Mk7.5",
     "subtitle": null,
     "ribbonText": "NEW",
-    "descriptionHtml": "<p> Ambient Lighting Package – £774.99 (incl. VAT) </p><p> 1 Year Warranty | Pro Install (5–7 hrs)</p><p>Includes: </p><p>•Dashboard + Driver Side</p><p>•All Door Strips /Trims</p><p>•Door handle Lights</p><p>•Door bin Lights </p><p>•All Footwells</p><p>•(Optional Add-Ons Available)</p><p>•Variety of styles - stars - dragon scale - wave</p><p>Features: Bluetooth App </p><p>| 128+ Colours </p><p>| Two-Tone Options </p><p>Optional:</p><p> 4x Speaker Lights – £39.99 | </p><p>Premium Pack: 25+ Animations &amp; Start-Up Effects – £49.99</p><p>Transform your drive </p><p>VW GOLF MK7.75</p>",
+    "descriptionHtml": "<p> Ambient Lighting Package – £774.99 (incl. VAT) </p><p> 1 Year Warranty | Pro Install (5–7 hrs)</p><p>Includes: </p><p>•Dashboard + Driver Side</p><p>•All Door Strips /Trims</p><p>•Door handle Lights</p><p>•Door bin Lights </p><p>•All Footwells</p><p>•(Optional Add-Ons Available)</p><p>•Variety of styles - stars - dragon scale - wave</p><p>Features: Bluetooth App </p><p>| 128+ Colours </p><p>| Two-Tone Options </p><p>Optional:</p><p> 4x Speaker Lights – £39.99 | </p><p>Premium Pack: 25+ Animations &amp; Start-Up Effects – £49.99</p><p>Transform your drive </p><p>VW GOLF Mk7/Mk7.5</p>",
     "images": [
       "/images/products/ambient-lighting-package-01.jpg",
       "/images/products/ambient-lighting-package-02.jpg",
@@ -1724,7 +1934,7 @@
     "variants": [
       {
         "id": "variant_01KRGYB95N2F3J300J4DD7WQ1F",
-        "title": "Ambient Lighting Package VW GOLF MK7.75",
+        "title": "Ambient Lighting Package VW GOLF Mk7/Mk7.5",
         "price": 77499,
         "available": true
       }
@@ -1893,45 +2103,147 @@
     "mediaKey": "mercedes-a-class-cla-gla-oem-ambient-lighting-upgrade"
   },
   {
-    "id": "prod_01KCFYNY97DJ0SBEYP5GG6XQ4B",
-    "slug": "twinkle-starlights-800-pieces-",
-    "title": "Shooting Stars + Twinkle Starlight (800 Pieces)",
+    "id": "prod_01M46HV2D29MDEFHGRFE2PJ8DQ",
+    "slug": "mercedes-a-class-cla-gla-oem-lighting-vents-add-on",
+    "title": "Mercedes A-Class/CLA/GLA Vents Lighting (Add-On)",
     "subtitle": null,
-    "ribbonText": "Premium Choice",
-    "descriptionHtml": "<p><strong> Shooting Stars Package (Twinkle + Motion)</strong></p><p>Experience a truly dynamic night sky inside your vehicle. This premium package combines the gentle shimmer of twinkling stars with the breathtaking motion of shooting meteor effects, creating a deep, immersive, and eye-catching display.</p><ul><li><p> <strong>Twinkle Effect:</strong> Soft, realistic shimmering stars for a calming vibe.</p></li><li><p>️ <strong>Shooting Stars:</strong> Dynamic meteors streak across the headliner.</p></li><li><p> <strong>Motion &amp; Depth:</strong> Adds a layer of movement for a cinematic feel.</p></li><li><p> <strong>Peace of Mind:</strong> Includes a <strong>1-Year Warranty</strong>.</p></li></ul><p> All packages include a 1-Year Warranty for complete peace of mind.</p>",
+    "ribbonText": null,
+    "descriptionHtml": "<p>Vents lighting for the Full OEM Ambient Lighting Upgrade on the Mercedes A-Class, CLA and GLA.</p><p><em>Note: This is an optional add-on for the Full OEM Ambient Lighting Upgrade (A-Class, CLA, GLA) and can only be added from that package's builder.</em></p>",
     "images": [
-      "/images/products/twinkle-starlights-800-pieces-01.jpeg"
+      "/images/products/mercedes-a-class-cla-gla-oem-lighting-vents-add-on-01.jpeg"
     ],
     "collectionIds": [
-      "pcol_01KCFNY9B69TCCMR45GSH79Q2W",
-      "pcol_01KCFVV0Z6W3FXV53594CPA5CB"
+      "pcol_01K5PSS5X3A249HKVEVSS0CG9K",
+      "pcol_01KCS0PFCZJAJSGRAMVB3EPYE5"
     ],
     "collections": [
-      "Supplied & Fitted",
-      "Shooting Stars + Twinkle Starlight"
+      "Ambient Lighting (Not OEM)",
+      "Custom Fittings"
     ],
     "variants": [
       {
-        "id": "variant_01KCFYNYBVV3KFV4SVMTN1A10Y",
-        "title": "Shooting Stars + Twinkle Starlight (800 Pieces)",
-        "price": 92499,
+        "id": "variant_01M46HV2D2QG6751J3DWJZVY1G",
+        "title": "Vents",
+        "price": 19999,
         "available": true
       }
     ],
     "purchasable": true,
     "available": true,
-    "updatedAt": "2025-12-23T21:55:56.821Z",
-    "kind": "main",
-    "family": "starlights",
+    "updatedAt": "2026-10-05T12:00:00.000Z",
+    "kind": "addon",
+    "family": "ambient-lighting",
     "fitment": {
-      "mode": "confirm",
-      "label": "Vehicle fitment must be confirmed before ordering or fitting.",
-      "makes": [],
-      "models": [],
+      "mode": "specific",
+      "label": "Mercedes A-Class, CLA or GLA; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "A-Class",
+        "CLA",
+        "GLA"
+      ],
       "chassisCodes": []
     },
     "comparisonGroup": null,
     "specTier": null,
-    "mediaKey": "twinkle-starlights-800-pieces"
+    "mediaKey": "mercedes-a-class-cla-gla-oem-lighting-vents-add-on"
+  },
+  {
+    "id": "prod_01M46HV2D32S15H078CA3T0JEG",
+    "slug": "mercedes-a-class-cla-gla-oem-lighting-dashboard-add-on",
+    "title": "Mercedes A-Class/CLA/GLA Dashboard Lighting (Add-On)",
+    "subtitle": null,
+    "ribbonText": null,
+    "descriptionHtml": "<p>Dashboard lighting for the Full OEM Ambient Lighting Upgrade on the Mercedes A-Class, CLA and GLA.</p><p><em>Note: This is an optional add-on for the Full OEM Ambient Lighting Upgrade (A-Class, CLA, GLA) and can only be added from that package's builder.</em></p>",
+    "images": [
+      "/images/products/mercedes-a-class-cla-gla-oem-lighting-dashboard-add-on-01.jpeg"
+    ],
+    "collectionIds": [
+      "pcol_01K5PSS5X3A249HKVEVSS0CG9K",
+      "pcol_01KCS0PFCZJAJSGRAMVB3EPYE5"
+    ],
+    "collections": [
+      "Ambient Lighting (Not OEM)",
+      "Custom Fittings"
+    ],
+    "variants": [
+      {
+        "id": "variant_01M46HV2D34NFSWW0TDZ12ARPW",
+        "title": "Dashboard",
+        "price": 17999,
+        "available": true
+      }
+    ],
+    "purchasable": true,
+    "available": true,
+    "updatedAt": "2026-10-05T12:00:00.000Z",
+    "kind": "addon",
+    "family": "ambient-lighting",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes A-Class, CLA or GLA; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "A-Class",
+        "CLA",
+        "GLA"
+      ],
+      "chassisCodes": []
+    },
+    "comparisonGroup": null,
+    "specTier": null,
+    "mediaKey": "mercedes-a-class-cla-gla-oem-lighting-dashboard-add-on"
+  },
+  {
+    "id": "prod_01M46HV2D45P6MTQA9FE5YDPQM",
+    "slug": "mercedes-a-class-cla-gla-oem-lighting-speakers-add-on",
+    "title": "Mercedes A-Class/CLA/GLA Speaker Lighting (Add-On)",
+    "subtitle": null,
+    "ribbonText": null,
+    "descriptionHtml": "<p>Speaker lighting for the Full OEM Ambient Lighting Upgrade on the Mercedes A-Class, CLA and GLA.</p><p><em>Note: This is an optional add-on for the Full OEM Ambient Lighting Upgrade (A-Class, CLA, GLA) and can only be added from that package's builder.</em></p>",
+    "images": [
+      "/images/products/mercedes-a-class-cla-gla-oem-lighting-speakers-add-on-01.jpeg"
+    ],
+    "collectionIds": [
+      "pcol_01K5PSS5X3A249HKVEVSS0CG9K",
+      "pcol_01KCS0PFCZJAJSGRAMVB3EPYE5"
+    ],
+    "collections": [
+      "Ambient Lighting (Not OEM)",
+      "Custom Fittings"
+    ],
+    "variants": [
+      {
+        "id": "variant_01M46HV2D4VZ7NR1T37CSH5KCA",
+        "title": "Speakers",
+        "price": 9999,
+        "available": true
+      }
+    ],
+    "purchasable": true,
+    "available": true,
+    "updatedAt": "2026-10-05T12:00:00.000Z",
+    "kind": "addon",
+    "family": "ambient-lighting",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes A-Class, CLA or GLA; confirm model year and trim before fitting.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "A-Class",
+        "CLA",
+        "GLA"
+      ],
+      "chassisCodes": []
+    },
+    "comparisonGroup": null,
+    "specTier": null,
+    "mediaKey": "mercedes-a-class-cla-gla-oem-lighting-speakers-add-on"
   }
 ]

@@ -8,6 +8,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
+from app.catalog import CatalogConfigurationError, load_catalog
+
 
 ADD_ONS_PATH = Path(__file__).with_name("add-ons.json")
 
@@ -30,11 +32,9 @@ class AddOnOption(BaseModel):
     label: str = Field(min_length=1)
     description: str = Field(min_length=1)
     appliesToFamilies: list[ProductFamily] = Field(min_length=1)
-    # When set, the add-on is offered only on these base products, and those
-    # products then offer only their product-scoped add-ons. Precedence holds even
-    # when every scoped add-on is disabled: the product then offers no extras
-    # instead of falling back to the family-wide list (the generic list was wrong
-    # for the C-Class, per the client).
+    # When set, the add-on is offered only on these base products. A base product
+    # offers the union of the add-ons scoped to it and any family-wide (unscoped)
+    # add-on of its family; see add_ons_for_product.
     appliesToProducts: list[str] | None = None
     # At most one add-on per exclusive group may be attached to a single build.
     exclusiveGroup: str | None = Field(default=None, pattern=r"^[a-z0-9][a-z0-9-]*$")
@@ -59,6 +59,10 @@ class AddOnOption(BaseModel):
             )
         if self.status == "active" and (not self.productId or not self.variantId):
             raise ValueError("active add-ons require product and variant IDs")
+        if self.status == "active" and self.appliesToProducts is None:
+            # A family-wide add-on would reach every listing of the family (the
+            # C-Class included), so each active add-on names its listings.
+            raise ValueError("active add-ons require appliesToProducts")
         if self.status == "disabled" and (
             self.productId is not None or self.variantId is not None
         ):
@@ -71,17 +75,16 @@ def add_ons_for_product(
     product_id: str,
     family: ProductFamily,
 ) -> list[AddOnOption]:
-    """Product-scoped add-ons take precedence over family-wide add-ons."""
-    matching = [
+    """Every add-on of the family that is scoped to this product or family-wide.
+
+    Mirrors getProductAddOnOptions in frontend/src/data/catalog.ts (which also offers
+    nothing on add-on products; _validate_builds rejects those as bases)."""
+    return [
         option
         for option in add_ons
         if family in option.appliesToFamilies
         and (option.appliesToProducts is None or product_id in option.appliesToProducts)
     ]
-    product_scoped = [
-        option for option in matching if option.appliesToProducts is not None
-    ]
-    return product_scoped or matching
 
 
 class AddOnConfigurationError(RuntimeError):
@@ -121,4 +124,21 @@ def load_add_ons() -> list[AddOnOption]:
         raise AddOnConfigurationError(
             "Every add-on exclusive group needs at least two members."
         )
+    try:
+        catalog = load_catalog()
+    except CatalogConfigurationError as exc:
+        raise AddOnConfigurationError(
+            "The add-on configuration is unavailable."
+        ) from exc
+    for option in add_ons:
+        for base_id in option.appliesToProducts or []:
+            base = catalog.get(base_id)
+            if (
+                base is None
+                or base.kind == "addon"
+                or base.family not in option.appliesToFamilies
+            ):
+                raise AddOnConfigurationError(
+                    "The add-on configuration targets an invalid base product."
+                )
     return add_ons

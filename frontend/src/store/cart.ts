@@ -23,9 +23,12 @@ export interface CartState {
   lines: CartLine[];
   checkoutSnapshots: CheckoutSnapshot[];
   isOpen: boolean;
-  /** Set when add-ons that no longer apply to their build were dropped; not persisted. */
-  removedAddOnNotice: boolean;
-  dismissRemovedAddOnNotice: () => void;
+  /**
+   * Set when loading the saved bag dropped products that are no longer sold or add-ons that no
+   * longer apply to their build; not persisted.
+   */
+  removedItemsNotice: boolean;
+  dismissRemovedItemsNotice: () => void;
   addItem: (productId: string, variantId: string, quantity?: number) => void;
   addItems: (lines: CartLine[]) => void;
   addBuildAddOn: (buildId: string, productId: string, variantId: string) => void;
@@ -63,6 +66,21 @@ function isPurchasableCatalogVariant(
       (variant) => variant.id === variantId && variant.available,
     )
   );
+}
+
+/** Well-formed saved lines whose product or variant is no longer sold (or no longer exists). */
+function countUnavailableLines(value: unknown): number {
+  if (!Array.isArray(value)) return 0;
+  return value.filter(
+    (candidate: unknown) =>
+      typeof candidate === "object" &&
+      candidate !== null &&
+      "productId" in candidate &&
+      "variantId" in candidate &&
+      typeof candidate.productId === "string" &&
+      typeof candidate.variantId === "string" &&
+      !isPurchasableCatalogVariant(candidate.productId, candidate.variantId),
+  ).length;
 }
 
 function sanitiseLines(value: unknown): CartLine[] {
@@ -194,8 +212,8 @@ export const useCartStore = create<CartState>()(
       lines: [],
       checkoutSnapshots: [],
       isOpen: false,
-      removedAddOnNotice: false,
-      dismissRemovedAddOnNotice: () => set({ removedAddOnNotice: false }),
+      removedItemsNotice: false,
+      dismissRemovedItemsNotice: () => set({ removedItemsNotice: false }),
       addItem: (productId, variantId, quantity = 1) => {
         set((state) => ({
           lines: mergeLines(state.lines, [
@@ -345,7 +363,7 @@ export const useCartStore = create<CartState>()(
       onRehydrateStorage: () => (state) => {
         // Hydration does not write back to storage on its own. Any set() through the
         // store persists, so the cleaned bag is saved and the notice shows only once.
-        if (state?.removedAddOnNotice) state.closeCart();
+        if (state?.removedItemsNotice) state.closeCart();
       },
       merge: (persistedState, currentState) => {
         const persisted = persistedState as {
@@ -358,7 +376,8 @@ export const useCartStore = create<CartState>()(
         return {
           ...currentState,
           lines,
-          removedAddOnNotice: removedAddOns > 0,
+          removedItemsNotice:
+            removedAddOns > 0 || countUnavailableLines(persisted?.lines) > 0,
           checkoutSnapshots: sanitiseCheckoutSnapshots(
             persisted?.checkoutSnapshots,
           ),

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sqlite3
 from pathlib import Path
 from types import SimpleNamespace
@@ -593,7 +594,7 @@ def test_c_class_offers_only_its_six_product_scoped_add_ons() -> None:
     assert base.variants[0].price == 39999
 
 
-def test_other_ambient_products_keep_family_add_ons() -> None:
+def test_allow_listed_ambient_products_keep_the_generic_add_ons() -> None:
     catalog = load_catalog()
     base = catalog[AMBIENT_BASE["productId"]]
 
@@ -702,3 +703,237 @@ def test_checkout_rejects_deleted_duplicate_a_class_listing() -> None:
 
     assert response.status_code == 404
     assert "prod_01KD61YEY0HMGATXME9EGEFCX9" not in load_catalog()
+
+
+# Client audit answers (2026-10-05): per-product add-ons on the BMW, A-Class OEM, Audi
+# 2020+ and calipers listings; no generic add-ons on the DIY kits.
+SLUG_IDS = {
+    product["slug"]: product["id"]
+    for product in json.loads(
+        (Path(__file__).parents[1] / "app" / "catalog.json").read_text(encoding="utf-8")
+    )
+}
+
+
+def catalog_line(slug: str) -> dict[str, str]:
+    product = load_catalog()[SLUG_IDS[slug]]
+    return {"productId": product.id, "variantId": product.variants[0].id}
+
+
+BMW_SLUG = "-bmw-f-series-oem-ambient-package"
+A_CLASS_OEM_SLUG = "full-oem-ambient-lighting-upgrade-a-class1"
+AUDI_UPGRADE_SLUG = "ambient-lighting-upgrade"
+BMW_EXTRAS = [
+    "bmw-f-series-oem-ambient-tweeter-speakers-add-on",
+    "bmw-f-series-oem-ambient-door-speakers-add-on",
+    "bmw-f-series-oem-ambient-illuminated-door-handles-add-on",
+]
+A_CLASS_OEM_EXTRAS = [
+    "mercedes-a-class-cla-gla-oem-lighting-vents-add-on",
+    "mercedes-a-class-cla-gla-oem-lighting-dashboard-add-on",
+    "mercedes-a-class-cla-gla-oem-lighting-speakers-add-on",
+]
+DIY_KIT_SLUGS = [
+    "dual-car-air-vent-ambient-light-kit",
+    "mercedes-benz-led-air-vent-kit-vents-for-c-classclagla-2012-2026-front",
+    "car-interior-ambient-led-light-kit-audi-q3-2018-current",
+    "car-interior-ambient-led-lighting-kit-audi-8y-2012-2020",
+    "multi-color-ambient-car-interior-led-kit-audi-8y-2012-2020",
+    "car-interior-ambient-light-kit-golf-mk7-mk75-2012-2019",
+    "car-ambient-interior-led-light-kit-aclagla-2018-2026",
+    "car-led-ambient-light-kit-cla-gla-2018-2026",
+]
+
+
+def offered_prices(slug: str) -> dict[str, int]:
+    catalog = load_catalog()
+    base = catalog[SLUG_IDS[slug]]
+    return {
+        option.label: next(
+            variant.price
+            for variant in catalog[option.productId].variants
+            if variant.id == option.variantId
+        )
+        for option in add_ons_for_product(load_add_ons(), base.id, base.family)
+        if option.status == "active"
+    }
+
+
+@pytest.mark.parametrize(
+    ("slug", "expected"),
+    [
+        (
+            BMW_SLUG,
+            {
+                "4x Speaker Lights": 3999,
+                "Premium Pack: 25+ Animations & Start-Up Effects": 4999,
+                "Tweeter speakers": 14999,
+                "Door speakers": 9999,
+                "Illuminated door handles": 14999,
+            },
+        ),
+        (A_CLASS_OEM_SLUG, {"Vents": 19999, "Dashboard": 17999, "Speakers": 9999}),
+        (
+            AUDI_UPGRADE_SLUG,
+            {
+                "4x Speaker Lights": 3999,
+                "Premium Pack: 25+ Animations & Start-Up Effects": 4999,
+            },
+        ),
+        ("calipers", {"Caliper Decals": 3500}),
+        ("rims", {}),
+        *((slug, {}) for slug in DIY_KIT_SLUGS),
+    ],
+)
+def test_listings_offer_exactly_their_client_approved_add_ons(
+    slug: str, expected: dict[str, int]
+) -> None:
+    assert offered_prices(slug) == expected
+
+
+def stripe_settings(monkeypatch, tmp_path: Path, captured: dict[str, object]) -> None:
+    def fake_create(**kwargs: object) -> SimpleNamespace:
+        captured.update(kwargs)
+        return SimpleNamespace(
+            id="cs_test_audit_build", url="https://checkout.stripe.com/c/pay/audit"
+        )
+
+    monkeypatch.setattr("app.main.stripe.checkout.Session.create", fake_create)
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        stripe_secret_key="sk_test_placeholder",
+        stripe_payment_method_configuration_id="pmc_test_checkout",
+        stripe_webhook_secret="whsec_test_checkout",
+        orders_database_path=tmp_path / "orders.db",
+    )
+
+
+@pytest.mark.parametrize(
+    ("base_slug", "add_on_slugs", "expected_amounts"),
+    [
+        (
+            BMW_SLUG,
+            [
+                "-4x-speaker-lights-optional-add-on",
+                "premium-pack-add-on-25-animations-and-start-up-effects",
+                *BMW_EXTRAS,
+            ],
+            [44999, 3999, 4999, 14999, 9999, 14999],
+        ),
+        (A_CLASS_OEM_SLUG, A_CLASS_OEM_EXTRAS, [89999, 19999, 17999, 9999]),
+        (
+            AUDI_UPGRADE_SLUG,
+            [
+                "-4x-speaker-lights-optional-add-on",
+                "premium-pack-add-on-25-animations-and-start-up-effects",
+            ],
+            [79999, 3999, 4999],
+        ),
+        ("calipers", ["caliper-decals-add-on"], [22499, 3500]),
+    ],
+    ids=[
+        "bmw-all-five",
+        "a-class-oem-all-three",
+        "audi-upgrade-both",
+        "calipers-decals",
+    ],
+)
+def test_checkout_accepts_client_approved_add_on_builds(
+    monkeypatch,
+    tmp_path: Path,
+    base_slug: str,
+    add_on_slugs: list[str],
+    expected_amounts: list[int],
+) -> None:
+    captured: dict[str, object] = {}
+    stripe_settings(monkeypatch, tmp_path, captured)
+
+    response = client.post(
+        "/api/checkout/session",
+        json={
+            "items": build_items(
+                catalog_line(base_slug),
+                [catalog_line(slug) for slug in add_on_slugs],
+                build_id="audit-build",
+            )
+        },
+    )
+
+    assert response.status_code == 200
+    line_items = captured["line_items"]  # type: ignore[assignment]
+    assert [
+        item["price_data"]["unit_amount"] for item in line_items
+    ] == expected_amounts
+
+
+@pytest.mark.parametrize(
+    "items",
+    [
+        *(
+            build_items(catalog_line(slug), [add_on], build_id="diy-build")
+            for slug in DIY_KIT_SLUGS
+            for add_on in (SPEAKER_ADD_ON, PREMIUM_ADD_ON)
+        ),
+        build_items(
+            catalog_line("ambient-lighting-package-"), [catalog_line(BMW_EXTRAS[0])]
+        ),
+        build_items(
+            catalog_line("car-led-ambient-light-kit-cla-gla-2018-2026"),
+            [catalog_line(A_CLASS_OEM_EXTRAS[0])],
+        ),
+        build_items(catalog_line(A_CLASS_OEM_SLUG), [SPEAKER_ADD_ON]),
+        build_items(catalog_line(AUDI_UPGRADE_SLUG), [catalog_line(BMW_EXTRAS[1])]),
+        build_items(C_CLASS_BASE, [catalog_line(A_CLASS_OEM_EXTRAS[1])]),
+        build_items(catalog_line("rims"), [catalog_line("caliper-decals-add-on")]),
+        build_items(catalog_line("caliper-decals-add-on"), [SPEAKER_ADD_ON]),
+        [{**catalog_line("caliper-decals-add-on"), "quantity": 1}],
+        [{**catalog_line(BMW_EXTRAS[2]), "quantity": 1}],
+    ],
+)
+def test_checkout_rejects_add_ons_the_client_did_not_approve(
+    items: list[dict[str, object]],
+) -> None:
+    response = client.post("/api/checkout/session", json={"items": items})
+
+    assert response.status_code == 409
+    assert response.json()["detail"]["code"] == "BUILD_INVALID"
+
+
+def test_checkout_rejects_deleted_duplicate_800_piece_listing() -> None:
+    response = client.post(
+        "/api/checkout/session",
+        json={
+            "items": [
+                {
+                    "productId": "prod_01KCFYNY97DJ0SBEYP5GG6XQ4B",
+                    "variantId": "variant_01KCFYNYBVV3KFV4SVMTN1A10Y",
+                    "quantity": 1,
+                }
+            ]
+        },
+    )
+
+    assert response.status_code == 404
+    assert "prod_01KCFYNY97DJ0SBEYP5GG6XQ4B" not in load_catalog()
+
+
+def test_checkout_accepts_the_800_piece_shooting_stars_package(
+    monkeypatch, tmp_path: Path
+) -> None:
+    captured: dict[str, object] = {}
+    stripe_settings(monkeypatch, tmp_path, captured)
+
+    response = client.post(
+        "/api/checkout/session",
+        json={
+            "items": [
+                {
+                    **catalog_line("shooting-stars-twinkle-starlight-800-pieces"),
+                    "quantity": 1,
+                }
+            ]
+        },
+    )
+
+    assert response.status_code == 200
+    line_items = captured["line_items"]  # type: ignore[assignment]
+    assert [item["price_data"]["unit_amount"] for item in line_items] == [97499]

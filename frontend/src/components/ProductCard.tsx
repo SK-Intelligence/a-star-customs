@@ -69,10 +69,10 @@ export function ProductCard({ product, returnTo, returnLabel, fullWidth = false 
             className="product-card__action"
             to={`/${product.slug}`}
             state={{ returnTo, returnLabel }}
-            aria-label={`${product.kind === 'upgrade' ? 'View upgrade' : supportsAddOns ? 'View package options' : 'View product'} for ${product.title}`}
+            aria-label={`${supportsAddOns ? 'View package options' : product.kind === 'upgrade' ? 'View upgrade' : 'View product'} for ${product.title}`}
           >
             <SlidersHorizontal aria-hidden="true" />
-            <span>{product.kind === 'upgrade' ? 'View upgrade' : supportsAddOns ? 'View package options' : 'View product'}</span>
+            <span>{supportsAddOns ? 'View package options' : product.kind === 'upgrade' ? 'View upgrade' : 'View product'}</span>
           </Link>
         ) : (
           <a

@@ -26,6 +26,7 @@ MEDIA_REVIEW = ROOT / "scripts" / "media-review.json"
 GENERIC_ADD_ON_APPROVALS = ROOT / "scripts" / "generic-add-on-approvals.json"
 EXCLUSIVE_GROUP_PATTERN = re.compile(r"[a-z0-9][a-z0-9-]*")
 PRODUCT_KINDS = {"main", "addon", "upgrade"}
+BASE_KINDS = {"main", "upgrade"}  # listings that can carry add-ons
 PRODUCT_FAMILIES = {
     "ambient-lighting",
     "starlights",
@@ -125,6 +126,9 @@ MERCEDES_CLASS_LOOSE_PATTERN = re.compile(r"\b([ABCEGLMSV]) ?[Cc]lass(?:es)?\b")
 MERCEDES_SLASH_LIST_PATTERN = re.compile(
     r"\b[A-Za-z]{1,3}(?:\s?/\s?[A-Za-z]{1,3})+\b", re.IGNORECASE
 )
+# "3 Series" is a model; "F-Series" is a chassis generation (F30, F32...). A generation names
+# every chassis in it, so it passes only when explicit chassis codes follow it ("F series
+# F32/F33"); those codes are then checked as usual.
 BMW_SERIES_PATTERN = re.compile(r"\b([1-8]|[efg])([\s-])series\b", re.IGNORECASE)
 # Chassis and trim codes look like ordinary part numbers (H264, E27, S100, 8x, Mk2), so each
 # counts only with its make's context within VEHICLE_CONTEXT_WINDOW characters (see `near`).
@@ -168,33 +172,31 @@ GENERIC_FITMENT_CLAIM = re.compile(
     re.IGNORECASE,
 )
 HTML_TAG = re.compile(r"<[^>]+>")
+# "not CLA or GLA", "not C-Class", "not for the A-Class, CLA or GLA": the names right after
+# "not" are ones the listing does NOT fit. A name there is excused only when it is also outside
+# the fitment (see text_terms_outside_fitment). The list is one name, or names joined by commas
+# and closed by "or"/"nor"; it stops at any make word and at clause words ("and", "also",
+# "supported", "fits"...), so "not GLA and BMW 3 Series also fits" negates only GLA.
+_MAKE_WORDS = (
+    r"mercedes(?:-benz)?|merc|benz|amg|bmw|audi|volkswagen|vw|ford|vauxhall|toyota|tesla"
+    r"|porsche|range\s+rover|land\s+rover|skoda|seat|cupra|kia|hyundai|nissan|honda|lexus"
+)
+_CLAUSE_WORDS = r"also|and|but|or|nor|fits?|fitted|supported|with|for|including|plus"
+_NEGATED_NAME = (
+    rf"(?!(?i:{_MAKE_WORDS}|{_CLAUSE_WORDS})\b)[A-Z0-9][\w-]*"
+    rf"(?:/(?!(?i:{_MAKE_WORDS})\b)[A-Z0-9][\w-]*)*"
+)
+NEGATED_NAMES = re.compile(
+    rf"\b[Nn]ot\s+(?:for\s+)?(?:the\s+)?(?P<names>{_NEGATED_NAME}"
+    rf"(?:(?:\s*,\s*{_NEGATED_NAME})*\s+(?:or|nor)\s+{_NEGATED_NAME})?)"
+)
+# "Tweeter Speakers – £149.99", "Dashboard: +£179.99": a price right after an add-on's label.
+COPY_PRICE = re.compile(r"\s*[:–—-]?\s*\+?\s*£\s?(\d[\d,]*(?:\.\d{2})?)")
 
 # Text that names a vehicle outside the listing's fitment while the client confirms what the
 # product fits. Each entry lists the exact terms it excuses; any other hit still fails, and an
 # entry whose terms no longer appear fails so it is removed once the listing is fixed.
-KNOWN_TEXT_EXCEPTIONS: dict[str, dict[str, Any]] = {
-    "mercedes-benz-led-air-vent-kit-vents-for-c-classclagla-2012-2026-front": {
-        "terms": {"model:mercedes-benz/a-class", "model:mercedes-benz/b-class"},
-        "reason": (
-            "Client question H1: the description says the front vent kit fits A/B/CLA/GLA "
-            "while the title and fitment say C-Class/CLA/GLA."
-        ),
-    },
-    "-bmw-f-series-oem-ambient-package": {
-        "terms": {"chassis:f32", "chassis:f33", "chassis:f34"},
-        "reason": (
-            "Client question H2: the description names F32/F33/F34 (4 Series) while the "
-            "fitment says every BMW F-Series; which F-Series cars does the package fit?"
-        ),
-    },
-    "ambient-lighting-package-": {
-        "terms": {"chassis:mk7.75"},
-        "reason": (
-            "Client question on the Golf package title: 'MK7.75' is not a Golf generation; "
-            "the fitment says Mk7/Mk7.5. Which cars is the package for?"
-        ),
-    },
-}
+KNOWN_TEXT_EXCEPTIONS: dict[str, dict[str, Any]] = {}
 
 # Same-family listings at the same price that look like one product listed twice. Each pair
 # waits on the client deciding whether to merge or differentiate them.
@@ -205,8 +207,8 @@ DUPLICATE_ALLOWLIST: dict[frozenset[str], str] = {
             "multi-color-ambient-car-interior-led-kit-audi-8y-2012-2020",
         }
     ): (
-        "Pending client question on duplicates: two Audi A3 8V/8Y kits with the same fitment "
-        "and price; merge them or say how they differ."
+        "Two Audi A3 8V/8Y kits with the same fitment and price: client confirmed distinct "
+        "products (2026-10-05)."
     ),
     frozenset(
         {
@@ -271,8 +273,9 @@ def add_on_options(
     add_ons: list[dict[str, Any]],
     products_by_id: dict[str, dict[str, Any]],
 ) -> list[tuple[dict[str, Any], dict[str, Any]]]:
-    """Port of getProductAddOnOptions: the (definition, add-on product) pairs on sale."""
-    if base["kind"] != "main":
+    """Port of getProductAddOnOptions: the (definition, add-on product) pairs on sale. A
+    main or upgrade listing gets every add-on of its family scoped to it or family-wide."""
+    if base["kind"] == "addon":
         return []
     matching = [
         add_on
@@ -283,11 +286,8 @@ def add_on_options(
             or base["id"] in add_on["appliesToProducts"]
         )
     ]
-    scoped = [
-        add_on for add_on in matching if add_on.get("appliesToProducts") is not None
-    ]
     options = []
-    for add_on in scoped or matching:
+    for add_on in matching:
         product = products_by_id.get(add_on["productId"] or "")
         variant = next(
             (
@@ -372,6 +372,7 @@ def fits_every_vehicle(base: dict[str, Any], candidate: dict[str, Any]) -> bool:
 
 
 def listing_text(product: dict[str, Any]) -> str:
+    """The listing's customer-facing text."""
     parts = [
         product.get("title"),
         product.get("subtitle"),
@@ -404,8 +405,10 @@ def near(text: str, start: int, end: int, make: str) -> bool:
     return False
 
 
-def vehicle_terms(text: str) -> set[str]:
-    """Every make, model and chassis code the text names, as 'make:x', 'model:make/x', 'chassis:x'.
+def vehicle_term_spans(text: str) -> list[tuple[str, int, int]]:
+    """Every make, model and chassis code the text names, as ('make:x' | 'model:make/x' |
+    'chassis:x' | 'generation:bmw/f', start, end), one entry per occurrence. A BMW generation
+    ("F-Series") is named only when no chassis code of that generation follows it.
 
     Ambiguous tokens (part-number-shaped codes, model names that are also words) count only
     near their make's context; see MAKE_CONTEXT and VEHICLE_CONTEXT_WINDOW. In Mercedes
@@ -413,9 +416,14 @@ def vehicle_terms(text: str) -> set[str]:
     that class and is read as the class; any other letter-and-three-digit code (W205, C205,
     X156) is a chassis code.
     """
-    terms = {
-        f"make:{MAKE_ALIASES[m.group(1).lower()]}" for m in MAKE_PATTERN.finditer(text)
-    }
+    terms: list[tuple[str, int, int]] = [
+        (f"make:{MAKE_ALIASES[m.group(1).lower()]}", m.start(), m.end())
+        for m in MAKE_PATTERN.finditer(text)
+    ]
+
+    def add(term: str, match: re.Match[str]) -> None:
+        terms.append((term, match.start(), match.end()))
+
     for match in MODEL_PATTERN.finditer(text):
         model = match.group(1).lower()
         make = MODEL_MAKES[model]
@@ -423,31 +431,35 @@ def vehicle_terms(text: str) -> set[str]:
             text, match.start(), match.end(), make
         ):
             continue
-        terms.add(f"model:{make}/{model}")
+        add(f"model:{make}/{model}", match)
     for match in MERCEDES_CLASS_PATTERN.finditer(text):
-        terms.add(f"model:{MERCEDES}/{match.group(1).lower()}-class")
+        add(f"model:{MERCEDES}/{match.group(1).lower()}-class", match)
     for match in MERCEDES_CLASS_LOOSE_PATTERN.finditer(text):
         if near(text, match.start(), match.end(), MERCEDES):
-            terms.add(f"model:{MERCEDES}/{match.group(1).lower()}-class")
+            add(f"model:{MERCEDES}/{match.group(1).lower()}-class", match)
     for match in MERCEDES_SLASH_LIST_PATTERN.finditer(text):
         tokens = [token.strip().lower() for token in match.group(0).split("/")]
         if any(MODEL_MAKES.get(token) == MERCEDES for token in tokens):
-            terms.update(
-                f"model:{MERCEDES}/{token}-class"
-                for token in tokens
-                if token in set("abceglmsv")
-            )
+            for token in tokens:
+                if token in set("abceglmsv"):
+                    add(f"model:{MERCEDES}/{token}-class", match)
     for match in BMW_SERIES_PATTERN.finditer(text):
         if match.group(2) == "-" or near(text, match.start(), match.end(), "bmw"):
-            terms.add(f"model:bmw/{match.group(1).lower()}-series")
+            series = match.group(1).lower()
+            if series not in "efg":
+                add(f"model:bmw/{series}-series", match)
+            elif not re.match(
+                rf"\s*[/,(:]?\s*{series}\d{{2}}\b", text[match.end() :], re.IGNORECASE
+            ):
+                add(f"generation:bmw/{series}", match)
     for match in MERCEDES_CODE_PATTERN.finditer(text):
         if not near(text, match.start(), match.end(), MERCEDES):
             continue
         letter, number = match.group(1).lower(), match.group(2)
         if letter in "abcegs" and number.endswith("0"):
-            terms.add(f"model:{MERCEDES}/{letter}-class")
+            add(f"model:{MERCEDES}/{letter}-class", match)
         else:
-            terms.add(f"chassis:{letter}{number}")
+            add(f"chassis:{letter}{number}", match)
     for pattern, make in (
         (BMW_CHASSIS_PATTERN, "bmw"),
         (AUDI_CHASSIS_PATTERN, "audi"),
@@ -455,8 +467,23 @@ def vehicle_terms(text: str) -> set[str]:
     ):
         for match in pattern.finditer(text):
             if near(text, match.start(), match.end(), make):
-                terms.add("chassis:" + match.group(1).lower().replace(" ", ""))
+                add("chassis:" + match.group(1).lower().replace(" ", ""), match)
     return terms
+
+
+def vehicle_terms(text: str) -> set[str]:
+    """The distinct terms of vehicle_term_spans."""
+    return {term for term, _, _ in vehicle_term_spans(text)}
+
+
+def split_negated_terms(text: str) -> tuple[set[str], set[str]]:
+    """(terms named outside any "not ..." list, terms named inside one)."""
+    negated_spans = [m.span("names") for m in NEGATED_NAMES.finditer(text)]
+    positive, negated = set(), set()
+    for term, start, end in vehicle_term_spans(text):
+        inside = any(lo <= start and end <= hi for lo, hi in negated_spans)
+        (negated if inside else positive).add(term)
+    return positive, negated
 
 
 def terms_outside_fitment(product: dict[str, Any], terms: set[str]) -> set[str]:
@@ -474,7 +501,67 @@ def terms_outside_fitment(product: dict[str, Any], terms: set[str]) -> set[str]:
                 outside.add(term)
         elif kind == "chassis" and value not in chassis:
             outside.add(term)
+        elif kind == "generation":
+            # A bare generation ("all BMW F-Series") claims every chassis in it, which no
+            # fitment lists; name the chassis codes instead.
+            outside.add(term)
     return outside
+
+
+def text_terms_outside_fitment(product: dict[str, Any]) -> set[str]:
+    """Vehicle terms in the listing's text that its fitment does not back. A name in a
+    "not ..." list is skipped only when it is also outside the fitment; one inside the fitment
+    contradicts it and is reported as 'not <term>'."""
+    positive, negated = split_negated_terms(listing_text(product))
+    if not product["fitment"]["makes"]:
+        return positive
+    negated_outside = terms_outside_fitment(product, negated)
+    return terms_outside_fitment(product, positive) | {
+        f"not {term}" for term in negated - negated_outside
+    }
+
+
+def _copy_text(value: str) -> str:
+    text = html.unescape(HTML_TAG.sub(" ", value)).replace("&", "and")
+    return re.sub(r"\s+", " ", text)
+
+
+def copy_price_mismatches(
+    base: dict[str, Any],
+    add_ons: list[dict[str, Any]],
+    products_by_id: dict[str, dict[str, Any]],
+) -> list[str]:
+    """Prices the base listing's copy quotes for its add-ons ("Tweeter Speakers – £149.99")
+    that differ from the add-on's catalogue price. Longer labels are matched first, so
+    "AMG Dashboard" is not read as "Dashboard"."""
+    text = _copy_text(base.get("descriptionHtml") or "")
+    taken: list[tuple[int, int]] = []
+    problems = []
+    options = sorted(
+        add_on_options(base, add_ons, products_by_id),
+        key=lambda option: len(option[0]["label"]),
+        reverse=True,
+    )
+    for add_on, product in options:
+        label = _copy_text(add_on["label"]).strip()
+        price = next(
+            v["price"] for v in product["variants"] if v["id"] == add_on["variantId"]
+        )
+        pattern = re.compile(rf"(?<!\w){re.escape(label)}(?!\w)", re.IGNORECASE)
+        for match in pattern.finditer(text):
+            if any(lo < match.end() and match.start() < hi for lo, hi in taken):
+                continue
+            taken.append(match.span())
+            quoted = COPY_PRICE.match(text, match.end())
+            if not quoted:
+                continue
+            pence = round(float(quoted.group(1).replace(",", "")) * 100)
+            if pence != price:
+                problems.append(
+                    f"{base['slug']} copy prices {add_on['label']} at £{quoted.group(1)}, "
+                    f"but the add-on costs £{price / 100:.2f}."
+                )
+    return problems
 
 
 def check_fitment_guards(
@@ -487,7 +574,7 @@ def check_fitment_guards(
     errors: list[str] = []
     warnings: list[str] = []
     products_by_id = {product["id"]: product for product in catalog}
-    bases = [product for product in catalog if product["kind"] == "main"]
+    bases = [product for product in catalog if product["kind"] != "addon"]
 
     # 1. Add-ons: a vehicle-specific add-on must fit every vehicle of its base; a generic
     #    (confirm-first, no make) add-on on a vehicle-specific base needs an explicit approval.
@@ -524,9 +611,9 @@ def check_fitment_guards(
         for add_on_id, slug in sorted(approved - used_approvals, key=str)
     )
 
-    # 2. Discovery: every offer the product page shows (the port, which filters the candidates
+    # 2. Discovery (main listings only): every offer the product page shows (the port, which filters the candidates
     #    with `covers`) must fit every vehicle of the page by the independent rule.
-    for base in bases:
+    for base in (product for product in bases if product["kind"] == "main"):
         offered = discovery_products(base, catalog)
         candidate_ids = {c["id"] for c in discovery_candidates(base, catalog)}
         errors.extend(
@@ -545,12 +632,10 @@ def check_fitment_guards(
     for product in catalog:
         slug = product["slug"]
         text = listing_text(product)
-        terms = vehicle_terms(text)
+        bad = text_terms_outside_fitment(product)
         if not product["fitment"]["makes"]:
-            bad = terms
             problem = "is not vehicle-specific but its text names"
         else:
-            bad = terms_outside_fitment(product, terms)
             problem = "text names vehicles outside its fitment:"
             claim = GENERIC_FITMENT_CLAIM.search(text)
             if claim:
@@ -568,7 +653,11 @@ def check_fitment_guards(
                 f"KNOWN_TEXT_EXCEPTIONS[{slug!r}] is stale ({', '.join(sorted(stale))}); remove it."
             )
 
-    # 4. Duplicates among sellable listings.
+    # 4. Prices quoted in a listing's copy for its add-ons match the add-ons' prices.
+    for base in bases:
+        errors.extend(copy_price_mismatches(base, add_ons, products_by_id))
+
+    # 5. Duplicates among sellable listings.
     listings = [p for p in catalog if p["kind"] != "addon" and sellable(p)]
     used_allowlist = set()
     for index, first in enumerate(listings):
@@ -821,7 +910,7 @@ def main(argv: list[str] | None = None) -> None:
                 or not isinstance(applicable_families, list)
                 or any(
                     not isinstance(base_id, str)
-                    or products_by_id.get(base_id, {}).get("kind") != "main"
+                    or products_by_id.get(base_id, {}).get("kind") not in BASE_KINDS
                     or products_by_id[base_id].get("family") not in applicable_families
                     for base_id in applicable_products
                 )
@@ -839,6 +928,12 @@ def main(argv: list[str] | None = None) -> None:
                 )
             exclusive_group_sizes[exclusive_group] = (
                 exclusive_group_sizes.get(exclusive_group, 0) + 1
+            )
+        if status == "active" and "appliesToProducts" not in add_on:
+            # Family-wide add-ons would reach every listing of the family (the C-Class
+            # included), so each active add-on names the listings it is offered on.
+            raise SystemExit(
+                f"Catalog check failed: active add-on {add_on_id} has no appliesToProducts."
             )
         if status == "disabled":
             if product_id is not None or variant_id is not None:

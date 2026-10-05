@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 
 const cartStorageKey = 'astar-customs-cart';
@@ -355,7 +357,7 @@ test('a saved bag drops add-ons that no longer apply and checks out without a bu
   ]);
   await page.goto('/checkout');
 
-  const notice = page.locator('.checkout-page').getByRole('status').filter({ hasText: /no longer apply/ });
+  const notice = page.locator('.checkout-page').getByRole('status').filter({ hasText: /no longer available/ });
   await expect(notice).toBeVisible();
   await expect(page.locator('.checkout-build-line--base')).toHaveCount(1);
   await expect(page.locator('.checkout-build-line--addon')).toHaveCount(1);
@@ -430,15 +432,193 @@ test('panoramic lights do not offer ambient-lighting-only extras', async ({ page
   await expect(page.locator('.product-buybox .buy-actions').getByRole('button', { name: 'Add to bag' })).toBeVisible();
 });
 
-test('upgrade listings are directly purchasable and contain no nested upsells', async ({ page }) => {
+test('upgrade listings are directly purchasable, offer only their own add-ons and no discovery upsells', async ({ page }) => {
   await page.goto('/ambient-lighting-upgrade');
 
   await expect(page.getByRole('heading', { name: 'Ambient Lighting Upgrade Audi 2020+' })).toBeVisible();
   await expect(page.getByText(/Audi models from 2020/)).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Add to bag' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Personalise your package' })).toHaveCount(0);
+  // Upgrades can carry add-ons scoped to them (client, 2026-10-05) but never suggest other listings.
+  await expect(page.getByRole('heading', { name: 'Personalise your package' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add build to bag · £799.99' })).toBeVisible();
   await expect(page.getByText('If you’re interested')).toHaveCount(0);
   await expect(page.getByText(/GLA is the higher spec/i)).toHaveCount(0);
+});
+
+function buildExtra(page: Page, label: string) {
+  return page
+    .locator('.build-extras')
+    .getByRole('button', { name: new RegExp(`^Optional extra ${escapeRegExp(label)} `) });
+}
+
+async function expectBuildExtras(page: Page, slug: string, expected: readonly (readonly [string, string])[]) {
+  await page.goto(`/${slug}`);
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  if (expected.length === 0) {
+    await expect(page.getByRole('heading', { name: 'Personalise your package' })).toHaveCount(0);
+    await expect(page.locator('.build-extra')).toHaveCount(0);
+    await expect(page.locator('.product-buybox .buy-actions').getByRole('button', { name: 'Add to bag' })).toBeVisible();
+    return;
+  }
+  const extras = page.locator('.build-extras');
+  await expect(extras.getByText(`${expected.length} option${expected.length === 1 ? '' : 's'}`)).toBeVisible();
+  await expect(extras.locator('.build-extra strong')).toHaveText(expected.map(([label]) => label));
+  for (const [label, price] of expected) {
+    await expect(buildExtra(page, label)).toContainText(`+${price} per build`);
+  }
+}
+
+const genericExtras = [
+  ['4x Speaker Lights', '£39.99'],
+  ['Premium Pack: 25+ Animations & Start-Up Effects', '£49.99'],
+] as const;
+
+test('BMW F-Series package offers its three extras and both generic add-ons', async ({ page }) => {
+  await expectBuildExtras(page, '-bmw-f-series-oem-ambient-package', [
+    ...genericExtras,
+    ['Tweeter speakers', '£149.99'],
+    ['Door speakers', '£99.99'],
+    ['Illuminated door handles', '£149.99'],
+  ]);
+  await expect(page.getByText(/F32 coupé and F33 convertible/)).toBeVisible();
+
+  for (const label of ['4x Speaker Lights', 'Tweeter speakers', 'Door speakers', 'Illuminated door handles']) {
+    await buildExtra(page, label).click();
+  }
+  await page.getByRole('button', { name: 'Add build to bag · £889.95' }).click();
+  await expect(page.getByRole('dialog', { name: 'Shopping bag' }).locator('.cart-line')).toHaveCount(5);
+});
+
+test('A-Class/CLA/GLA OEM upgrade offers only its three add-ons', async ({ page }) => {
+  await expectBuildExtras(page, 'full-oem-ambient-lighting-upgrade-a-class1', [
+    ['Vents', '£199.99'],
+    ['Dashboard', '£179.99'],
+    ['Speakers', '£99.99'],
+  ]);
+  await expect(page.locator('.build-extras').getByRole('button', { name: /4x Speaker Lights|Premium Pack/ })).toHaveCount(0);
+
+  await buildExtra(page, 'Vents').click();
+  await buildExtra(page, 'Dashboard').click();
+  await buildExtra(page, 'Speakers').click();
+  await page.getByRole('button', { name: 'Add build to bag · £1,379.96' }).click();
+  await page.getByRole('dialog', { name: 'Shopping bag' }).getByRole('link', { name: /Review & checkout/ }).click();
+
+  await page.getByRole('checkbox').check();
+  const checkoutResponse = page.waitForResponse('**/api/checkout/session');
+  await page.getByRole('button', { name: /Continue to secure payment/ }).click();
+  const response = await checkoutResponse;
+  expect(response.status()).not.toBe(409);
+  expect(response.request().postDataJSON().items).toHaveLength(4);
+});
+
+test('Audi 2020+ upgrade offers the two generic add-ons and nothing vehicle-specific', async ({ page }) => {
+  await expectBuildExtras(page, 'ambient-lighting-upgrade', genericExtras);
+});
+
+test('DIY kits offer no generic add-ons', async ({ page }) => {
+  for (const slug of [
+    'car-interior-ambient-light-kit-golf-mk7-mk75-2012-2019',
+    'car-interior-ambient-led-light-kit-audi-q3-2018-current',
+  ]) {
+    await expectBuildExtras(page, slug, []);
+  }
+});
+
+test('calipers offer caliper decals at £35 in the package builder', async ({ page }) => {
+  await expectBuildExtras(page, 'calipers', [['Caliper Decals', '£35.00']]);
+  await expect(page.getByText(/add them to your calipers in the package builder/i)).toBeVisible();
+  await expect(page.getByText(/seperately/)).toHaveCount(0);
+
+  await buildExtra(page, 'Caliper Decals').click();
+  await page.getByRole('button', { name: 'Add build to bag · £259.99' }).click();
+  await expect(page.getByRole('dialog', { name: 'Shopping bag' }).locator('.cart-line')).toHaveCount(2);
+});
+
+test('the removed 800-piece Shooting Stars slug redirects to a live listing', async ({ page }) => {
+  // nginx (production) answers the old slug with a 301; vite preview has no nginx, so check the
+  // rule in the shipped config and that its target is a real product page.
+  const nginx = readFileSync(path.join(import.meta.dirname, '..', 'nginx.conf'), 'utf-8');
+  const redirect = /location = \/twinkle-starlights-800-pieces- \{[^}]*return 301 \/([\w-]+)\$is_args\$args;/.exec(nginx);
+  expect(redirect?.[1]).toBe('shooting-stars-twinkle-starlight-800-pieces');
+
+  await page.goto(`/${redirect?.[1]}`);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Shooting Stars + Twinkle Starlight (800 Pieces)');
+  await page.goto('/twinkle-starlights-800-pieces-');
+  await expect(page.getByRole('heading', { level: 1 })).not.toHaveText(/800/);
+});
+
+test('the 800-piece Shooting Stars package is bought online at £974.99 like its siblings', async ({ page }) => {
+  await page.goto('/shooting-stars-twinkle-starlight-800-pieces');
+
+  await expect(page.locator('.product-buybox__price')).toHaveText('£974.99');
+  await expect(page.getByText(/contact (the team|us) first/i)).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Personalise your package' })).toHaveCount(0);
+  await page.locator('.product-buybox .buy-actions').getByRole('button', { name: 'Add to bag' }).click();
+
+  const drawer = page.getByRole('dialog', { name: 'Shopping bag' });
+  await expect(drawer.locator('.cart-line')).toHaveCount(1);
+  await expect(drawer.locator('.cart-line')).toContainText('Shooting Stars + Twinkle Starlight (800 Pieces)');
+  await expect(drawer.getByText('£974.99').first()).toBeVisible();
+});
+
+test('a saved bag drops a product that is no longer sold and says so', async ({ page }) => {
+  await seedCart(page, 1, [], [
+    // The deleted cheaper 800-piece Shooting Stars listing, on its own (no add-ons involved).
+    { productId: 'prod_01KCFYNY97DJ0SBEYP5GG6XQ4B', variantId: 'variant_01KCFYNYBVV3KFV4SVMTN1A10Y', quantity: 1 },
+  ]);
+  await page.goto('/checkout');
+
+  const notice = page.locator('.checkout-page').getByRole('status');
+  await expect(notice).toHaveText(/Some items in your bag are no longer available, so we removed them/);
+  await expect
+    .poll(() => page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? '{}').state?.lines?.length, cartStorageKey))
+    .toBe(1);
+  await notice.getByRole('button', { name: 'Dismiss' }).click();
+  await expect(notice).toHaveCount(0);
+});
+
+test('shop cards send upgrades with add-ons to their package options', async ({ page }) => {
+  await page.goto('/shop');
+  await page.getByRole('searchbox', { name: 'Search products' }).fill('Ambient Lighting Upgrade Audi');
+  const card = page.getByRole('article').filter({ hasText: 'Ambient Lighting Upgrade Audi 2020+' });
+  await expect(card.getByRole('link', { name: 'View package options for Ambient Lighting Upgrade Audi 2020+' })).toBeVisible();
+  await expect(card.getByRole('link', { name: /^View upgrade/ })).toHaveCount(0);
+});
+
+test('a saved bag drops generic add-ons from DIY kits and the deleted 800-piece listing', async ({ page }) => {
+  const diyBuild = 'saved-golf-diy-build';
+  await seedCartState(page, [
+    {
+      productId: 'prod_01KSCZYYJ1XMT0QDWPFPZM924B',
+      variantId: 'variant_01KSCZYYM8BQYQHG9QAAKXQ74Q',
+      quantity: 1,
+      buildId: diyBuild,
+      lineType: 'base',
+    },
+    { productId: 'prod_01KCFR1PBNK4HHMX64NN0BPCCK', variantId: 'variant_01KCFR1PF6SSFRX0GSDM2FDNDH', quantity: 1, buildId: diyBuild, lineType: 'addon' },
+    { productId: premiumAddOnProductId, variantId: premiumAddOnVariantId, quantity: 1, buildId: diyBuild, lineType: 'addon' },
+    // The deleted cheaper 800-piece Shooting Stars listing.
+    { productId: 'prod_01KCFYNY97DJ0SBEYP5GG6XQ4B', variantId: 'variant_01KCFYNYBVV3KFV4SVMTN1A10Y', quantity: 1 },
+  ]);
+  await page.goto('/checkout');
+
+  const notice = page.locator('.checkout-page').getByRole('status').filter({ hasText: /no longer available/ });
+  await expect(notice).toBeVisible();
+  await expect(page.locator('.checkout-build-line--base')).toHaveCount(1);
+  await expect(page.locator('.checkout-build-line--addon')).toHaveCount(0);
+  await expect(page.getByText('Shooting Stars + Twinkle Starlight (800 Pieces)')).toHaveCount(0);
+  await expect(page.locator('.order-summary dl')).toContainText('£299.99');
+  await expect
+    .poll(() => page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? '{}').state?.lines?.length, cartStorageKey))
+    .toBe(1);
+
+  await page.getByRole('checkbox').check();
+  const checkoutResponse = page.waitForResponse('**/api/checkout/session');
+  await page.getByRole('button', { name: /Continue to secure payment/ }).click();
+  const response = await checkoutResponse;
+  expect(response.status()).not.toBe(409);
+  expect(response.status()).not.toBe(404);
+  expect(response.request().postDataJSON().items).toHaveLength(1);
+  await expect(page.getByText(/This build needs a quick review/)).toHaveCount(0);
 });
 
 test('vehicle-specific catalogue media matches its label', async ({ page }) => {

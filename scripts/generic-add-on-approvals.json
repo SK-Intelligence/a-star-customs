@@ -1,102 +1,32 @@
 [
   {
     "addOnId": "speaker-lights",
-    "baseSlug": "dual-car-air-vent-ambient-light-kit",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the 4x Speaker Lights add-on suits this vehicle-specific kit."
-  },
-  {
-    "addOnId": "premium-animation-pack",
-    "baseSlug": "dual-car-air-vent-ambient-light-kit",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the Premium Pack (25+ animations) add-on suits this vehicle-specific kit."
-  },
-  {
-    "addOnId": "speaker-lights",
-    "baseSlug": "mercedes-benz-led-air-vent-kit-vents-for-c-classclagla-2012-2026-front",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the 4x Speaker Lights add-on suits this vehicle-specific kit."
-  },
-  {
-    "addOnId": "premium-animation-pack",
-    "baseSlug": "mercedes-benz-led-air-vent-kit-vents-for-c-classclagla-2012-2026-front",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the Premium Pack (25+ animations) add-on suits this vehicle-specific kit."
-  },
-  {
-    "addOnId": "speaker-lights",
-    "baseSlug": "car-interior-ambient-led-light-kit-audi-q3-2018-current",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the 4x Speaker Lights add-on suits this vehicle-specific kit."
-  },
-  {
-    "addOnId": "premium-animation-pack",
-    "baseSlug": "car-interior-ambient-led-light-kit-audi-q3-2018-current",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the Premium Pack (25+ animations) add-on suits this vehicle-specific kit."
-  },
-  {
-    "addOnId": "speaker-lights",
-    "baseSlug": "car-interior-ambient-led-lighting-kit-audi-8y-2012-2020",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the 4x Speaker Lights add-on suits this vehicle-specific kit."
-  },
-  {
-    "addOnId": "premium-animation-pack",
-    "baseSlug": "car-interior-ambient-led-lighting-kit-audi-8y-2012-2020",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the Premium Pack (25+ animations) add-on suits this vehicle-specific kit."
-  },
-  {
-    "addOnId": "speaker-lights",
-    "baseSlug": "multi-color-ambient-car-interior-led-kit-audi-8y-2012-2020",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the 4x Speaker Lights add-on suits this vehicle-specific kit."
-  },
-  {
-    "addOnId": "premium-animation-pack",
-    "baseSlug": "multi-color-ambient-car-interior-led-kit-audi-8y-2012-2020",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the Premium Pack (25+ animations) add-on suits this vehicle-specific kit."
-  },
-  {
-    "addOnId": "speaker-lights",
-    "baseSlug": "car-interior-ambient-light-kit-golf-mk7-mk75-2012-2019",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the 4x Speaker Lights add-on suits this vehicle-specific kit."
-  },
-  {
-    "addOnId": "premium-animation-pack",
-    "baseSlug": "car-interior-ambient-light-kit-golf-mk7-mk75-2012-2019",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the Premium Pack (25+ animations) add-on suits this vehicle-specific kit."
-  },
-  {
-    "addOnId": "speaker-lights",
-    "baseSlug": "car-ambient-interior-led-light-kit-aclagla-2018-2026",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the 4x Speaker Lights add-on suits this vehicle-specific kit."
-  },
-  {
-    "addOnId": "premium-animation-pack",
-    "baseSlug": "car-ambient-interior-led-light-kit-aclagla-2018-2026",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the Premium Pack (25+ animations) add-on suits this vehicle-specific kit."
-  },
-  {
-    "addOnId": "speaker-lights",
-    "baseSlug": "car-led-ambient-light-kit-cla-gla-2018-2026",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the 4x Speaker Lights add-on suits this vehicle-specific kit."
-  },
-  {
-    "addOnId": "premium-animation-pack",
-    "baseSlug": "car-led-ambient-light-kit-cla-gla-2018-2026",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the Premium Pack (25+ animations) add-on suits this vehicle-specific kit."
-  },
-  {
-    "addOnId": "speaker-lights",
     "baseSlug": "-bmw-f-series-oem-ambient-package",
-    "note": "Pending client confirmation (BMW extras question): the listing names its own optional extras (tweeters, door speakers, door handles); confirm the 4x Speaker Lights add-on belongs on the BMW package."
+    "note": "Client confirmed 2026-10-05: the BMW 4 Series F32/F33 & 3 Series GT F34 package offers the 4x Speaker Lights add-on alongside its own tweeter, door speaker and door handle extras."
   },
   {
     "addOnId": "premium-animation-pack",
     "baseSlug": "-bmw-f-series-oem-ambient-package",
-    "note": "Pending client confirmation (BMW extras question): the listing names its own optional extras (tweeters, door speakers, door handles); confirm the Premium Pack (25+ animations) add-on belongs on the BMW package."
+    "note": "Client confirmed 2026-10-05: the BMW 4 Series F32/F33 & 3 Series GT F34 package offers the Premium Pack (25+ animations) add-on alongside its own tweeter, door speaker and door handle extras."
   },
   {
     "addOnId": "speaker-lights",
     "baseSlug": "ambient-lighting-package-",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the 4x Speaker Lights add-on suits this vehicle-specific kit."
+    "note": "Client confirmed 2026-10-05: the 4x Speaker Lights add-on suits the fitted Golf Mk7/Mk7.5 ambient lighting package."
   },
   {
     "addOnId": "premium-animation-pack",
     "baseSlug": "ambient-lighting-package-",
-    "note": "Pending client confirmation: inherited from the ambient-lighting family list; confirm the Premium Pack (25+ animations) add-on suits this vehicle-specific kit."
+    "note": "Client confirmed 2026-10-05: the Premium Pack (25+ animations) add-on suits the fitted Golf Mk7/Mk7.5 ambient lighting package."
+  },
+  {
+    "addOnId": "speaker-lights",
+    "baseSlug": "ambient-lighting-upgrade",
+    "note": "Client confirmed 2026-10-05: offer the add-ons other fitted packages offer where nothing contradicts it; the 4x Speaker Lights add-on is tied to A Star's fitted lighting package, which the Audi 2020+ upgrade is."
+  },
+  {
+    "addOnId": "premium-animation-pack",
+    "baseSlug": "ambient-lighting-upgrade",
+    "note": "Client confirmed 2026-10-05: offer the add-ons other fitted packages offer where nothing contradicts it; the Premium Pack (25+ animations) add-on is tied to A Star's fitted lighting package, which the Audi 2020+ upgrade is."
   }
 ]
