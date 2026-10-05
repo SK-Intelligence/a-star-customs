@@ -8,6 +8,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
+from app.catalog import CatalogConfigurationError, load_catalog
+
 
 ADD_ONS_PATH = Path(__file__).with_name("add-ons.json")
 
@@ -57,6 +59,10 @@ class AddOnOption(BaseModel):
             )
         if self.status == "active" and (not self.productId or not self.variantId):
             raise ValueError("active add-ons require product and variant IDs")
+        if self.status == "active" and self.appliesToProducts is None:
+            # A family-wide add-on would reach every listing of the family (the
+            # C-Class included), so each active add-on names its listings.
+            raise ValueError("active add-ons require appliesToProducts")
         if self.status == "disabled" and (
             self.productId is not None or self.variantId is not None
         ):
@@ -118,4 +124,21 @@ def load_add_ons() -> list[AddOnOption]:
         raise AddOnConfigurationError(
             "Every add-on exclusive group needs at least two members."
         )
+    try:
+        catalog = load_catalog()
+    except CatalogConfigurationError as exc:
+        raise AddOnConfigurationError(
+            "The add-on configuration is unavailable."
+        ) from exc
+    for option in add_ons:
+        for base_id in option.appliesToProducts or []:
+            base = catalog.get(base_id)
+            if (
+                base is None
+                or base.kind == "addon"
+                or base.family not in option.appliesToFamilies
+            ):
+                raise AddOnConfigurationError(
+                    "The add-on configuration targets an invalid base product."
+                )
     return add_ons
