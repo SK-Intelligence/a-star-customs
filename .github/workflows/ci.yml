@@ -176,8 +176,8 @@ jobs:
         with: { name: frontend-dist, path: frontend/dist }
       # Budgets in frontend/lighthouserc.json (median of 3 runs): accessibility >= 0.95, best
       # practices >= 0.9, performance >= 0.8. With responsive WebP images (responsive-images.ts)
-      # the local medians were 0.93 on / and 0.96 on the product page (LCP 3.2 s and 2.7 s,
-      # 2026-10-04; 0.75 and 0.75 before). The budget stays well below them because runner
+      # the local medians were 0.93 on / and 0.95 on the product page (LCP 3.1 s and 2.9 s,
+      # 2026-10-05; 0.75 and 0.75 before). The budget stays well below them because runner
       # medians vary by several points. Uses the runner's preinstalled Chrome.
       - run: npx -y @lhci/cli@0.15.1 autorun
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
