@@ -5,7 +5,7 @@ Everything reaches customers the same way. Nothing is pushed straight to `main`.
 1. **Branch** from `main`: `git switch -c short-description main`.
 2. **Check locally** (from the repository root): `npm run ci:fast` (ESLint, `tsc -b`, Ruff lint and format, forbidden text, backend tests, `check_catalog_sync.py --ci` and its self-tests). For UI, cart or checkout changes also `npm run build`, then `cd frontend && E2E_TARGET=prod npx playwright test` (the E2E and accessibility suites against the production build).
 3. **Open a pull request** into `main`. The **Quality gate** workflow (`.github/workflows/ci.yml`) runs every check below. All jobs must be green; a red job means the change is not ready.
-4. **Merge** the pull request into `main`. The GitHub ruleset below blocks the merge until all 10 Quality gate checks pass, and Railway also waits for the commit's check suites before deploying it ("Wait for CI").
+4. **Merge** the pull request into `main`. The GitHub ruleset below blocks the merge until all 10 Quality gate checks pass and the branch is up to date with `main`. Once `.railway/railway.ts` is applied, Railway also waits for the commit's check suites before deploying it ("Wait for CI").
 
 First-time setup is in `README.md` (`npm install`, and `backend/.venv` from the hashed lock with `pip install --require-hashes -r backend/requirements.txt`). Enable the pre-push hook once per clone with `npm run setup:hooks`: pushing `main` then runs `npm run ci:fast` first and is refused if it fails.
 
@@ -30,9 +30,9 @@ After a release, **Actions → Live site smoke check → Run workflow** runs `op
 
 ## Deploys
 
-Railway builds each service as described by Infrastructure as Code in `.railway/railway.ts`: the frontend (nginx + the built storefront, `frontend/Dockerfile`) and the backend (FastAPI, `backend/Dockerfile`, health check `/api/health`, rebuilt only when `backend/**` changes, persistent volume at `/data`). Both services deploy `main` of `SK-Intelligence/a-star-customs` with check suites ("Wait for CI") on. Variables and secrets are not in the file; they stay in Railway. The deprecated `railway.json` files are gone. Restart policy is left to each service's Railway settings. Both Docker builds run the structural catalogue check first, so a catalogue that is out of sync cannot deploy. A backend release that fails its health check never goes live and the previous one keeps serving; the frontend has no Railway health check, so run the live smoke check after a release.
+Railway builds each service as described by Infrastructure as Code in `.railway/railway.ts`: the frontend (nginx + the built storefront, `frontend/Dockerfile`) and the backend (FastAPI, `backend/Dockerfile`, health check `/api/health`, rebuilt only when `backend/**` changes, persistent volume at `/data`). Both services deploy `main` of `SK-Intelligence/a-star-customs`. The file declares check suites ("Wait for CI") on, which takes effect only after `railway config apply`; until then the GitHub ruleset is the only gate. Variables and secrets are not in the file; they stay in Railway. The deprecated `railway.json` files are gone. Restart policy is left to each service's Railway settings. Both Docker builds run the structural catalogue check first, so a catalogue that is out of sync cannot deploy. A backend release that fails its health check never goes live and the previous one keeps serving; the frontend has no Railway health check, so run the live smoke check after a release.
 
-**Branch protection.** The GitHub ruleset "Protect main: Quality gate" guards `main`. It requires a pull request and all 10 Quality gate checks to pass, blocks force-pushes and deletion of `main`, and lets organisation admins bypass it through a pull request only (never by pushing directly). Railway's Wait for CI is a second, deploy-time gate, not the only one.
+**Branch protection.** The GitHub ruleset "Protect main: Quality gate" guards `main`. It requires a pull request and all 10 Quality gate checks to pass, blocks force-pushes and deletion of `main`, and lets organisation admins bypass it through a pull request only (never by pushing directly). The branch must be up to date with `main` before merging. Railway's Wait for CI, once applied, is a second, deploy-time gate.
 
 **Required Railway setup** (once, by the project owner):
 
@@ -41,7 +41,6 @@ Railway builds each service as described by Infrastructure as Code in `.railway/
 3. Apply it with `railway config apply`, which asks for confirmation. Planning is read-only; applying changes the live project, so review the plan first.
 4. Leave each service's old "Config file path" setting empty; the `railway.json` files no longer exist.
 
-Until the services are connected, a push to `main` is not deployed at all; the ruleset keeps unreviewed changes off `main` either way.
 
 ## Dependency updates (Dependabot)
 
