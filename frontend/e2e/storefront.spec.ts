@@ -357,7 +357,7 @@ test('a saved bag drops add-ons that no longer apply and checks out without a bu
   ]);
   await page.goto('/checkout');
 
-  const notice = page.locator('.checkout-page').getByRole('status').filter({ hasText: /no longer apply/ });
+  const notice = page.locator('.checkout-page').getByRole('status').filter({ hasText: /no longer available/ });
   await expect(notice).toBeVisible();
   await expect(page.locator('.checkout-build-line--base')).toHaveCount(1);
   await expect(page.locator('.checkout-build-line--addon')).toHaveCount(1);
@@ -560,6 +560,30 @@ test('the 800-piece Shooting Stars package is bought online at £974.99 like its
   await expect(drawer.getByText('£974.99').first()).toBeVisible();
 });
 
+test('a saved bag drops a product that is no longer sold and says so', async ({ page }) => {
+  await seedCart(page, 1, [], [
+    // The deleted cheaper 800-piece Shooting Stars listing, on its own (no add-ons involved).
+    { productId: 'prod_01KCFYNY97DJ0SBEYP5GG6XQ4B', variantId: 'variant_01KCFYNYBVV3KFV4SVMTN1A10Y', quantity: 1 },
+  ]);
+  await page.goto('/checkout');
+
+  const notice = page.locator('.checkout-page').getByRole('status');
+  await expect(notice).toHaveText(/Some items in your bag are no longer available, so we removed them/);
+  await expect
+    .poll(() => page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? '{}').state?.lines?.length, cartStorageKey))
+    .toBe(1);
+  await notice.getByRole('button', { name: 'Dismiss' }).click();
+  await expect(notice).toHaveCount(0);
+});
+
+test('shop cards send upgrades with add-ons to their package options', async ({ page }) => {
+  await page.goto('/shop');
+  await page.getByRole('searchbox', { name: 'Search products' }).fill('Ambient Lighting Upgrade Audi');
+  const card = page.getByRole('article').filter({ hasText: 'Ambient Lighting Upgrade Audi 2020+' });
+  await expect(card.getByRole('link', { name: 'View package options for Ambient Lighting Upgrade Audi 2020+' })).toBeVisible();
+  await expect(card.getByRole('link', { name: /^View upgrade/ })).toHaveCount(0);
+});
+
 test('a saved bag drops generic add-ons from DIY kits and the deleted 800-piece listing', async ({ page }) => {
   const diyBuild = 'saved-golf-diy-build';
   await seedCartState(page, [
@@ -577,7 +601,7 @@ test('a saved bag drops generic add-ons from DIY kits and the deleted 800-piece 
   ]);
   await page.goto('/checkout');
 
-  const notice = page.locator('.checkout-page').getByRole('status').filter({ hasText: /no longer apply/ });
+  const notice = page.locator('.checkout-page').getByRole('status').filter({ hasText: /no longer available/ });
   await expect(notice).toBeVisible();
   await expect(page.locator('.checkout-build-line--base')).toHaveCount(1);
   await expect(page.locator('.checkout-build-line--addon')).toHaveCount(0);

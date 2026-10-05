@@ -85,9 +85,9 @@ test('@a11y checkout with an item in the bag', async ({ page }) => {
   await expectNoSeriousViolations(page, '/checkout');
 });
 
-test('@a11y bag drawer showing the removed add-on notice', async ({ page }) => {
+test('@a11y bag drawer showing the removed items notice', async ({ page }) => {
   // The stale saved bag from storefront.spec.ts ("a saved bag drops add-ons that no longer
-  // apply"): loading it drops the add-ons and shows RemovedAddOnNotice in the drawer.
+  // apply"): loading it drops the add-ons and shows RemovedItemsNotice in the drawer.
   const buildId = 'saved-c-class-build';
   await page.addInitScript((lines) => {
     window.localStorage.setItem(
@@ -104,6 +104,6 @@ test('@a11y bag drawer showing the removed add-on notice', async ({ page }) => {
   await expectNoSeriousViolations(page, '/', async (current) => {
     await current.getByRole('button', { name: /Open shopping bag/ }).click();
     const drawer = current.getByRole('dialog', { name: 'Shopping bag' });
-    await expect(drawer.getByRole('status').filter({ hasText: /no longer apply/ })).toBeVisible();
+    await expect(drawer.getByRole('status').filter({ hasText: /no longer available/ })).toBeVisible();
   });
 });
