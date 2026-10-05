@@ -78,6 +78,21 @@ def test_everyday_text_names_no_vehicle(text: str) -> None:
         ),
         ("Golf Mk8", {"model:volkswagen/golf", "chassis:mk8"}),
         ("BMW F32 4 Series", {"make:bmw", "chassis:f32", "model:bmw/4-series"}),
+        # "F-Series" is a chassis generation, not a model.
+        ("BMW F-Series", {"make:bmw", "generation:bmw/f"}),
+        (
+            "Mercedes A-Class W177, CLA C118/X118 and GLB X247",
+            {
+                "make:mercedes-benz",
+                "model:mercedes-benz/a-class",
+                "model:mercedes-benz/cla",
+                "model:mercedes-benz/glb",
+                "chassis:w177",
+                "chassis:c118",
+                "chassis:x118",
+                "chassis:x247",
+            },
+        ),
         (
             "fits the A/B/CLA/GLA",
             {
@@ -130,3 +145,56 @@ def test_text_heuristics_run_only_with_ci(
     check.check_fitment_guards(planted, add_ons, heuristics=False)
     with pytest.raises(SystemExit, match="outside its fitment"):
         check.check_fitment_guards(planted, add_ons, heuristics=True)
+
+
+def _listing(fitment: dict[str, Any], text: str) -> dict[str, Any]:
+    return {"title": text, "fitment": {"label": "", **fitment}}
+
+
+MERCEDES_C_CLASS = {
+    "mode": "specific",
+    "makes": ["Mercedes-Benz"],
+    "models": ["C-Class", "GLC"],
+    "chassisCodes": ["W205", "C205", "X253"],
+}
+BMW_F32 = {
+    "mode": "specific",
+    "makes": ["BMW"],
+    "models": ["3-Series", "4-Series"],
+    "chassisCodes": ["F32", "F33", "F34"],
+}
+
+
+@pytest.mark.parametrize(
+    ("fitment", "text", "outside"),
+    [
+        # A "not ..." list names what the listing does not fit.
+        (MERCEDES_C_CLASS, "Mercedes C-Class W205 and GLC X253; not CLA or GLA.", set()),
+        (MERCEDES_C_CLASS, "Mercedes C-Class; not for the A-Class, CLA or GLA", set()),
+        # Without "not" the same names are still caught.
+        (
+            MERCEDES_C_CLASS,
+            "Mercedes C-Class W205, CLA or GLA.",
+            {"model:mercedes-benz/cla", "model:mercedes-benz/gla"},
+        ),
+        # "not" before ordinary words hides nothing that follows the sentence.
+        (
+            MERCEDES_C_CLASS,
+            "The price is not indicative. Fits the Mercedes CLA.",
+            {"model:mercedes-benz/cla"},
+        ),
+        (BMW_F32, "BMW F-Series F32/F33 F34", set()),
+        (
+            {**BMW_F32, "chassisCodes": ["F32", "G22"]},
+            "BMW F-Series",
+            {"generation:bmw/f"},
+        ),
+        ({**BMW_F32, "chassisCodes": []}, "BMW F-Series", {"generation:bmw/f"}),
+    ],
+)
+def test_text_against_fitment_reads_negations_and_generations(
+    fitment: dict[str, Any], text: str, outside: set[str]
+) -> None:
+    listing = _listing(fitment, text)
+    terms = check.vehicle_terms(check.listing_text(listing))
+    assert check.terms_outside_fitment(listing, terms) == outside

@@ -53,16 +53,19 @@
     "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
     "fitment": {
       "mode": "specific",
-      "label": "Mercedes C-Class, CLA or GLA (2012–2026); confirm vent shape and model year.",
+      "label": "Rear centre-console vents for Mercedes C-Class W205/C205 and GLC X253; not CLA or GLA.",
       "makes": [
         "Mercedes-Benz"
       ],
       "models": [
         "C-Class",
-        "CLA",
-        "GLA"
+        "GLC"
       ],
-      "chassisCodes": []
+      "chassisCodes": [
+        "W205",
+        "C205",
+        "X253"
+      ]
     },
     "images": [
       {
@@ -229,16 +232,25 @@
     "reviewBasis": "Existing catalogue asset reviewed against listing title and fitment",
     "fitment": {
       "mode": "specific",
-      "label": "Mercedes C-Class, CLA or GLA (2012–2026); confirm vent shape and model year.",
+      "label": "Mercedes A-Class W177, B-Class W247, CLA C118/X118, GLA H247 and GLB X247 (2018+); front dashboard vents only, not C-Class.",
       "makes": [
         "Mercedes-Benz"
       ],
       "models": [
-        "C-Class",
+        "A-Class",
+        "B-Class",
         "CLA",
-        "GLA"
+        "GLA",
+        "GLB"
       ],
-      "chassisCodes": []
+      "chassisCodes": [
+        "W177",
+        "W247",
+        "C118",
+        "X118",
+        "H247",
+        "X247"
+      ]
     },
     "images": [
       {
@@ -756,14 +768,19 @@
     "reviewBasis": "SK Webminds gallery: BMW-labelled OEM lighting images",
     "fitment": {
       "mode": "specific",
-      "label": "BMW F-Series; confirm model, year and trim before fitting.",
+      "label": "BMW 4-Series F32 coupé and F33 convertible, and 3-Series Gran Turismo F34; confirm year and trim before fitting.",
       "makes": [
         "BMW"
       ],
       "models": [
-        "F-Series"
+        "3-Series",
+        "4-Series"
       ],
-      "chassisCodes": []
+      "chassisCodes": [
+        "F32",
+        "F33",
+        "F34"
+      ]
     },
     "images": [
       {

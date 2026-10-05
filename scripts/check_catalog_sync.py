@@ -125,6 +125,7 @@ MERCEDES_CLASS_LOOSE_PATTERN = re.compile(r"\b([ABCEGLMSV]) ?[Cc]lass(?:es)?\b")
 MERCEDES_SLASH_LIST_PATTERN = re.compile(
     r"\b[A-Za-z]{1,3}(?:\s?/\s?[A-Za-z]{1,3})+\b", re.IGNORECASE
 )
+# "3 Series" is a model; "F-Series" is a chassis generation (F30, F32...), read as one.
 BMW_SERIES_PATTERN = re.compile(r"\b([1-8]|[efg])([\s-])series\b", re.IGNORECASE)
 # Chassis and trim codes look like ordinary part numbers (H264, E27, S100, 8x, Mk2), so each
 # counts only with its make's context within VEHICLE_CONTEXT_WINDOW characters (see `near`).
@@ -168,33 +169,17 @@ GENERIC_FITMENT_CLAIM = re.compile(
     re.IGNORECASE,
 )
 HTML_TAG = re.compile(r"<[^>]+>")
+# "not CLA or GLA", "not C-Class": a list of names right after "not" says what the listing does
+# NOT fit, so it is left out of the text-against-fitment check.
+NEGATED_NAMES = re.compile(
+    r"\b[Nn]ot\s+(?:for\s+)?(?:the\s+)?[A-Z][\w-]*"
+    r"(?:(?:\s*,\s*|\s*/\s*|\s+(?:or|and|nor)\s+)[A-Z][\w-]*)*"
+)
 
 # Text that names a vehicle outside the listing's fitment while the client confirms what the
 # product fits. Each entry lists the exact terms it excuses; any other hit still fails, and an
 # entry whose terms no longer appear fails so it is removed once the listing is fixed.
-KNOWN_TEXT_EXCEPTIONS: dict[str, dict[str, Any]] = {
-    "mercedes-benz-led-air-vent-kit-vents-for-c-classclagla-2012-2026-front": {
-        "terms": {"model:mercedes-benz/a-class", "model:mercedes-benz/b-class"},
-        "reason": (
-            "Client question H1: the description says the front vent kit fits A/B/CLA/GLA "
-            "while the title and fitment say C-Class/CLA/GLA."
-        ),
-    },
-    "-bmw-f-series-oem-ambient-package": {
-        "terms": {"chassis:f32", "chassis:f33", "chassis:f34"},
-        "reason": (
-            "Client question H2: the description names F32/F33/F34 (4 Series) while the "
-            "fitment says every BMW F-Series; which F-Series cars does the package fit?"
-        ),
-    },
-    "ambient-lighting-package-": {
-        "terms": {"chassis:mk7.75"},
-        "reason": (
-            "Client question on the Golf package title: 'MK7.75' is not a Golf generation; "
-            "the fitment says Mk7/Mk7.5. Which cars is the package for?"
-        ),
-    },
-}
+KNOWN_TEXT_EXCEPTIONS: dict[str, dict[str, Any]] = {}
 
 # Same-family listings at the same price that look like one product listed twice. Each pair
 # waits on the client deciding whether to merge or differentiate them.
@@ -205,8 +190,8 @@ DUPLICATE_ALLOWLIST: dict[frozenset[str], str] = {
             "multi-color-ambient-car-interior-led-kit-audi-8y-2012-2020",
         }
     ): (
-        "Pending client question on duplicates: two Audi A3 8V/8Y kits with the same fitment "
-        "and price; merge them or say how they differ."
+        "Two Audi A3 8V/8Y kits with the same fitment and price: client confirmed distinct "
+        "products (2026-10-05)."
     ),
     frozenset(
         {
@@ -372,6 +357,7 @@ def fits_every_vehicle(base: dict[str, Any], candidate: dict[str, Any]) -> bool:
 
 
 def listing_text(product: dict[str, Any]) -> str:
+    """The listing's customer-facing text, minus "not ..." lists (see NEGATED_NAMES)."""
     parts = [
         product.get("title"),
         product.get("subtitle"),
@@ -379,7 +365,7 @@ def listing_text(product: dict[str, Any]) -> str:
         product["fitment"]["label"],
         html.unescape(HTML_TAG.sub(" ", product.get("descriptionHtml") or "")),
     ]
-    return " ".join(part for part in parts if part)
+    return NEGATED_NAMES.sub(" ", " ".join(part for part in parts if part))
 
 
 def near(text: str, start: int, end: int, make: str) -> bool:
@@ -405,7 +391,8 @@ def near(text: str, start: int, end: int, make: str) -> bool:
 
 
 def vehicle_terms(text: str) -> set[str]:
-    """Every make, model and chassis code the text names, as 'make:x', 'model:make/x', 'chassis:x'.
+    """Every make, model and chassis code the text names, as 'make:x', 'model:make/x', 'chassis:x',
+    plus BMW chassis generations ("F-Series") as 'generation:bmw/f'.
 
     Ambiguous tokens (part-number-shaped codes, model names that are also words) count only
     near their make's context; see MAKE_CONTEXT and VEHICLE_CONTEXT_WINDOW. In Mercedes
@@ -439,7 +426,12 @@ def vehicle_terms(text: str) -> set[str]:
             )
     for match in BMW_SERIES_PATTERN.finditer(text):
         if match.group(2) == "-" or near(text, match.start(), match.end(), "bmw"):
-            terms.add(f"model:bmw/{match.group(1).lower()}-series")
+            series = match.group(1).lower()
+            terms.add(
+                f"generation:bmw/{series}"
+                if series in "efg"
+                else f"model:bmw/{series}-series"
+            )
     for match in MERCEDES_CODE_PATTERN.finditer(text):
         if not near(text, match.start(), match.end(), MERCEDES):
             continue
@@ -474,6 +466,13 @@ def terms_outside_fitment(product: dict[str, Any], terms: set[str]) -> set[str]:
                 outside.add(term)
         elif kind == "chassis" and value not in chassis:
             outside.add(term)
+        elif kind == "generation":
+            # "F-Series" fits a listing whose chassis codes are all F-codes (F32, F33...).
+            make, _, letter = value.partition("/")
+            if make not in makes or not chassis or any(
+                not code.startswith(letter) for code in chassis
+            ):
+                outside.add(term)
     return outside
 
 

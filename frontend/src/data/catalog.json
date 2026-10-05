@@ -89,10 +89,10 @@
   {
     "id": "prod_01KSD0914ZFT86256G4WN1AECM",
     "slug": "dual-car-air-vent-ambient-light-kit",
-    "title": "Dual Car Air Vent Ambient Light Kit - Vents for C class/CLA/GLA 2012-2026 Back",
+    "title": "Dual Rear Air Vent Ambient Light Kit – Rear Console Vents for Mercedes C-Class W205/C205 / GLC X253",
     "subtitle": "LED Lighting Accessory for Car Interiors",
     "ribbonText": "New",
-    "descriptionHtml": "<p>Upgrade your car’s interior with this Dual Car Air Vent Ambient Light Kit. Designed for stylish and functional airflow, it features integrated LED lighting rings and a complete wiring harness for easy installation. Perfect for those seeking to enhance their driving experience with modern aesthetics, this kit combines efficient ventilation with customizable ambient lighting.</p>",
+    "descriptionHtml": "<p>Upgrade the rear centre-console vents of your Mercedes C-Class W205 saloon, C205 coupé or GLC X253 with this Dual Rear Air Vent Ambient Light Kit. It replaces the two rear console vents with vents that have integrated LED lighting rings, and comes with a complete wiring harness for easy installation. It combines efficient ventilation with customizable ambient lighting.</p>",
     "images": [
       "/images/products/dual-car-air-vent-ambient-light-kit-01.jpg"
     ],
@@ -107,7 +107,7 @@
     "variants": [
       {
         "id": "variant_01KSD0917FWT95S2D0DFP9QJ6Q",
-        "title": "Dual Car Air Vent Ambient Light Kit - Vents for C class/CLA/GLA 2012-2026 Back",
+        "title": "Dual Rear Air Vent Ambient Light Kit – Rear Console Vents for Mercedes C-Class W205/C205 / GLC X253",
         "price": 3499,
         "available": true
       }
@@ -119,16 +119,19 @@
     "family": "ambient-lighting",
     "fitment": {
       "mode": "specific",
-      "label": "Mercedes C-Class, CLA or GLA (2012–2026); confirm vent shape and model year.",
+      "label": "Rear centre-console vents for Mercedes C-Class W205/C205 and GLC X253; not CLA or GLA.",
       "makes": [
         "Mercedes-Benz"
       ],
       "models": [
         "C-Class",
-        "CLA",
-        "GLA"
+        "GLC"
       ],
-      "chassisCodes": []
+      "chassisCodes": [
+        "W205",
+        "C205",
+        "X253"
+      ]
     },
     "comparisonGroup": null,
     "specTier": null,
@@ -460,10 +463,10 @@
   {
     "id": "prod_01KSD071WXFF7FNXR8MZHQAPBJ",
     "slug": "mercedes-benz-led-air-vent-kit-vents-for-c-classclagla-2012-2026-front",
-    "title": "Mercedes-Benz LED Air Vent Kit - Vents for C class/CLA/GLA 2012-2026 Front",
+    "title": "Mercedes-Benz LED Turbine Air Vent Kit – 5 Front Vents for A/B-Class, CLA, GLA, GLB (2018+)",
     "subtitle": "Custom Ambient Air Vents with Wiring Harness",
     "ribbonText": "New",
-    "descriptionHtml": "<p>Upgrade your vehicle's interior with this premium Mercedes-Benz LED Air Vent Kit. Designed to fit A/B/CLA/GLA models, this kit includes four modern turbine-style air vents with integrated ambient LED lighting and complete wiring harnesses for seamless installation. Enhance your driving experience with smart climate control and eye-catching illumination. Perfect for car enthusiasts seeking both style and functionality.</p>",
+    "descriptionHtml": "<p>Upgrade your vehicle's interior with this premium Mercedes-Benz LED Air Vent Kit. Designed for the 2018+ Mercedes A-Class, B-Class, CLA, GLA and GLB (W177/W247/C118/H247/X247), this kit includes five modern turbine-style air vents with integrated ambient LED lighting and complete wiring harnesses for seamless installation. Enhance your driving experience with smart climate control and eye-catching illumination. Perfect for car enthusiasts seeking both style and functionality.</p>",
     "images": [
       "/images/products/mercedes-benz-led-air-vent-kit-vents-for-c-classclagla-2012-2026-front-01.jpg"
     ],
@@ -478,7 +481,7 @@
     "variants": [
       {
         "id": "variant_01KSD071Z1BP9YKXTD6CA9SBG7",
-        "title": "Mercedes-Benz LED Air Vent Kit - Vents for C class/CLA/GLA 2012-2026 Front",
+        "title": "Mercedes-Benz LED Turbine Air Vent Kit – 5 Front Vents for A/B-Class, CLA, GLA, GLB (2018+)",
         "price": 12499,
         "available": true
       }
@@ -490,16 +493,25 @@
     "family": "ambient-lighting",
     "fitment": {
       "mode": "specific",
-      "label": "Mercedes C-Class, CLA or GLA (2012–2026); confirm vent shape and model year.",
+      "label": "Mercedes A-Class W177, B-Class W247, CLA C118/X118, GLA H247 and GLB X247 (2018+); front dashboard vents only, not C-Class.",
       "makes": [
         "Mercedes-Benz"
       ],
       "models": [
-        "C-Class",
+        "A-Class",
+        "B-Class",
         "CLA",
-        "GLA"
+        "GLA",
+        "GLB"
       ],
-      "chassisCodes": []
+      "chassisCodes": [
+        "W177",
+        "W247",
+        "C118",
+        "X118",
+        "H247",
+        "X247"
+      ]
     },
     "comparisonGroup": null,
     "specTier": null,
@@ -1429,14 +1441,19 @@
     "family": "ambient-lighting",
     "fitment": {
       "mode": "specific",
-      "label": "BMW F-Series; confirm model, year and trim before fitting.",
+      "label": "BMW 4-Series F32 coupé and F33 convertible, and 3-Series Gran Turismo F34; confirm year and trim before fitting.",
       "makes": [
         "BMW"
       ],
       "models": [
-        "F-Series"
+        "3-Series",
+        "4-Series"
       ],
-      "chassisCodes": []
+      "chassisCodes": [
+        "F32",
+        "F33",
+        "F34"
+      ]
     },
     "comparisonGroup": null,
     "specTier": null,
@@ -1701,10 +1718,10 @@
   {
     "id": "prod_01KRGYB92HFEDJ2669V89535NR",
     "slug": "ambient-lighting-package-",
-    "title": "Ambient Lighting Package VW GOLF MK7.75",
+    "title": "Ambient Lighting Package VW GOLF Mk7/Mk7.5",
     "subtitle": null,
     "ribbonText": "NEW",
-    "descriptionHtml": "<p> Ambient Lighting Package – £774.99 (incl. VAT) </p><p> 1 Year Warranty | Pro Install (5–7 hrs)</p><p>Includes: </p><p>•Dashboard + Driver Side</p><p>•All Door Strips /Trims</p><p>•Door handle Lights</p><p>•Door bin Lights </p><p>•All Footwells</p><p>•(Optional Add-Ons Available)</p><p>•Variety of styles - stars - dragon scale - wave</p><p>Features: Bluetooth App </p><p>| 128+ Colours </p><p>| Two-Tone Options </p><p>Optional:</p><p> 4x Speaker Lights – £39.99 | </p><p>Premium Pack: 25+ Animations &amp; Start-Up Effects – £49.99</p><p>Transform your drive </p><p>VW GOLF MK7.75</p>",
+    "descriptionHtml": "<p> Ambient Lighting Package – £774.99 (incl. VAT) </p><p> 1 Year Warranty | Pro Install (5–7 hrs)</p><p>Includes: </p><p>•Dashboard + Driver Side</p><p>•All Door Strips /Trims</p><p>•Door handle Lights</p><p>•Door bin Lights </p><p>•All Footwells</p><p>•(Optional Add-Ons Available)</p><p>•Variety of styles - stars - dragon scale - wave</p><p>Features: Bluetooth App </p><p>| 128+ Colours </p><p>| Two-Tone Options </p><p>Optional:</p><p> 4x Speaker Lights – £39.99 | </p><p>Premium Pack: 25+ Animations &amp; Start-Up Effects – £49.99</p><p>Transform your drive </p><p>VW GOLF Mk7/Mk7.5</p>",
     "images": [
       "/images/products/ambient-lighting-package-01.jpg",
       "/images/products/ambient-lighting-package-02.jpg",
@@ -1724,7 +1741,7 @@
     "variants": [
       {
         "id": "variant_01KRGYB95N2F3J300J4DD7WQ1F",
-        "title": "Ambient Lighting Package VW GOLF MK7.75",
+        "title": "Ambient Lighting Package VW GOLF Mk7/Mk7.5",
         "price": 77499,
         "available": true
       }
