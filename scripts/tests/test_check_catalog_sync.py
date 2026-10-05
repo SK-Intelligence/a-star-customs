@@ -157,51 +157,189 @@ MERCEDES_C_CLASS = {
     "models": ["C-Class", "GLC"],
     "chassisCodes": ["W205", "C205", "X253"],
 }
+MERCEDES_CLA = {
+    "mode": "specific",
+    "makes": ["Mercedes-Benz"],
+    "models": ["CLA"],
+    "chassisCodes": [],
+}
+MERCEDES_W177 = {
+    "mode": "specific",
+    "makes": ["Mercedes-Benz"],
+    "models": ["A-Class"],
+    "chassisCodes": ["W177"],
+}
 BMW_F32 = {
     "mode": "specific",
     "makes": ["BMW"],
     "models": ["3-Series", "4-Series"],
     "chassisCodes": ["F32", "F33", "F34"],
 }
+BMW_F30 = {
+    "mode": "specific",
+    "makes": ["BMW"],
+    "models": ["3-Series"],
+    "chassisCodes": ["F30"],
+}
 
 
 @pytest.mark.parametrize(
-    ("fitment", "text", "outside"),
+    ("fitment", "text"),
     [
-        # A "not ..." list names what the listing does not fit.
+        # The catalogue's own phrasing: names after "not" that the fitment leaves out.
+        (MERCEDES_C_CLASS, "Mercedes C-Class W205/C205 and GLC X253; not CLA or GLA."),
+        (MERCEDES_C_CLASS, "Mercedes C-Class; not for the A-Class, CLA or GLA"),
         (
-            MERCEDES_C_CLASS,
-            "Mercedes C-Class W205 and GLC X253; not CLA or GLA.",
-            set(),
+            {**MERCEDES_W177, "models": ["A-Class", "B-Class"]},
+            "Mercedes A-Class W177 front dashboard vents only, not C-Class.",
         ),
-        (MERCEDES_C_CLASS, "Mercedes C-Class; not for the A-Class, CLA or GLA", set()),
-        # Without "not" the same names are still caught.
+        # A generation passes only next to explicit chassis codes, which are checked.
+        (BMW_F32, "BMW F-Series F32/F33 F34"),
+        (BMW_F32, "BMW 4 Series F32/F33 & 3 Series GT F34"),
+    ],
+)
+def test_text_that_matches_its_fitment_passes(
+    fitment: dict[str, Any], text: str
+) -> None:
+    assert check.text_terms_outside_fitment(_listing(fitment, text)) == set()
+
+
+@pytest.mark.parametrize(
+    ("fitment", "text", "must_include"),
+    [
+        # A negated list stops at a make word: the Audi names are positive claims.
+        (MERCEDES_CLA, "Fits CLA, not GLA or Audi A3 owners", {"make:audi"}),
+        (MERCEDES_CLA, "not GLA/Audi A3", {"make:audi", "model:audi/a3"}),
+        (
+            MERCEDES_CLA,
+            "Mercedes CLA, not GLA, Audi Q3 also supported",
+            {"make:audi", "model:audi/q3"},
+        ),
+        (
+            MERCEDES_CLA,
+            "Mercedes CLA but not GLA and BMW 3 Series also fits",
+            {"make:bmw", "model:bmw/3-series"},
+        ),
+        # "and" ends the negated list, so W205 is a positive claim.
+        (
+            MERCEDES_W177,
+            "Mercedes W177, not W176 and W205 C-Class supported",
+            {"chassis:w205"},
+        ),
+        # Without "not" the names are claims.
         (
             MERCEDES_C_CLASS,
             "Mercedes C-Class W205, CLA or GLA.",
             {"model:mercedes-benz/cla", "model:mercedes-benz/gla"},
         ),
-        # "not" before ordinary words hides nothing that follows the sentence.
+        # "not" before ordinary words hides nothing that follows.
         (
             MERCEDES_C_CLASS,
             "The price is not indicative. Fits the Mercedes CLA.",
             {"model:mercedes-benz/cla"},
         ),
-        (BMW_F32, "BMW F-Series F32/F33 F34", set()),
+        # Negating a vehicle the fitment includes contradicts it.
+        (MERCEDES_CLA, "Mercedes kit, not CLA", {"not model:mercedes-benz/cla"}),
+        # A bare generation claims every chassis in it.
+        (BMW_F30, "Fits all BMW F-Series", {"generation:bmw/f"}),
         (
             {**BMW_F32, "chassisCodes": ["F32", "G22"]},
             "BMW F-Series",
             {"generation:bmw/f"},
         ),
-        ({**BMW_F32, "chassisCodes": []}, "BMW F-Series", {"generation:bmw/f"}),
+        # Chassis codes after a generation are still checked.
+        (
+            {**BMW_F32, "chassisCodes": ["F32"]},
+            "BMW F-Series F32/F33 F34",
+            {"chassis:f33"},
+        ),
+        # An E-code after "F-Series" is not that generation's code.
+        (BMW_F30, "BMW F-Series E90", {"generation:bmw/f", "chassis:e90"}),
     ],
 )
-def test_text_against_fitment_reads_negations_and_generations(
-    fitment: dict[str, Any], text: str, outside: set[str]
+def test_text_naming_vehicles_outside_the_fitment_fails(
+    fitment: dict[str, Any], text: str, must_include: set[str]
 ) -> None:
-    listing = _listing(fitment, text)
-    terms = check.vehicle_terms(check.listing_text(listing))
-    assert check.terms_outside_fitment(listing, terms) == outside
+    outside = check.text_terms_outside_fitment(_listing(fitment, text))
+    assert must_include <= outside
+
+
+def test_a_bare_generation_fails_the_full_text_check(
+    catalog: list[dict[str, Any]], add_ons: list[dict[str, Any]]
+) -> None:
+    planted = copy.deepcopy(catalog)
+    product = next(
+        p for p in planted if p["slug"] == "-bmw-f-series-oem-ambient-package"
+    )
+    product["descriptionHtml"] += "<p>Suits the whole BMW F-Series.</p>"
+
+    with pytest.raises(SystemExit, match=r"generation:bmw/f"):
+        check.check_fitment_guards(planted, add_ons, heuristics=True)
+
+
+@pytest.mark.parametrize(
+    ("slug", "old", "new", "label"),
+    [
+        (
+            "-bmw-f-series-oem-ambient-package",
+            "Tweeter Speakers – £149.99",
+            "Tweeter Speakers – £129.99",
+            "Tweeter speakers",
+        ),
+        (
+            "mercedes-c-class-oem-ambient-lighting",
+            "Dashboard: +£179.99",
+            "Dashboard: +£219.99",
+            "Dashboard",
+        ),
+        (
+            "mercedes-c-class-oem-ambient-lighting",
+            "Front &amp; rear vents: +£219.99",
+            "Front &amp; rear vents: +£199.99",
+            "Front and rear vents",
+        ),
+        (
+            "calipers",
+            "Caliper Decals - £35.",
+            "Caliper Decals - £45.",
+            "Caliper Decals",
+        ),
+    ],
+)
+def test_copy_price_guard_trips_on_a_wrong_add_on_price(
+    catalog: list[dict[str, Any]],
+    add_ons: list[dict[str, Any]],
+    slug: str,
+    old: str,
+    new: str,
+    label: str,
+) -> None:
+    planted = copy.deepcopy(catalog)
+    product = next(p for p in planted if p["slug"] == slug)
+    assert old in product["descriptionHtml"]
+    product["descriptionHtml"] = product["descriptionHtml"].replace(old, new)
+
+    with pytest.raises(SystemExit, match=rf"{slug} copy prices {label} at"):
+        check.check_fitment_guards(planted, add_ons, heuristics=True)
+
+
+def test_copy_prices_match_on_the_catalogue(
+    catalog: list[dict[str, Any]], add_ons: list[dict[str, Any]]
+) -> None:
+    by_id = {p["id"]: p for p in catalog}
+    for slug in (
+        "-bmw-f-series-oem-ambient-package",
+        "mercedes-c-class-oem-ambient-lighting",
+        "calipers",
+        "ambient-lighting-package-",
+    ):
+        base = next(p for p in catalog if p["slug"] == slug)
+        assert check.copy_price_mismatches(base, add_ons, by_id) == []
+    # "AMG Dashboard: +£219.99" is not read as the £179.99 Dashboard.
+    c_class = next(
+        p for p in catalog if p["slug"] == "mercedes-c-class-oem-ambient-lighting"
+    )
+    assert "AMG Dashboard: +£219.99" in check._copy_text(c_class["descriptionHtml"])
 
 
 @pytest.mark.parametrize(

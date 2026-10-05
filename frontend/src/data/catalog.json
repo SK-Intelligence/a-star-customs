@@ -664,7 +664,7 @@
     "title": "Calipers",
     "subtitle": "You'd be suprised how much this brightens up your wheels!",
     "ribbonText": "Great Value",
-    "descriptionHtml": "<p>Price is for spraying all 4 calipers.</p><p> All packages include a 1-Year Warranty for complete peace of mind.</p><p></p><p><strong>Optional:</strong> Decals - £35. Add them to your calipers in the package builder; they cannot be bought separately.</p>",
+    "descriptionHtml": "<p>Price is for spraying all 4 calipers.</p><p> All packages include a 1-Year Warranty for complete peace of mind.</p><p></p><p><strong>Optional:</strong> Caliper Decals - £35. Add them to your calipers in the package builder; they cannot be bought separately.</p>",
     "images": [
       "/images/products/calipers-01.jpeg",
       "/images/products/calipers-02.jpeg",
@@ -1448,10 +1448,10 @@
   {
     "id": "prod_01KRGY8J6KK956RF83F6VCCBKA",
     "slug": "-bmw-f-series-oem-ambient-package",
-    "title": "BMW F-Series OEM Ambient Package",
+    "title": "BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package",
     "subtitle": null,
     "ribbonText": "NEW",
-    "descriptionHtml": "<p> BMW F-Series OEM Ambient Package – £449.99 </p><p> 1 Year Warranty | Pro Install</p><p>Includes:</p><p>* Dashboard + Driver Side</p><p>* All Door Strips</p><p>* Door Handle Lights</p><p>* Door Bin Lights</p><p>* All Footwells</p><p>Features:</p><p> Controlled through iDrive + Phone App</p><p> Supports Two-Tone Colours</p><p> Full OEM Integration</p><p>Optional:</p><p> Tweeter Speakers – £149.99</p><p> Door Speakers – £99.99</p><p> Illuminated Door Handles – £149.99</p><p>Transform your drive </p><p>BMW F series F32/F33 F34</p>",
+    "descriptionHtml": "<p> BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package – £449.99 </p><p> 1 Year Warranty | Pro Install</p><p>Includes:</p><p>* Dashboard + Driver Side</p><p>* All Door Strips</p><p>* Door Handle Lights</p><p>* Door Bin Lights</p><p>* All Footwells</p><p>Features:</p><p> Controlled through iDrive + Phone App</p><p> Supports Two-Tone Colours</p><p> Full OEM Integration</p><p>Optional:</p><p> Tweeter Speakers – £149.99</p><p> Door Speakers – £99.99</p><p> Illuminated Door Handles – £149.99</p><p>Transform your drive </p><p>BMW F series F32/F33 F34</p>",
     "images": [
       "/images/products/bmw-f-series-oem-ambient-package-01.jpeg",
       "/images/products/bmw-f-series-oem-ambient-package-02.jpeg",
@@ -1469,7 +1469,7 @@
     "variants": [
       {
         "id": "variant_01KRGY8J8ZGY79PSESV1Z3ESPT",
-        "title": "BMW F-Series OEM Ambient Package",
+        "title": "BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package",
         "price": 44999,
         "available": true
       }
@@ -1502,10 +1502,10 @@
   {
     "id": "prod_01M46HV2D03AVSQPF311V91PE5",
     "slug": "bmw-f-series-oem-ambient-tweeter-speakers-add-on",
-    "title": "BMW F-Series Tweeter Speakers (Add-On)",
+    "title": "BMW F32/F33/F34 Tweeter Speakers (Add-On)",
     "subtitle": null,
     "ribbonText": null,
-    "descriptionHtml": "<p>Illuminated tweeter speakers for the BMW F-Series OEM Ambient Package on the F32, F33 and F34, lit in the same colours as the rest of your ambient lighting.</p><p><em>Note: This is an optional add-on for the BMW F-Series OEM Ambient Package and can only be added from that package's builder.</em></p>",
+    "descriptionHtml": "<p>Illuminated tweeter speakers for the BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package, lit in the same colours as the rest of your ambient lighting.</p><p><em>Note: This is an optional add-on for the BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package and can only be added from that package's builder.</em></p>",
     "images": [
       "/images/products/bmw-f-series-oem-ambient-tweeter-speakers-add-on-01.jpeg"
     ],
@@ -1553,10 +1553,10 @@
   {
     "id": "prod_01M46HV2D14ZCW4PRZ2ZQVER7R",
     "slug": "bmw-f-series-oem-ambient-door-speakers-add-on",
-    "title": "BMW F-Series Door Speakers (Add-On)",
+    "title": "BMW F32/F33/F34 Door Speakers (Add-On)",
     "subtitle": null,
     "ribbonText": null,
-    "descriptionHtml": "<p>Illuminated door speakers for the BMW F-Series OEM Ambient Package on the F32, F33 and F34, lit in the same colours as the rest of your ambient lighting.</p><p><em>Note: This is an optional add-on for the BMW F-Series OEM Ambient Package and can only be added from that package's builder.</em></p>",
+    "descriptionHtml": "<p>Illuminated door speakers for the BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package, lit in the same colours as the rest of your ambient lighting.</p><p><em>Note: This is an optional add-on for the BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package and can only be added from that package's builder.</em></p>",
     "images": [
       "/images/products/bmw-f-series-oem-ambient-door-speakers-add-on-01.jpeg"
     ],
@@ -1604,10 +1604,10 @@
   {
     "id": "prod_01M46HV2D1KPGMP1GN7AB30J2Z",
     "slug": "bmw-f-series-oem-ambient-illuminated-door-handles-add-on",
-    "title": "BMW F-Series Illuminated Door Handles (Add-On)",
+    "title": "BMW F32/F33/F34 Illuminated Door Handles (Add-On)",
     "subtitle": null,
     "ribbonText": null,
-    "descriptionHtml": "<p>Illuminated door handles for the BMW F-Series OEM Ambient Package on the F32, F33 and F34, lit in the same colours as the rest of your ambient lighting.</p><p><em>Note: This is an optional add-on for the BMW F-Series OEM Ambient Package and can only be added from that package's builder.</em></p>",
+    "descriptionHtml": "<p>Illuminated door handles for the BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package, lit in the same colours as the rest of your ambient lighting.</p><p><em>Note: This is an optional add-on for the BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package and can only be added from that package's builder.</em></p>",
     "images": [
       "/images/products/bmw-f-series-oem-ambient-illuminated-door-handles-add-on-01.jpeg"
     ],
