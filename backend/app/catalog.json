@@ -46,32 +46,32 @@
   {
     "id": "prod_01KCRZ1AXP7H0VHJ04JTDN0D0J",
     "slug": "shooting-stars-twinkle-starlight-800-pieces",
-    "title": "Shooting Stars + Twinkle Starlight 800+ Pieces (MUST CONTACT FIRST)",
-    "subtitle": "Custom quote available",
-    "ribbonText": "Custom Pricing",
-    "descriptionHtml": "<p><strong> Shooting Stars Package (Twinkle + Motion)</strong></p><p>Experience a truly dynamic night sky inside your vehicle. This premium package combines the gentle shimmer of twinkling stars with the breathtaking motion of shooting meteor effects, creating a deep, immersive, and eye-catching display.</p><ul><li><p> <strong>Twinkle Effect:</strong> Soft, realistic shimmering stars for a calming vibe.</p></li><li><p>️ <strong>Shooting Stars:</strong> Dynamic meteors streak across the headliner.</p></li><li><p> <strong>Motion &amp; Depth:</strong> Adds a layer of movement for a cinematic feel.</p></li><li><p> <strong>Peace of Mind:</strong> Includes a <strong>1-Year Warranty</strong>.</p></li></ul><p>Please do <strong>NOT</strong> place an order, contact the team first and we will discuss pricing accordingly. The base price is £974.99 however this just a placeholder so do <strong>NOT </strong>order before contacting us first!</p>",
+    "title": "Shooting Stars + Twinkle Starlight (800 Pieces)",
+    "subtitle": null,
+    "ribbonText": null,
+    "descriptionHtml": "<p><strong> Shooting Stars Package (Twinkle + Motion)</strong></p><p>Experience a truly dynamic night sky inside your vehicle. This premium package combines the gentle shimmer of twinkling stars with the breathtaking motion of shooting meteor effects, creating a deep, immersive, and eye-catching display.</p><ul><li><p> <strong>Twinkle Effect:</strong> Soft, realistic shimmering stars for a calming vibe.</p></li><li><p>️ <strong>Shooting Stars:</strong> Dynamic meteors streak across the headliner.</p></li><li><p> <strong>Motion &amp; Depth:</strong> Adds a layer of movement for a cinematic feel.</p></li><li><p> <strong>Peace of Mind:</strong> Includes a <strong>1-Year Warranty</strong>.</p></li></ul><p></p>",
     "images": [
       "/images/products/shooting-stars-twinkle-starlight-800-pieces-01.jpg",
       "/images/products/shooting-stars-twinkle-starlight-800-pieces-02.jpg"
     ],
     "collectionIds": [
       "pcol_01KCFVV0Z6W3FXV53594CPA5CB",
-      "pcol_01KCS0PFCZJAJSGRAMVB3EPYE5"
+      "pcol_01KCFNY9B69TCCMR45GSH79Q2W"
     ],
     "collections": [
       "Shooting Stars + Twinkle Starlight",
-      "Custom Fittings"
+      "Supplied & Fitted"
     ],
     "variants": [
       {
         "id": "variant_01KCRZ1B0AK5TCXKDYK0S6HRGF",
-        "title": "Shooting Stars + Twinkle Starlight 800+ Pieces (MUST CONTACT FIRST)",
-        "price": 0,
+        "title": "Shooting Stars + Twinkle Starlight (800 Pieces)",
+        "price": 97499,
         "available": true
       }
     ],
-    "purchasable": false,
-    "available": false,
+    "purchasable": true,
+    "available": true,
     "updatedAt": "2025-12-23T22:19:13.770Z",
     "kind": "main",
     "family": "starlights",

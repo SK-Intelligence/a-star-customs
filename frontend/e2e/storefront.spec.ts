@@ -541,9 +541,23 @@ test('the removed 800-piece Shooting Stars slug redirects to a live listing', as
   expect(redirect?.[1]).toBe('shooting-stars-twinkle-starlight-800-pieces');
 
   await page.goto(`/${redirect?.[1]}`);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Shooting Stars + Twinkle Starlight 800+ Pieces (MUST CONTACT FIRST)');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Shooting Stars + Twinkle Starlight (800 Pieces)');
   await page.goto('/twinkle-starlights-800-pieces-');
   await expect(page.getByRole('heading', { level: 1 })).not.toHaveText(/800/);
+});
+
+test('the 800-piece Shooting Stars package is bought online at £974.99 like its siblings', async ({ page }) => {
+  await page.goto('/shooting-stars-twinkle-starlight-800-pieces');
+
+  await expect(page.locator('.product-buybox__price')).toHaveText('£974.99');
+  await expect(page.getByText(/contact (the team|us) first/i)).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Personalise your package' })).toHaveCount(0);
+  await page.locator('.product-buybox .buy-actions').getByRole('button', { name: 'Add to bag' }).click();
+
+  const drawer = page.getByRole('dialog', { name: 'Shopping bag' });
+  await expect(drawer.locator('.cart-line')).toHaveCount(1);
+  await expect(drawer.locator('.cart-line')).toContainText('Shooting Stars + Twinkle Starlight (800 Pieces)');
+  await expect(drawer.getByText('£974.99').first()).toBeVisible();
 });
 
 test('a saved bag drops generic add-ons from DIY kits and the deleted 800-piece listing', async ({ page }) => {

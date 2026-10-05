@@ -914,3 +914,26 @@ def test_checkout_rejects_deleted_duplicate_800_piece_listing() -> None:
 
     assert response.status_code == 404
     assert "prod_01KCFYNY97DJ0SBEYP5GG6XQ4B" not in load_catalog()
+
+
+def test_checkout_accepts_the_800_piece_shooting_stars_package(
+    monkeypatch, tmp_path: Path
+) -> None:
+    captured: dict[str, object] = {}
+    stripe_settings(monkeypatch, tmp_path, captured)
+
+    response = client.post(
+        "/api/checkout/session",
+        json={
+            "items": [
+                {
+                    **catalog_line("shooting-stars-twinkle-starlight-800-pieces"),
+                    "quantity": 1,
+                }
+            ]
+        },
+    )
+
+    assert response.status_code == 200
+    line_items = captured["line_items"]  # type: ignore[assignment]
+    assert [item["price_data"]["unit_amount"] for item in line_items] == [97499]
