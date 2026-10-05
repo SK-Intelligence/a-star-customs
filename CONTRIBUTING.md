@@ -14,7 +14,7 @@ First-time setup is in `README.md` (npm install, `backend/.venv`). Enable the pr
 | Job | What fails it |
 |---|---|
 | Lint, types, forbidden text | an ESLint error or warning (`frontend/eslint.config.js`), a `tsc -b` error, a Ruff finding or unformatted Python (`ruff check` / `ruff format --check`, `ruff.toml`), or a Stripe/Web3Forms secret or Hostinger URL in the storefront source (`scripts/check-forbidden-text.mjs`) |
-| Unit tests + coverage, catalog sync | a failing backend test, backend coverage below `fail_under` in `backend/.coveragerc` (the measured baseline rounded down: 90.10% -> 90), or `scripts/check_catalog_sync.py` |
+| Unit tests + coverage, catalog sync | a failing responsive-image unit test (`npm run test:unit`), a failing backend test, backend coverage below `fail_under` in `backend/.coveragerc` (the measured baseline rounded down: 90.10% -> 90), or `scripts/check_catalog_sync.py` |
 | Production build | `npm run build` failing, or forbidden text in the built bundle (`frontend/dist`) |
 | E2E | the Playwright suite (desktop, and a 390 x 844 phone) against the production build served by `vite preview` with the FastAPI backend |
 | Accessibility | a serious or critical axe violation on `/`, the C-Class product page, `/shop`, `/contact-us` or `/checkout` at 390px and 1440px (`frontend/e2e/accessibility.spec.ts`) |

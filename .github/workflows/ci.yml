@@ -53,6 +53,11 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
+      - run: npm ci
+      # The responsive image pipeline (frontend/test/responsive-images.test.mjs, node:test).
+      - run: npm run test:unit
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with: { python-version: "${{ env.PYTHON_VERSION }}", cache: pip, cache-dependency-path: backend/requirements.txt }
       - run: pip install -r backend/requirements.txt
@@ -74,6 +79,13 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
       - run: npm ci
+      # WebP variants from frontend/responsive-images.ts; entries are keyed by source bytes and
+      # encoder settings, so a stale restore only costs re-encoding.
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: frontend/node_modules/.cache/responsive-images
+          key: "responsive-images-${{ runner.os }}-${{ hashFiles('frontend/responsive-images.ts', 'frontend/responsive-image-names.ts', 'package-lock.json', 'frontend/public/images/**') }}"
+          restore-keys: "responsive-images-${{ runner.os }}-"
       # As Railway builds it (frontend/Dockerfile): no VITE_API_BASE_URL, /api on the same origin.
       - run: npm run build
       # The built bundle too: no provider secret or Hostinger URL may reach a customer's browser.

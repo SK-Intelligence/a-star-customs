@@ -11,5 +11,5 @@
     "strict": true,
     "types": ["node"]
   },
-  "include": ["vite.config.ts", "responsive-images.ts"]
+  "include": ["vite.config.ts", "responsive-images.ts", "responsive-image-names.ts"]
 }

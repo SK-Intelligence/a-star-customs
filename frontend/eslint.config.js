@@ -36,7 +36,7 @@ export default tseslint.config(
   },
   {
     // Playwright specs and config run in Node, not the browser.
-    files: ['e2e/**/*.ts', 'playwright.config.ts', 'vite.config.ts', 'responsive-images.ts'],
+    files: ['e2e/**/*.ts', 'playwright.config.ts', 'vite.config.ts', 'responsive-images.ts', 'test/**/*.mjs'],
     languageOptions: { globals: globals.node },
   },
 );
