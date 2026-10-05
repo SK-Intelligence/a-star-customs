@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ShieldCheck, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { OPEN_COOKIE_PREFERENCES_EVENT } from '../hooks/cookiePreferencesEvents';
+import { OPEN_COOKIE_PREFERENCES_EVENT, setCookieBannerPending } from '../hooks/cookiePreferencesEvents';
 import { useAnyDialogOpen, useDialogFocus } from '../hooks/useDialogFocus';
 
 const STORAGE_KEY = 'astar-cookie-preferences';
@@ -99,7 +99,15 @@ export function CookieConsent() {
     analytics: false,
     marketing: false,
   });
-  const closePreferences = () => setIsManaging(false);
+  const manageButtonRef = useRef<HTMLButtonElement>(null);
+  const closePreferences = () => {
+    setIsManaging(false);
+    // First visit: the banner is still showing, unanswered. The "Manage preferences" button that
+    // opened the dialog was unmounted with it, so put focus back on its replacement.
+    if (preferences === null) {
+      window.requestAnimationFrame(() => manageButtonRef.current?.focus());
+    }
+  };
   const preferencesRef = useDialogFocus<HTMLElement>({
     isOpen: isManaging,
     onClose: closePreferences,
@@ -116,6 +124,13 @@ export function CookieConsent() {
   useEffect(() => {
     if (wrapRef.current) wrapRef.current.inert = yielding;
   }, [yielding]);
+
+  // Lets the floating WhatsApp bubble step aside while the unanswered banner is showing.
+  const bannerShowing = preferences === null && !isManaging;
+  useEffect(() => {
+    setCookieBannerPending(bannerShowing);
+    return () => setCookieBannerPending(false);
+  }, [bannerShowing]);
 
   useEffect(() => {
     const handleChange = (event: Event) => {
@@ -144,13 +159,14 @@ export function CookieConsent() {
   if (preferences && !isManaging) return null;
 
   const accept = (next: CookiePreferences) => {
-    // The banner is about to unmount. If it held focus, hand focus to the page content rather
-    // than letting it fall back to the document start, where the skip link would take it.
-    const heldFocus = !isManaging && wrapRef.current?.contains(document.activeElement);
+    // First visit: whichever control held focus (Accept all, Essentials only, or Save choices in
+    // the dialog opened from "Manage preferences") unmounts with the banner. Hand focus to the
+    // page content rather than letting it fall to <body> or onto the skip link.
+    const firstVisit = preferences === null;
     savePreferences(next);
     setPreferences(next);
     setIsManaging(false);
-    if (heldFocus) {
+    if (firstVisit) {
       window.requestAnimationFrame(() => {
         document.getElementById('main-content')?.focus({ preventScroll: true });
       });
@@ -256,12 +272,13 @@ export function CookieConsent() {
               </button>
               <button
                 type="button"
-                className="button button--ghost"
+                className="button button--primary"
                 onClick={() => accept({ analytics: false, marketing: false })}
               >
                 Essentials only
               </button>
               <button
+                ref={manageButtonRef}
                 type="button"
                 className="text-button"
                 onClick={() => {
