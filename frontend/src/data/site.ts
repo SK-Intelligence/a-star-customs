@@ -254,11 +254,11 @@ export const contactDetails: ContactDetails = {
   phoneDisplay: "07960 405187",
   email: "astarenquires@gmail.com",
   address: [
-    "160–164 Brabazon Road",
+    "155 Brabazon Road",
     "Hounslow, London",
     "United Kingdom",
   ],
-  mapQuery: "160-164 Brabazon Road, Hounslow, London, United Kingdom",
+  mapQuery: "155 Brabazon Road, Hounslow, London, United Kingdom",
 };
 
 export const socialLinks: readonly SocialLink[] = [
