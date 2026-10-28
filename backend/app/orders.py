@@ -162,6 +162,24 @@ def has_previous_purchase(database_path: Path, email: str) -> bool:
     return row is not None
 
 
+def open_discounted_sessions(database_path: Path, email: str) -> list[str]:
+    """Stripe sessions of this inbox's discounted orders that haven't been settled yet."""
+
+    initialize_orders_database(database_path)
+    with _connect(database_path) as connection:
+        rows = connection.execute(
+            """
+            SELECT stripe_session_id FROM orders
+            WHERE customer_email = ?
+              AND discount_percent > 0
+              AND status = 'pending'
+              AND stripe_session_id IS NOT NULL
+            """,
+            (normalize_email(email),),
+        ).fetchall()
+    return [row["stripe_session_id"] for row in rows]
+
+
 def add_known_customers(database_path: Path, emails: list[str]) -> int:
     """Record past customers; returns how many were new to the list."""
 

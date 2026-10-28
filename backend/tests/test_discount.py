@@ -7,12 +7,14 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+import stripe
 from fastapi.testclient import TestClient
 
 from app.config import Settings, get_settings
 from app.main import app
 from app.orders import (
     add_known_customers,
+    attach_stripe_session,
     create_pending_order,
     has_previous_purchase,
     normalize_email,
@@ -355,3 +357,70 @@ def test_webhook_saves_the_buyer_email_on_paid_orders(
 
     assert response.status_code == 200
     assert order_row(database_path) == ("paid", "buyer@example.com")
+
+
+def open_discounted_checkout(database_path: Path) -> None:
+    create_pending_order(
+        database_path,
+        order_reference="asc_first_tab",
+        cart_reference="cart",
+        amount_total=4999,
+        customer_email="buyer@example.com",
+        discount_percent=10,
+    )
+    attach_stripe_session(
+        database_path, order_reference="asc_first_tab", stripe_session_id="cs_first_tab"
+    )
+
+
+DISCOUNTED_CART = {
+    "items": [CARPLAY],
+    "email": "buyer@example.com",
+    "discountCode": "WELCOME10",
+}
+
+
+def test_a_new_discounted_checkout_closes_the_earlier_one(
+    captured, monkeypatch, tmp_path: Path
+) -> None:
+    database_path = tmp_path / "orders.db"
+    open_discounted_checkout(database_path)
+    expired: list[str] = []
+    monkeypatch.setattr(
+        "app.main.stripe.checkout.Session.expire",
+        lambda session_id, **_: expired.append(session_id),
+    )
+    use_settings(database_path)
+
+    response = client.post("/api/checkout/session", json=DISCOUNTED_CART)
+
+    assert response.status_code == 200
+    assert expired == ["cs_first_tab"]
+    assert captured["discounts"] == [{"coupon": "coupon_first_order"}]
+
+
+@pytest.mark.parametrize(
+    ("earlier_status", "expected_status"), [("complete", 409), ("expired", 200)]
+)
+def test_an_earlier_checkout_that_cannot_be_closed(
+    captured, monkeypatch, tmp_path: Path, earlier_status: str, expected_status: int
+) -> None:
+    database_path = tmp_path / "orders.db"
+    open_discounted_checkout(database_path)
+
+    def not_open(session_id: str, **_: object) -> None:
+        raise stripe.InvalidRequestError("Session is not open", param=None)
+
+    monkeypatch.setattr("app.main.stripe.checkout.Session.expire", not_open)
+    monkeypatch.setattr(
+        "app.main.stripe.checkout.Session.retrieve",
+        lambda session_id, **_: {"id": session_id, "status": earlier_status},
+    )
+    use_settings(database_path)
+
+    response = client.post("/api/checkout/session", json=DISCOUNTED_CART)
+
+    assert response.status_code == expected_status
+    if expected_status == 409:
+        assert response.json()["detail"]["code"] == "DISCOUNT_NOT_ELIGIBLE"
+        assert captured == {}

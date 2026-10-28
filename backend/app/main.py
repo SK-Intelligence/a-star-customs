@@ -38,6 +38,7 @@ from app.orders import (
     create_pending_order,
     get_order_by_session_id,
     has_previous_purchase,
+    open_discounted_sessions,
     process_stripe_event,
 )
 from app.reviews import list_approved_reviews, submit_review
@@ -281,6 +282,53 @@ def _validate_builds(
                 exclusive_groups.add(option.exclusiveGroup)
 
 
+async def _close_open_discounted_sessions(settings: Settings, email: str) -> None:
+    """Keep one open discounted checkout per inbox, so the first-order discount can't be
+    paid twice from parallel sessions. Earlier ones are expired on Stripe; if one can no
+    longer be expired it has been completed, so this inbox has used its discount."""
+
+    try:
+        session_ids = await asyncio.to_thread(
+            open_discounted_sessions, settings.orders_database_path, email
+        )
+    except (OSError, sqlite3.Error) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The discount could not be checked. Please try again later.",
+        ) from exc
+    for session_id in session_ids:
+        try:
+            await asyncio.to_thread(
+                stripe.checkout.Session.expire,
+                session_id,
+                api_key=settings.stripe_secret_key,
+            )
+            continue
+        except stripe.InvalidRequestError:
+            pass  # Not open any more: expired already, or completed.
+        except stripe.StripeError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Checkout could not be started. Please try again later.",
+            ) from exc
+        try:
+            previous = await asyncio.to_thread(
+                stripe.checkout.Session.retrieve,
+                session_id,
+                api_key=settings.stripe_secret_key,
+            )
+        except stripe.StripeError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Checkout could not be started. Please try again later.",
+            ) from exc
+        if _stripe_value(previous, "status") == "complete":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=DISCOUNT_NOT_ELIGIBLE_DETAIL,
+            )
+
+
 @app.post("/api/checkout/session", response_model=CheckoutResponse)
 async def create_checkout_session(
     cart: CheckoutRequest,
@@ -396,6 +444,7 @@ async def create_checkout_session(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=DISCOUNT_NOT_ELIGIBLE_DETAIL,
             )
+        await _close_open_discounted_sessions(settings, cart.email)
         discount_percent = settings.first_order_discount_percent
 
     # Discounted sessions fix the email on Stripe's page to the one that was checked here.
