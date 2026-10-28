@@ -1070,7 +1070,7 @@
     "title": "Ambient Lighting (Universal)",
     "subtitle": "Modern ambient lighting upgrade",
     "ribbonText": "Most Popular (Discount)",
-    "descriptionHtml": "<p> <strong>Ambient Lighting Package –Discounted (374.99£) (incl. VAT)</strong> </p><p><strong></strong> <strong>1 Year Warranty | Pro Install (5–7 hrs)</strong></p><p>Includes:</p><p>• Dashboard + Driver Side</p><p>• All Door Strips</p><p>• Door handle Lights</p><p>• Door bin Lights</p><p>• All Footwells</p><p><strong>Features: Bluetooth App</strong> </p><p>• 128+ Colours </p><p>• Two-Tone Options </p><p></p><p></p>",
+    "descriptionHtml": "<p><strong>Ambient Lighting Package – £359.99 (incl. VAT)</strong></p><p><strong>Klarna available – pay in 3 monthly instalments</strong></p><p><strong>1 Year Warranty | Pro Install (5–7 hrs)</strong></p><p>Includes:</p><p>• Dashboard + Driver Side</p><p>• All Door Strips</p><p>• Door Handle Lights</p><p>• Door Bin Lights</p><p>• All Footwells</p><p>• (Optional Add-Ons Available)</p><p><strong>Features: Bluetooth App | 128+ Colours | Two-Tone Options</strong></p><p>Optional:</p><p>• 4x Speaker Lights – £39.99</p><p>• Premium Pack: 25+ Animations &amp; Start-Up Effects – £49.99</p><p>Transform your drive</p>",
     "images": [
       "/images/products/luxury-car-interior-01.jpeg",
       "/images/products/luxury-car-interior-02.jpeg",
@@ -1093,13 +1093,13 @@
       {
         "id": "variant_01K6GY7W48DGBZ4D4D9JTD3E54",
         "title": "Ambient Lighting (Universal)",
-        "price": 37499,
+        "price": 35999,
         "available": true
       }
     ],
     "purchasable": true,
     "available": true,
-    "updatedAt": "2026-04-20T21:51:57.254Z",
+    "updatedAt": "2026-10-28T11:50:00.000Z",
     "kind": "main",
     "family": "ambient-lighting",
     "fitment": {

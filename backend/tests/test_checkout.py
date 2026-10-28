@@ -91,7 +91,7 @@ def test_checkout_uses_all_trusted_catalog_prices(monkeypatch, tmp_path: Path) -
         "Wireless Carplay Adapter"
     )
     assert line_items[0]["quantity"] == 2
-    assert line_items[1]["price_data"]["unit_amount"] == 37499
+    assert line_items[1]["price_data"]["unit_amount"] == 35999
     assert line_items[1]["price_data"]["product_data"]["description"] == (
         "Ambient Lighting (Universal)"
     )
