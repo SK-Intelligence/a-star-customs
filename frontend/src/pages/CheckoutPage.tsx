@@ -8,7 +8,16 @@ import { Seo } from '../components/Seo';
 import { formatPrice, getProductAddOnOptions, products } from '../data/catalog';
 import { cartSubtotal, useCartStore } from '../store/cart';
 
-type CheckoutStatus = 'idle' | 'loading' | 'unconfigured' | 'review' | 'error';
+type CheckoutStatus =
+  | 'idle'
+  | 'loading'
+  | 'unconfigured'
+  | 'review'
+  | 'discount-invalid'
+  | 'discount-ineligible'
+  | 'error';
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function CheckoutPage() {
   const lines = useCartStore((state) => state.lines);
@@ -19,7 +28,12 @@ export function CheckoutPage() {
   const subtotal = useCartStore(cartSubtotal);
   const [agreed, setAgreed] = useState(false);
   const [status, setStatus] = useState<CheckoutStatus>('idle');
+  const [discountCode, setDiscountCode] = useState('');
+  const [email, setEmail] = useState('');
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
+  // The server decides whether the code applies; the email is only needed when there is a code.
+  const hasDiscountCode = discountCode.trim() !== '';
+  const emailReady = !hasDiscountCode || EMAIL_PATTERN.test(email.trim());
 
   const resolvedLines = lines.flatMap((line) => {
     const product = products.find((candidate) => candidate.id === line.productId);
@@ -40,6 +54,9 @@ export function CheckoutPage() {
             quantity: line.quantity,
             ...(line.buildId ? { buildId: line.buildId, lineType: line.lineType } : {}),
           })),
+          ...(hasDiscountCode
+            ? { discountCode: discountCode.trim(), email: email.trim() }
+            : {}),
         }),
       });
 
@@ -58,6 +75,14 @@ export function CheckoutPage() {
       }
       if (response.status === 409 && payload?.detail?.code === 'BUILD_INVALID') {
         setStatus('review');
+        return;
+      }
+      if (response.status === 409 && payload?.detail?.code === 'DISCOUNT_INVALID') {
+        setStatus('discount-invalid');
+        return;
+      }
+      if (response.status === 409 && payload?.detail?.code === 'DISCOUNT_NOT_ELIGIBLE') {
+        setStatus('discount-ineligible');
         return;
       }
       if (!response.ok) throw new Error('Checkout request failed');
@@ -203,8 +228,45 @@ export function CheckoutPage() {
             <dl>
               <div><dt>Subtotal</dt><dd>{formatPrice(subtotal)}</dd></div>
               <div><dt>Shipping</dt><dd>Free</dd></div>
+              {hasDiscountCode ? (
+                <div><dt>Discount</dt><dd>Applied at payment if eligible</dd></div>
+              ) : null}
               <div><dt>Total</dt><dd>{formatPrice(subtotal)}</dd></div>
             </dl>
+            <div className="checkout-discount">
+              <label>
+                <span>Discount code <small>optional</small></span>
+                <input
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                  maxLength={40}
+                  value={discountCode}
+                  onChange={(event) => {
+                    setDiscountCode(event.target.value);
+                    if (status.startsWith('discount-')) setStatus('idle');
+                  }}
+                />
+              </label>
+              {hasDiscountCode ? (
+                <label>
+                  <span>Email address</span>
+                  <input
+                    required
+                    type="email"
+                    autoComplete="email"
+                    maxLength={254}
+                    value={email}
+                    onChange={(event) => {
+                      setEmail(event.target.value);
+                      if (status.startsWith('discount-')) setStatus('idle');
+                    }}
+                    placeholder="you@example.com"
+                  />
+                  <small>First-order codes are checked against this email, and you'll pay with it.</small>
+                </label>
+              ) : null}
+            </div>
             <label className="policy-checkbox">
               <input type="checkbox" checked={agreed} onChange={(event) => setAgreed(event.target.checked)} />
               <span>
@@ -214,7 +276,7 @@ export function CheckoutPage() {
             <button
               className="button button--primary button--wide"
               type="button"
-              disabled={!agreed || status === 'loading'}
+              disabled={!agreed || !emailReady || status === 'loading'}
               onClick={startCheckout}
             >
               {status === 'loading' ? 'Preparing checkout…' : 'Continue to secure payment'}
@@ -230,6 +292,12 @@ export function CheckoutPage() {
               ) : null}
               {status === 'error' ? (
                 <p>Checkout could not start. Your bag is safe — please try again.</p>
+              ) : null}
+              {status === 'discount-invalid' ? (
+                <p>That discount code isn't valid. Check it, or remove it to continue.</p>
+              ) : null}
+              {status === 'discount-ineligible' ? (
+                <p>This code is for first orders only, and this email has ordered before. Remove the code to continue.</p>
               ) : null}
               {status === 'review' ? (
                 <p>This build needs a quick review. Your bag is safe — check the package and add-ons before trying again.</p>

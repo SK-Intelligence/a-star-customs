@@ -740,6 +740,40 @@ test('invalid build checkout keeps the cart and asks for review', async ({ page 
     .toBe(2);
 });
 
+test('a discount code needs an email and explains a refused code', async ({ page }) => {
+  let requestBody: Record<string, unknown> | null = null;
+  await page.route('**/api/checkout/session', async (route) => {
+    requestBody = route.request().postDataJSON();
+    await route.fulfill({
+      status: 409,
+      contentType: 'application/json',
+      body: JSON.stringify({ detail: { code: 'DISCOUNT_NOT_ELIGIBLE' } }),
+    });
+  });
+  await page.goto('/luxury-car-interior');
+  await page.getByRole('button', { name: /Add build to bag/ }).click();
+  await page.getByRole('dialog', { name: 'Shopping bag' }).getByRole('link', { name: /Review & checkout/ }).click();
+  await page.getByRole('checkbox').check();
+
+  const pay = page.getByRole('button', { name: /Continue to secure payment/ });
+  await expect(page.getByRole('textbox', { name: /Email address/ })).toHaveCount(0);
+  await page.getByRole('textbox', { name: /Discount code/ }).fill('welcome10');
+  await expect(page.getByText('Applied at payment if eligible')).toBeVisible();
+  await expect(pay).toBeDisabled();
+  await page.getByRole('textbox', { name: /Email address/ }).fill('buyer@example.com');
+  await expect(pay).toBeEnabled();
+  await pay.click();
+
+  await expect(page.getByText(/This code is for first orders only/)).toBeVisible();
+  await expect.poll(() => requestBody).toEqual(
+    expect.objectContaining({ discountCode: 'welcome10', email: 'buyer@example.com' }),
+  );
+
+  await page.getByRole('textbox', { name: /Discount code/ }).fill('');
+  await expect(page.getByText(/This code is for first orders only/)).toHaveCount(0);
+  await expect(page.getByRole('textbox', { name: /Email address/ })).toHaveCount(0);
+});
+
 test('grouped builder actions remain reachable on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/luxury-car-interior');

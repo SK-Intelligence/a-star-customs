@@ -37,6 +37,7 @@ from app.orders import (
     attach_stripe_session,
     create_pending_order,
     get_order_by_session_id,
+    has_previous_purchase,
     process_stripe_event,
 )
 from app.reviews import list_approved_reviews, submit_review
@@ -59,6 +60,14 @@ VARIANT_NOT_FOUND_DETAIL = {
 ITEM_UNAVAILABLE_DETAIL = {
     "code": "ITEM_UNAVAILABLE",
     "message": "Item is not available for online purchase.",
+}
+DISCOUNT_INVALID_DETAIL = {
+    "code": "DISCOUNT_INVALID",
+    "message": "That discount code isn't valid.",
+}
+DISCOUNT_NOT_ELIGIBLE_DETAIL = {
+    "code": "DISCOUNT_NOT_ELIGIBLE",
+    "message": "This code is for first orders only.",
 }
 # Validation errors: the name of an unexpected field is client input, so it is replaced; other
 # location parts are schema names, capped as a backstop. At most this many errors are returned.
@@ -363,6 +372,41 @@ async def create_checkout_session(
             },
         )
 
+    discount_percent = 0
+    if cart.discountCode is not None and cart.email is not None:
+        if (
+            not settings.stripe_first_order_coupon_id
+            or cart.discountCode.upper() != settings.first_order_discount_code.upper()
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=DISCOUNT_INVALID_DETAIL,
+            )
+        try:
+            returning = await asyncio.to_thread(
+                has_previous_purchase, settings.orders_database_path, cart.email
+            )
+        except (OSError, sqlite3.Error) as exc:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="The discount could not be checked. Please try again later.",
+            ) from exc
+        if returning:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=DISCOUNT_NOT_ELIGIBLE_DETAIL,
+            )
+        discount_percent = settings.first_order_discount_percent
+
+    # Discounted sessions fix the email on Stripe's page to the one that was checked here.
+    discount_options: dict[str, Any] = {}
+    if cart.email is not None:
+        discount_options["customer_email"] = cart.email
+    if discount_percent:
+        discount_options["discounts"] = [
+            {"coupon": settings.stripe_first_order_coupon_id}
+        ]
+
     order_reference = f"asc_{uuid4().hex}"
     cart_reference = hashlib.sha256("|".join(cart_identity_parts).encode()).hexdigest()[
         :20
@@ -374,6 +418,8 @@ async def create_checkout_session(
             order_reference=order_reference,
             cart_reference=cart_reference,
             amount_total=amount_total,
+            customer_email=cart.email if discount_percent else None,
+            discount_percent=discount_percent,
         )
     except (OSError, sqlite3.Error) as exc:
         raise HTTPException(
@@ -403,9 +449,11 @@ async def create_checkout_session(
             ],
             success_url=settings.checkout_success_url,
             cancel_url=settings.checkout_cancel_url,
+            **discount_options,
             metadata={
                 "order_reference": order_reference,
                 "cart_reference": cart_reference,
+                "discount_percent": str(discount_percent),
                 "line_count": str(len(stripe_line_items)),
                 "build_count": str(
                     len(
@@ -605,6 +653,20 @@ async def stripe_webhook(
     amount_total = _stripe_value(session, "amount_total")
     currency = _stripe_value(session, "currency")
     mode = _stripe_value(session, "mode")
+    amount_subtotal = _stripe_value(session, "amount_subtotal")
+    total_details = _stripe_value(session, "total_details")
+    amount_discount = (
+        _stripe_value(total_details, "amount_discount")
+        if total_details is not None
+        else None
+    )
+    # The email the buyer paid with; saved on paid orders to recognise returning customers.
+    customer_details = _stripe_value(session, "customer_details")
+    customer_email = (
+        _stripe_value(customer_details, "email")
+        if customer_details is not None
+        else None
+    ) or _stripe_value(session, "customer_email")
     if new_status is not None and (
         not isinstance(amount_total, int)
         or not isinstance(currency, str)
@@ -627,6 +689,13 @@ async def stripe_webhook(
             amount_total=amount_total if isinstance(amount_total, int) else None,
             currency=currency if isinstance(currency, str) else None,
             mode=mode if isinstance(mode, str) else None,
+            amount_subtotal=amount_subtotal
+            if isinstance(amount_subtotal, int)
+            else None,
+            amount_discount=amount_discount
+            if isinstance(amount_discount, int)
+            else None,
+            customer_email=customer_email if isinstance(customer_email, str) else None,
         )
     except StripeEventOrderNotFoundError as exc:
         raise HTTPException(

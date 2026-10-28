@@ -2611,7 +2611,8 @@ h3 {
 }
 
 .review-modal label > span,
-.contact-form label > span {
+.contact-form label > span,
+.checkout-discount label > span {
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -2621,7 +2622,8 @@ h3 {
 .review-modal input,
 .review-modal textarea,
 .contact-form input,
-.contact-form textarea {
+.contact-form textarea,
+.checkout-discount input {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 0;
@@ -2632,7 +2634,8 @@ h3 {
 }
 
 .review-modal input,
-.contact-form input {
+.contact-form input,
+.checkout-discount input {
   height: 3.4rem;
   padding-inline: 0.9rem;
 }
@@ -2646,7 +2649,8 @@ h3 {
 .review-modal input:focus,
 .review-modal textarea:focus,
 .contact-form input:focus,
-.contact-form textarea:focus {
+.contact-form textarea:focus,
+.checkout-discount input:focus {
   border-color: var(--purple-bright);
   background: rgb(163 66 255 / 5%);
 }
@@ -3147,6 +3151,25 @@ h3 {
   color: #fff;
   font-size: 0.92rem;
   font-weight: 800;
+}
+
+.checkout-discount {
+  display: grid;
+  gap: 0.9rem;
+  margin-bottom: 1.2rem;
+}
+
+.checkout-discount label {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.checkout-discount label small {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .policy-checkbox {
