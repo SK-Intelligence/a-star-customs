@@ -211,17 +211,17 @@ test('optional extras update the build total and remain removable cart lines', a
   await premiumPack.click();
 
   await expect(speakerLights).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.getByText('£464.97', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Add build to bag · £464.97' }).click();
+  await expect(page.getByText('£449.97', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Add build to bag · £449.97' }).click();
 
   const drawer = page.getByRole('dialog', { name: 'Shopping bag' });
   await expect(drawer.locator('.cart-line')).toHaveCount(3);
-  await expect(drawer.getByText('£464.97', { exact: true })).toBeVisible();
+  await expect(drawer.getByText('£449.97', { exact: true })).toBeVisible();
   await drawer
     .getByRole('button', { name: /Remove Premium Pack.*from bag/ })
     .click();
   await expect(drawer.locator('.cart-line')).toHaveCount(2);
-  await expect(drawer.getByText('£414.98', { exact: true })).toBeVisible();
+  await expect(drawer.getByText('£399.98', { exact: true })).toBeVisible();
 
   await drawer.getByRole('button', { name: 'Close shopping bag' }).click();
   // On a phone the bubble stays hidden behind the unanswered cookie banner; answer it first.

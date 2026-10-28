@@ -120,7 +120,7 @@ def test_checkout_uses_all_trusted_catalog_prices(monkeypatch, tmp_path: Path) -
             FROM orders
             """
         ).fetchone()
-    assert order == ("cs_test_created", "pending", 52496, "gbp")
+    assert order == ("cs_test_created", "pending", 50996, "gbp")
 
 
 def test_order_initialization_failure_prevents_stripe_session_creation(
