@@ -17,8 +17,20 @@ CREATE TABLE IF NOT EXISTS orders (
         CHECK (status IN ('pending', 'paid', 'unpaid', 'expired')),
     amount_total INTEGER NOT NULL CHECK (amount_total >= 0),
     currency TEXT NOT NULL,
+    customer_email TEXT,
+    discount_percent INTEGER NOT NULL DEFAULT 0
+        CHECK (discount_percent BETWEEN 0 AND 100),
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+"""
+
+# Customers who bought before this site (old shop, phone or WhatsApp bookings), imported with
+# scripts/import_known_customers.py so they don't count as first-time buyers.
+KNOWN_CUSTOMER_TABLE_SQL = """
+CREATE TABLE IF NOT EXISTS known_customers (
+    email TEXT PRIMARY KEY,
+    added_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
 """
 
@@ -30,6 +42,8 @@ CREATE TABLE IF NOT EXISTS stripe_events (
 )
 """
 
+GMAIL_DOMAINS = {"gmail.com", "googlemail.com"}
+
 
 @dataclass(frozen=True)
 class StoredOrder:
@@ -38,6 +52,20 @@ class StoredOrder:
     status: OrderStatus
     amount_total: int
     currency: str
+
+
+def normalize_email(email: str) -> str:
+    """One key per inbox, so a returning customer can't pass as new.
+
+    Lowercases, drops a "+tag", and for Gmail ignores dots and the googlemail alias.
+    """
+
+    local, _, domain = email.strip().lower().rpartition("@")
+    local = local.split("+", 1)[0]
+    if domain in GMAIL_DOMAINS:
+        local = local.replace(".", "")
+        domain = "gmail.com"
+    return f"{local}@{domain}"
 
 
 class StripeEventOrderNotFoundError(RuntimeError):
@@ -96,10 +124,74 @@ def initialize_orders_database(database_path: Path) -> None:
                 """
             )
             connection.execute("DROP TABLE orders_legacy")
+        existing = {
+            column["name"]
+            for column in connection.execute("PRAGMA table_info(orders)").fetchall()
+        }
+        if "customer_email" not in existing:
+            connection.execute("ALTER TABLE orders ADD COLUMN customer_email TEXT")
+        if "discount_percent" not in existing:
+            connection.execute(
+                "ALTER TABLE orders ADD COLUMN discount_percent INTEGER NOT NULL DEFAULT 0"
+            )
         connection.execute(EVENT_TABLE_SQL)
+        connection.execute(KNOWN_CUSTOMER_TABLE_SQL)
         connection.execute(
             "CREATE INDEX IF NOT EXISTS idx_orders_stripe_session ON orders (stripe_session_id)"
         )
+        connection.execute(
+            "CREATE INDEX IF NOT EXISTS idx_orders_customer_email ON orders (customer_email)"
+        )
+
+
+def has_previous_purchase(database_path: Path, email: str) -> bool:
+    """True when this inbox has a paid order or is on the imported past-customer list."""
+
+    initialize_orders_database(database_path)
+    key = normalize_email(email)
+    with _connect(database_path) as connection:
+        row = connection.execute(
+            """
+            SELECT 1 FROM orders WHERE customer_email = ? AND status = 'paid'
+            UNION ALL
+            SELECT 1 FROM known_customers WHERE email = ?
+            LIMIT 1
+            """,
+            (key, key),
+        ).fetchone()
+    return row is not None
+
+
+def open_discounted_sessions(database_path: Path, email: str) -> list[str]:
+    """Stripe sessions of this inbox's discounted orders that haven't been settled yet."""
+
+    initialize_orders_database(database_path)
+    with _connect(database_path) as connection:
+        rows = connection.execute(
+            """
+            SELECT stripe_session_id FROM orders
+            WHERE customer_email = ?
+              AND discount_percent > 0
+              AND status = 'pending'
+              AND stripe_session_id IS NOT NULL
+            """,
+            (normalize_email(email),),
+        ).fetchall()
+    return [row["stripe_session_id"] for row in rows]
+
+
+def add_known_customers(database_path: Path, emails: list[str]) -> int:
+    """Record past customers; returns how many were new to the list."""
+
+    initialize_orders_database(database_path)
+    keys = {normalize_email(email) for email in emails if "@" in email}
+    with _connect(database_path) as connection:
+        before = connection.total_changes
+        connection.executemany(
+            "INSERT OR IGNORE INTO known_customers (email) VALUES (?)",
+            [(key,) for key in sorted(keys)],
+        )
+        return connection.total_changes - before
 
 
 def create_pending_order(
@@ -108,7 +200,11 @@ def create_pending_order(
     order_reference: str,
     cart_reference: str,
     amount_total: int,
+    customer_email: str | None = None,
+    discount_percent: int = 0,
 ) -> None:
+    """amount_total is always the full trusted cart total, before any discount."""
+
     initialize_orders_database(database_path)
     with _connect(database_path) as connection:
         connection.execute(
@@ -119,10 +215,18 @@ def create_pending_order(
                 cart_reference,
                 status,
                 amount_total,
-                currency
-            ) VALUES (?, NULL, ?, 'pending', ?, 'gbp')
+                currency,
+                customer_email,
+                discount_percent
+            ) VALUES (?, NULL, ?, 'pending', ?, 'gbp', ?, ?)
             """,
-            (order_reference, cart_reference, amount_total),
+            (
+                order_reference,
+                cart_reference,
+                amount_total,
+                normalize_email(customer_email) if customer_email else None,
+                discount_percent,
+            ),
         )
 
 
@@ -171,6 +275,33 @@ def get_order_by_session_id(
     )
 
 
+def _amount_matches(
+    trusted_total: int,
+    discount_percent: int,
+    *,
+    amount_total: int | None,
+    amount_subtotal: int | None,
+    amount_discount: int | None,
+) -> bool:
+    """Check Stripe's amounts against the trusted cart total.
+
+    Undiscounted orders must match exactly. A discounted order must have the trusted subtotal,
+    a discount within a penny of the agreed percentage (Stripe rounds it), and a total that is
+    the subtotal minus that discount.
+    """
+
+    if not discount_percent:
+        return amount_total == trusted_total and not amount_discount
+    if amount_total is None or amount_subtotal is None or amount_discount is None:
+        return False
+    expected_discount = trusted_total * discount_percent / 100
+    return (
+        amount_subtotal == trusted_total
+        and abs(amount_discount - expected_discount) <= 1
+        and amount_total == amount_subtotal - amount_discount
+    )
+
+
 def process_stripe_event(
     database_path: Path,
     *,
@@ -182,6 +313,9 @@ def process_stripe_event(
     amount_total: int | None = None,
     currency: str | None = None,
     mode: str | None = None,
+    amount_subtotal: int | None = None,
+    amount_discount: int | None = None,
+    customer_email: str | None = None,
 ) -> bool:
     """Record, attach, and apply an event atomically; return True for duplicates."""
 
@@ -210,7 +344,8 @@ def process_stripe_event(
 
         order = connection.execute(
             """
-            SELECT order_reference, status, amount_total, currency
+            SELECT order_reference, status, amount_total, currency,
+                   customer_email, discount_percent
             FROM orders
             WHERE stripe_session_id = ?
             """,
@@ -227,20 +362,37 @@ def process_stripe_event(
         if (
             mode != "payment"
             or currency != order["currency"]
-            or amount_total != order["amount_total"]
+            or not _amount_matches(
+                order["amount_total"],
+                order["discount_percent"],
+                amount_total=amount_total,
+                amount_subtotal=amount_subtotal,
+                amount_discount=amount_discount,
+            )
         ):
             raise StripeEventOrderMismatchError(
                 "Stripe order amount or currency does not match."
+            )
+        paid_email = normalize_email(customer_email) if customer_email else None
+        if (
+            order["discount_percent"]
+            and new_status == "paid"
+            and paid_email != order["customer_email"]
+        ):
+            raise StripeEventOrderMismatchError(
+                "Stripe customer does not match the discounted order."
             )
 
         if new_status == "paid":
             connection.execute(
                 """
                 UPDATE orders
-                SET status = 'paid', updated_at = CURRENT_TIMESTAMP
+                SET status = 'paid',
+                    customer_email = COALESCE(customer_email, ?),
+                    updated_at = CURRENT_TIMESTAMP
                 WHERE order_reference = ?
                 """,
-                (order["order_reference"],),
+                (paid_email, order["order_reference"]),
             )
         elif order["status"] != "paid":
             connection.execute(

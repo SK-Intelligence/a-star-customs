@@ -22,6 +22,11 @@ class Settings(BaseSettings):
     stripe_secret_key: str | None = None
     stripe_payment_method_configuration_id: str | None = None
     stripe_webhook_secret: str | None = None
+    # First-order discount. The code is off until the Stripe coupon ID is set, and the percent
+    # must match that coupon's percent_off (the webhook checks the paid amount against it).
+    first_order_discount_code: str = "WELCOME10"
+    first_order_discount_percent: int = Field(default=10, ge=1, le=100)
+    stripe_first_order_coupon_id: str | None = None
     orders_database_path: Path = (
         Path(__file__).resolve().parents[1] / "data" / "orders.db"
     )

@@ -46,6 +46,9 @@ Copy `.env.example` to `backend/.env` for local work or to `.env` for Docker Com
 | `STRIPE_SECRET_KEY` | Payments | Stripe server secret (`sk_test_…` in staging, `sk_live_…` in production). Never expose it as a `VITE_` variable. |
 | `STRIPE_PAYMENT_METHOD_CONFIGURATION_ID` | Payments | Stripe payment-method configuration (`pmc_…`) used by hosted Checkout. |
 | `STRIPE_WEBHOOK_SECRET` | Payment confirmation | Signing secret for `/api/stripe/webhook` (`whsec_…`). Checkout stays disabled until this, the Stripe secret, and the payment-method configuration are all set. |
+| `STRIPE_FIRST_ORDER_COUPON_ID` | First-order discount | Stripe coupon (`percent_off`, duration once) applied when a first-time buyer enters the code. The code is refused until this is set. |
+| `FIRST_ORDER_DISCOUNT_CODE` | First-order discount | The code customers type, case-insensitive. Default `WELCOME10`. |
+| `FIRST_ORDER_DISCOUNT_PERCENT` | First-order discount | Must equal the coupon's `percent_off`; the webhook checks the paid amount against it. Default `10`. |
 | `WEB3FORMS_ACCESS_KEY` | Contact form delivery | Server-side Web3Forms access key. |
 | `CHECKOUT_SUCCESS_URL` | Direct backend deployment | Must retain `?session_id={CHECKOUT_SESSION_ID}` so the result can be verified server-side. Docker Compose derives this from `PUBLIC_BASE_URL`. |
 | `CHECKOUT_CANCEL_URL` | Direct backend deployment | Returns customers to the checkout page. Docker Compose derives this from `PUBLIC_BASE_URL`. |
@@ -71,6 +74,15 @@ Copy `.env.example` to `backend/.env` for local work or to `.env` for Docker Com
 8. Complete test-mode payments on compatible iPhone/Safari and Android/Chrome devices, plus the other methods Stripe makes available to the test customer. Verify the order status before switching to live keys, then repeat a live-mode wallet check after domain registration and payment-method activation are complete.
 
 Checkout will not create a Stripe session until the secret key, payment-method configuration, and webhook signing secret are all present. This prevents the site from accepting delayed payments without a verified status-update path.
+
+### First-order discount
+
+A first-time buyer can enter the discount code at checkout, with their email. The backend refuses the code if that email (lowercased, ignoring `+tags`, and for Gmail ignoring dots) has a paid order or is on the imported past-customer list. Otherwise it applies the Stripe coupon and fixes the email on Stripe's payment page, and the webhook only marks the order paid if the discount, subtotal and email match what the backend approved. Every paid order records the buyer's email, so later orders are recognised.
+
+1. In Stripe, create a coupon: percent off `FIRST_ORDER_DISCOUNT_PERCENT`, duration once, no product restriction. Set its ID as `STRIPE_FIRST_ORDER_COUPON_ID`. Promotion codes are not used; the backend decides eligibility.
+2. Import customers from before this site (Stripe customer export, phone and WhatsApp bookings) so they aren't treated as new, from any CSV with an `email` column: `python scripts/import_known_customers.py customers.csv`, run where `ORDERS_DATABASE_PATH` points (the production volume).
+
+A guest who uses a different inbox can still get the discount once more; that is the usual limit of first-order codes.
 
 Checkout prices are always loaded from the backend catalog. The browser cannot submit a price. Payment details are collected on Stripe's hosted page. The backend passes the selected Payment Method Configuration and intentionally omits `payment_method_types`, allowing Stripe to decide which enabled methods to show for each customer, device, currency, basket, and account eligibility. The site does not promise every method on every order. Wallet domains, Klarna/Afterpay-Clearpay merchant approval, and PayPal connection are completed in Stripe rather than in this repository.
 

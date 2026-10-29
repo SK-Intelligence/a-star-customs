@@ -31,7 +31,7 @@ export function PrivacyPage() {
           <div className="policy-content">
             <p className="policy-intro">
               This notice applies when you use this website, contact A Star Customs,
-              submit a review or buy through Stripe Checkout. Last updated 17 August 2026.
+              submit a review or buy through Stripe Checkout. Last updated 29 October 2026.
             </p>
 
             <article>
@@ -53,6 +53,7 @@ export function PrivacyPage() {
                 <ul>
                   <li>Enquiries: name, email, optional phone number, vehicle and project details so we can answer and prepare a quote.</li>
                   <li>Orders: Stripe collects contact, shipping and payment information so your purchase can be processed, fulfilled and refunded when necessary. We do not receive or store full card details.</li>
+                  <li>Order records: we keep the email address used for each paid order, and any email you enter with a discount code, so we have a record of the order and can check whether a first-order discount applies. We also keep the email addresses of customers who bought from us before this website, only for that check.</li>
                   <li>Reviews: name, rating and comment so we can moderate and publish genuine customer feedback.</li>
                   <li>Website choices: cart contents and cookie preferences stored in your browser so the site works between visits.</li>
                 </ul>

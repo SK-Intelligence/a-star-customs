@@ -39,6 +39,30 @@ class CheckoutRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     items: list[CheckoutLine] = Field(min_length=1, max_length=50)
+    email: str | None = Field(default=None, max_length=254)
+    discountCode: str | None = Field(default=None, max_length=40)
+
+    @field_validator("email", "discountCode", mode="before")
+    @classmethod
+    def blank_to_none(cls, value: object) -> object:
+        if isinstance(value, str):
+            value = value.strip()
+            return value or None
+        return value
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, value: str | None) -> str | None:
+        if value is not None and not EMAIL_PATTERN.fullmatch(value):
+            raise ValueError("Enter a valid email address.")
+        return value
+
+    @model_validator(mode="after")
+    def discount_needs_email(self) -> "CheckoutRequest":
+        # First-order codes are checked against the buyer's email, so one is required.
+        if self.discountCode is not None and self.email is None:
+            raise ValueError("An email address is required with a discount code.")
+        return self
 
     @model_validator(mode="after")
     def reject_duplicate_lines(self) -> "CheckoutRequest":
