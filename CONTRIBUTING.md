@@ -40,6 +40,16 @@ Railway builds each service as described by Infrastructure as Code in `.railway/
 2. Preview the Infrastructure as Code with the Railway CLI (`railway link`, then `railway config plan` from the repository root) and check that only intended changes are listed.
 3. Apply it with `railway config apply`, which asks for confirmation. Planning is read-only; applying changes the live project, so review the plan first.
 4. Leave each service's old "Config file path" setting empty; the `railway.json` files no longer exist.
+5. Invite everyone who merges to `main` to the Railway workspace, with their GitHub account linked. Railway holds deploys of commits by anyone else as **NEEDS APPROVAL**.
+
+### Merged but not live?
+
+After the Quality gate passes on `main`, the **Deploy watch** workflow (`.github/workflows/deploy-watch.yml`) waits up to 15 minutes for the live site to serve the new commit, then runs the smoke check. If a service hasn't updated, it opens a GitHub issue titled "Deploy of <commit> is not live" that mentions whoever merged and says which service is stuck and what to do. The workflow run itself stays green on purpose, so it can never block Railway's Wait for CI.
+
+- Check what is live: `https://astarcustoms.com/version.txt` (frontend) and `https://astarcustoms.com/api/version` (backend). The backend only redeploys when `backend/**` changes, so it can lag `main` on frontend-only merges; that is expected.
+- **NEEDS APPROVAL** in Railway (service → Deployments) is the usual cause: the commit author isn't a Railway project member. Click **Approve** on the newest deployment, and invite the author (step 5 above) so it doesn't happen again. GitHub still shows "Deployed to Railway" for a held deploy, so that label is not proof it's live.
+- **FAILED**: open that deployment's build logs.
+- **SKIPPED** on the backend: no `backend/**` change, nothing to do.
 
 
 ## Dependency updates (Dependabot)

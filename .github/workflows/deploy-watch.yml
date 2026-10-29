@@ -1,0 +1,73 @@
+name: Deploy watch
+
+# After the Quality gate passes on main, waits for Railway to put that commit live (up to 15
+# minutes), then runs the live smoke check. If the site hasn't updated, it opens a GitHub issue that
+# mentions whoever merged, saying which service is stuck and how to fix it (usually a deploy
+# waiting for approval in Railway).
+#
+# The job itself always passes: Railway's "Wait for CI" (.railway/railway.ts) may wait for every
+# check suite on the commit, and a failing watch must never be the thing that blocks a deploy.
+# Read-only against the site; it only fetches public URLs. Costs one short run per merge to main.
+on:
+  workflow_run:
+    workflows: [Quality gate]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-watch
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  watch:
+    name: Live site is running main
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha || 'main' }}
+      - name: Wait for the new deploy
+        id: watch
+        run: |
+          frontend_sha=$(git rev-parse HEAD)
+          backend_sha=$(git log -1 --first-parent --format=%H -- backend/)
+          if sh ops/deploy-watch.sh https://astarcustoms.com "$frontend_sha" "$backend_sha" > watch.log 2>&1; then
+            echo "live=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "live=false" >> "$GITHUB_OUTPUT"
+          fi
+          cat watch.log
+          echo "sha=$frontend_sha" >> "$GITHUB_OUTPUT"
+      - name: Live site smoke check
+        if: steps.watch.outputs.live == 'true'
+        run: sh ops/smoke-test.sh https://astarcustoms.com
+      - name: Open an issue for the merger
+        if: steps.watch.outputs.live == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          SHA: ${{ steps.watch.outputs.sha }}
+          MERGER: ${{ github.event.workflow_run.actor.login || github.actor }}
+        run: |
+          short=$(printf '%.7s' "$SHA")
+          title="Deploy of $short is not live"
+          if gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number' | grep -q .; then
+            echo "Issue already open for $short"; exit 0
+          fi
+          {
+            echo "@$MERGER the Quality gate passed for $short, but after 15 minutes the live site is not running it."
+            echo
+            grep '^::error' watch.log | sed 's/^::error title=\([^:]*\)::/**\1:** /'
+            echo
+            echo "Checking and fixing it: CONTRIBUTING.md, \"Merged but not live?\". Close this issue once the site is live."
+          } > body.md
+          gh issue create --title "$title" --body-file body.md

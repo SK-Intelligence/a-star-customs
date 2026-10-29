@@ -5,8 +5,8 @@ name: Live site smoke check
 # Stripe session), and that the orders and reviews databases are never served. Read-only: a
 # failed check fails the run; nothing is ordered, sent or stored.
 #
-# Manual only (Actions -> Live site smoke check -> Run workflow), to save Actions minutes. Run it
-# after a release. Only the backend has a Railway health check (/api/health, .railway/railway.ts):
+# Manual (Actions -> Live site smoke check -> Run workflow), e.g. against another URL. After each
+# merge to main the Deploy watch workflow already runs this check once the new commit is live. Only the backend has a Railway health check (/api/health, .railway/railway.ts):
 # a backend release that fails it never goes live and the previous one keeps serving. The
 # frontend (nginx) has none, so this check is what confirms the storefront after a deploy.
 on:

@@ -28,6 +28,11 @@ COPY --chown=appuser:appuser backend/app ./app
 COPY --from=catalog-check /catalog-check-passed /tmp/catalog-check-passed
 RUN mkdir -p /data && chown appuser:appuser /data
 
+# The commit this image was built from, reported by /api/version for the Deploy watch workflow.
+# Declared late so it doesn't invalidate the dependency layers above on every commit.
+ARG RAILWAY_GIT_COMMIT_SHA=unknown
+ENV BUILD_COMMIT_SHA=${RAILWAY_GIT_COMMIT_SHA}
+
 USER appuser
 
 EXPOSE 8000
