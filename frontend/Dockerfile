@@ -29,5 +29,10 @@ ENV BACKEND_HOST=backend \
 COPY frontend/nginx.conf /etc/nginx/templates/default.conf.template
 COPY frontend/proxy_params /etc/nginx/proxy_params
 COPY --from=build /workspace/frontend/dist /usr/share/nginx/html
+# The commit this image was built from, served at /version.txt so the Deploy watch workflow can
+# tell whether the live storefront is running the latest main. Railway passes
+# RAILWAY_GIT_COMMIT_SHA as a build argument; local builds report "unknown".
+ARG RAILWAY_GIT_COMMIT_SHA=unknown
+RUN printf '%s\n' "$RAILWAY_GIT_COMMIT_SHA" > /usr/share/nginx/html/version.txt
 
 EXPOSE 80

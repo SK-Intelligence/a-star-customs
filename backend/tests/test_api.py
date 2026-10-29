@@ -55,6 +55,14 @@ def test_health() -> None:
     assert response.json() == {"status": "ok"}
 
 
+def test_version_reports_build_commit(monkeypatch) -> None:
+    monkeypatch.setenv("BUILD_COMMIT_SHA", "abc123")
+    assert client.get("/api/version").json() == {"commit": "abc123"}
+
+    monkeypatch.delenv("BUILD_COMMIT_SHA")
+    assert client.get("/api/version").json() == {"commit": "unknown"}
+
+
 def test_cors_does_not_allow_browser_credentials() -> None:
     response = client.options(
         "/api/health",

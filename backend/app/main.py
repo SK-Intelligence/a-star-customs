@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import os
 import sqlite3
 from typing import Any, NoReturn
 from uuid import uuid4
@@ -120,6 +121,12 @@ async def validation_error_handler(
 @app.get("/api/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/api/version")
+async def version() -> dict[str, str]:
+    """The commit this backend was built from, checked by the Deploy watch workflow."""
+    return {"commit": os.getenv("BUILD_COMMIT_SHA") or "unknown"}
 
 
 def _validate_product(product_id: str) -> None:

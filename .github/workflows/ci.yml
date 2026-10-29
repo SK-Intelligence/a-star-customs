@@ -215,8 +215,8 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with: { persist-credentials: false }
-      # The post-deploy smoke check and the pre-push hook (POSIX sh). ShellCheck is on the runner.
-      - run: shellcheck --version && shellcheck --shell=sh ops/smoke-test.sh .githooks/pre-push
+      # The post-deploy smoke check, the deploy watch and the pre-push hook (POSIX sh). ShellCheck is on the runner.
+      - run: shellcheck --version && shellcheck --shell=sh ops/smoke-test.sh ops/deploy-watch.sh .githooks/pre-push
 
   security:
     name: Security (npm audit, pip-audit, gitleaks, Semgrep)
