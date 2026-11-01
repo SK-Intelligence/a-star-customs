@@ -394,6 +394,11 @@ h3 {
   color: var(--purple-bright);
 }
 
+.announcement-bar strong {
+  color: var(--purple-bright);
+  font-weight: 900;
+}
+
 .site-header__main {
   height: 5.15rem;
   border-bottom: 1px solid var(--line);

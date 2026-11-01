@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useDialogFocus } from '../hooks/useDialogFocus';
 import { ResponsiveImage } from './ResponsiveImage';
-import { socialLinks } from '../data/site';
+import { firstOrderOffer, socialLinks } from '../data/site';
 import { cartItemCount, useCartStore } from '../store/cart';
 import { productBySlug } from '../data/catalog';
 
@@ -45,8 +45,11 @@ export function Header() {
   return (
     <header className="site-header">
       <div className="announcement-bar">
-        <span>Car upgrades and custom fitting in Hounslow</span>
-        <Link to="/contact-us">Get a quote</Link>
+        <span>
+          {firstOrderOffer.percent}% off your first order with code{' '}
+          <strong>{firstOrderOffer.code}</strong>
+        </span>
+        <Link to="/shop">Shop now</Link>
       </div>
       <div className="site-header__main">
         <div className="container site-header__inner">
