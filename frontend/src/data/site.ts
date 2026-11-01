@@ -261,6 +261,13 @@ export const contactDetails: ContactDetails = {
   mapQuery: "155 Brabazon Road, Hounslow, London, United Kingdom",
 };
 
+// Shown in the top banner. Keep in step with FIRST_ORDER_DISCOUNT_CODE and
+// FIRST_ORDER_DISCOUNT_PERCENT on the backend (Railway variables).
+export const firstOrderOffer = {
+  code: "WELCOME10",
+  percent: 10,
+} as const;
+
 export const socialLinks: readonly SocialLink[] = [
   { label: "Facebook", href: "https://www.facebook.com/AStrCustoms" },
   { label: "Instagram", href: "https://www.instagram.com/a_starcustoms/" },
