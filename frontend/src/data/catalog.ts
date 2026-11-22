@@ -265,6 +265,29 @@ export function getProductAddOns(product: Product): readonly Product[] {
   );
 }
 
+/**
+ * The purchasable base packages that offer an add-on listing as an optional extra: the
+ * `appliesToProducts` of its active definitions, else main listings of its family that offer it.
+ */
+export function getAddOnBaseProducts(addOn: Product): readonly Product[] {
+  if (addOn.kind !== "addon") return [];
+  const definitions = addOnDefinitions.filter(
+    (definition) => definition.status === "active" && definition.productId === addOn.id,
+  );
+  const scopedIds = new Set(definitions.flatMap((definition) => definition.appliesToProducts ?? []));
+  return products.filter(
+    (candidate) =>
+      candidate.kind !== "addon" &&
+      candidate.purchasable &&
+      candidate.available &&
+      (scopedIds.size > 0
+        ? scopedIds.has(candidate.id)
+        : candidate.kind === "main" &&
+          candidate.family === addOn.family &&
+          getProductAddOns(candidate).some((offered) => offered.id === addOn.id)),
+  );
+}
+
 export const shopCategories: readonly ShopCategory[] = [
   { label: "Ambient lighting", matches: (product) => getProductFamily(product) === "ambient-lighting" },
   { label: "Starlights", matches: (product) => getProductFamily(product) === "starlights" },
