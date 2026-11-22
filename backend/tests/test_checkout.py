@@ -966,19 +966,7 @@ def test_checkout_charges_catalog_prices_for_digital_dashboards(
     monkeypatch, tmp_path: Path
 ) -> None:
     captured: dict[str, object] = {}
-
-    def fake_create(**kwargs: object) -> SimpleNamespace:
-        captured.update(kwargs)
-        return SimpleNamespace(
-            id="cs_test_dash", url="https://checkout.stripe.com/c/pay/dash"
-        )
-
-    monkeypatch.setattr("app.main.stripe.checkout.Session.create", fake_create)
-    app.dependency_overrides[get_settings] = lambda: Settings(
-        stripe_secret_key="sk_test_placeholder",
-        stripe_webhook_secret="whsec_test_checkout",
-        orders_database_path=tmp_path / "orders.db",
-    )
+    stripe_settings(monkeypatch, tmp_path, captured)
 
     response = client.post(
         "/api/checkout/session",
