@@ -79,7 +79,7 @@ export function CartDrawer() {
                       src={product.images[0] ?? '/images/site/hero.jpg'}
                       alt={product.title}
                       sizes="(max-width: 520px) 84px, 105px"
-                      coverAspect={105 / 115}
+                      matte
                     />
                   </Link>
                   <div className="cart-line__copy">

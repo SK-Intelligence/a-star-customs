@@ -16,6 +16,12 @@ type ResponsiveImageProps = Omit<
    * renders wider than the box by the ratio of the two aspect ratios; `sizes` is scaled to match.
    */
   coverAspect?: number;
+  /**
+   * For a photo contained (object-fit: contain) in its box: paints the photo's own backdrop colour
+   * behind it (white for a product shot on white), so the letterbox reads as part of the photo.
+   * A photo whose edges are a scene, not a plain backdrop, keeps the box's own dark background.
+   */
+  matte?: boolean;
   /** Only for the page's LCP image: loads eagerly at high fetch priority. */
   priority?: boolean;
 };
@@ -64,9 +70,11 @@ export function ResponsiveImage({
   alt,
   sizes,
   coverAspect,
+  matte = false,
   priority = false,
   loading,
   fetchPriority,
+  style,
   ...imageProps
 }: ResponsiveImageProps) {
   // React 18 does not know `fetchPriority` (it warns and drops the camelCase prop); the lowercase
@@ -80,10 +88,10 @@ export function ResponsiveImage({
     ...imageProps,
   };
 
-  if (!Object.hasOwn(images, src)) return <img src={src} {...commonProps} />;
+  if (!Object.hasOwn(images, src)) return <img src={src} style={style} {...commonProps} />;
 
   const entry = images[src]!;
-  const [width, height] = entry;
+  const [width, height, , edgeColour] = entry;
   const coverScale = coverAspect ? Math.ceil((width / height / coverAspect) * 100) / 100 : 1;
   return (
     <picture>
@@ -92,7 +100,13 @@ export function ResponsiveImage({
         srcSet={srcSetFor(src, entry)}
         sizes={coverScale > 1 ? scaleSizes(sizes, coverScale) : sizes}
       />
-      <img src={src} width={width} height={height} {...commonProps} />
+      <img
+        src={src}
+        width={width}
+        height={height}
+        style={matte && edgeColour ? { backgroundColor: edgeColour, ...style } : style}
+        {...commonProps}
+      />
     </picture>
   );
 }

@@ -2,8 +2,8 @@
 // dev server) and re-exported to the browser by its `virtual:responsive-images` module, so the
 // files the build writes and the srcset ResponsiveImage emits come from the same code.
 
-/** Intrinsic width and height of an original, then the widths of its WebP candidates. */
-export type ImageEntry = readonly [width: number, height: number, widths: readonly number[]];
+/** Intrinsic width and height of an original, the widths of its WebP candidates, its backdrop colour ('' for none). */
+export type ImageEntry = readonly [width: number, height: number, widths: readonly number[], matte: string];
 
 export const VARIANT_WIDTHS: readonly number[] = [160, 320, 480, 640, 768, 960, 1280];
 

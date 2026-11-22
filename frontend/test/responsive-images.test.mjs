@@ -69,6 +69,47 @@ describe('scanImages and findReferences', () => {
     assert.deepEqual(scan.orphans, []);
   });
 
+  test('records a backdrop colour only for images with a plain backdrop', () => {
+    // The JPEG and WebP fixtures are gradients running off every edge; the PNG's transparent
+    // surround flattens onto black.
+    assert.deepEqual(
+      [...scan.images.values()].map(({ src, matte }) => [src, matte]),
+      [
+        [JPEG, ''],
+        [PNG, '#000000'],
+        [WEBP, ''],
+      ],
+    );
+  });
+
+  test('edgeColour takes the median of the outer ring, ignoring the centre', async () => {
+    const file = path.join(scratch, 'framed.png');
+    // A white frame round a black centre: the centre must not pull the colour.
+    await sharp({ create: { width: 240, height: 320, channels: 3, background: '#ffffff' } })
+      .composite([{ input: { create: { width: 200, height: 280, channels: 3, background: '#000000' } }, top: 20, left: 20 }])
+      .png()
+      .toFile(file);
+    assert.equal(await plugin.edgeColour(file), '#ffffff');
+  });
+
+  test('edgeColour tolerates a product touching an edge, but not a scene', async () => {
+    const touching = path.join(scratch, 'touching.png');
+    // A black product running off the bottom edge of a white backdrop: still a white backdrop.
+    await sharp({ create: { width: 300, height: 300, channels: 3, background: '#ffffff' } })
+      .composite([{ input: { create: { width: 200, height: 150, channels: 3, background: '#000000' } }, top: 150, left: 50 }])
+      .png()
+      .toFile(touching);
+    assert.equal(await plugin.edgeColour(touching), '#ffffff');
+
+    const scene = path.join(scratch, 'scene.png');
+    // Sky above, road below: no single backdrop.
+    await sharp({ create: { width: 300, height: 300, channels: 3, background: '#3a6ea5' } })
+      .composite([{ input: { create: { width: 300, height: 150, channels: 3, background: '#2b2b2b' } }, top: 150, left: 0 }])
+      .png()
+      .toFile(scene);
+    assert.equal(await plugin.edgeColour(scene), '');
+  });
+
   test('lists unreferenced images as orphans and makes no entry for them', async () => {
     const partial = await plugin.scanImages(publicDir, new Set([JPEG]));
     assert.deepEqual([...partial.images.keys()], [JPEG]);
@@ -263,6 +304,16 @@ describe('build output and the srcset ResponsiveImage emits', () => {
       /sizes="\(max-width: 520px\) calc\(\(88px\) \* 1.34\), calc\(\(130px\) \* 1.34\)"/,
     );
     assert.match(markup({ src: JPEG, alt: '', sizes: '130px', coverAspect: 2 }), /sizes="130px"/);
+  });
+
+  test('matte paints the backdrop colour behind the photo, only when asked and only if it has one', () => {
+    assert.match(markup({ src: PNG, alt: '', sizes: '130px', matte: true }), /style="background-color:#000000"/);
+    assert.doesNotMatch(markup({ src: PNG, alt: '', sizes: '130px' }), /style=/);
+    assert.doesNotMatch(markup({ src: JPEG, alt: '', sizes: '130px', matte: true }), /style=/);
+    assert.match(
+      markup({ src: PNG, alt: '', sizes: '130px', matte: true, style: { backgroundColor: 'red' } }),
+      /style="background-color:red"/,
+    );
   });
 
   test('an image without variants renders a plain <img>', () => {
