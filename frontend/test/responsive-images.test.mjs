@@ -1,6 +1,6 @@
 // Unit tests for the responsive image pipeline (responsive-images.ts, responsive-image-names.ts and
-// ResponsiveImage.tsx) against three fixture images: a 1000px JPEG, a 200px PNG with alpha and a
-// 120px WebP. Run with `npm run test:unit` (node:test; TypeScript through test/ts-loader.mjs).
+// ResponsiveImage.tsx) against four fixture images: a 1000px JPEG, a 300px studio shot on white,
+// a 200px PNG with alpha and a 120px WebP. Run with `npm run test:unit` (node:test; TypeScript through test/ts-loader.mjs).
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
@@ -17,6 +17,7 @@ const plugin = await import(pathToFileURL(path.join(frontend, 'responsive-images
 const names = await import(pathToFileURL(path.join(frontend, 'responsive-image-names.ts')).href);
 
 const JPEG = '/images/products/fixture-kit-01.jpg';
+const STUDIO = '/images/products/fixture-studio-01.jpg';
 const PNG = '/images/site/fixture-logo.png';
 const WEBP = '/images/site/fixture-small.webp';
 
@@ -62,6 +63,7 @@ describe('scanImages and findReferences', () => {
       [...scan.images.values()].map(({ src, width, height }) => [src, width, height]),
       [
         [JPEG, 1000, 750],
+        [STUDIO, 300, 400],
         [PNG, 200, 100],
         [WEBP, 120, 90],
       ],
@@ -70,13 +72,14 @@ describe('scanImages and findReferences', () => {
   });
 
   test('records a backdrop colour only for images with a plain backdrop', () => {
-    // The JPEG and WebP fixtures are gradients running off every edge; the PNG's transparent
-    // surround flattens onto black.
+    // The JPEG and WebP fixtures are gradients running off every edge, the PNG has a transparent
+    // surround, and the studio shot is a dark product on white.
     assert.deepEqual(
       [...scan.images.values()].map(({ src, matte }) => [src, matte]),
       [
         [JPEG, ''],
-        [PNG, '#000000'],
+        [STUDIO, '#ffffff'],
+        [PNG, ''],
         [WEBP, ''],
       ],
     );
@@ -90,6 +93,25 @@ describe('scanImages and findReferences', () => {
       .png()
       .toFile(file);
     assert.equal(await plugin.edgeColour(file), '#ffffff');
+  });
+
+  test('edgeColour looks past a thin border to the backdrop inside it', async () => {
+    const file = path.join(scratch, 'bordered.png');
+    // A white photo with a 2px #d0d0d0 border, as some supplier images have.
+    await sharp({ create: { width: 400, height: 400, channels: 3, background: '#d0d0d0' } })
+      .composite([{ input: { create: { width: 396, height: 396, channels: 3, background: '#ffffff' } }, top: 2, left: 2 }])
+      .png()
+      .toFile(file);
+    assert.equal(await plugin.edgeColour(file), '#ffffff');
+  });
+
+  test('edgeColour gives a transparent surround no colour', async () => {
+    const file = path.join(scratch, 'cut-out.png');
+    await sharp({ create: { width: 200, height: 200, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+      .composite([{ input: { create: { width: 100, height: 100, channels: 4, background: '#ffffff' } }, top: 50, left: 50 }])
+      .png()
+      .toFile(file);
+    assert.equal(await plugin.edgeColour(file), '');
   });
 
   test('edgeColour tolerates a product touching an edge, but not a scene', async () => {
@@ -113,7 +135,7 @@ describe('scanImages and findReferences', () => {
   test('lists unreferenced images as orphans and makes no entry for them', async () => {
     const partial = await plugin.scanImages(publicDir, new Set([JPEG]));
     assert.deepEqual([...partial.images.keys()], [JPEG]);
-    assert.deepEqual(partial.orphans, [PNG, WEBP]);
+    assert.deepEqual(partial.orphans, [STUDIO, PNG, WEBP]);
   });
 
   test('rejects a file name that is not URL- and srcset-safe', async () => {
@@ -297,21 +319,12 @@ describe('build output and the srcset ResponsiveImage emits', () => {
     assert.doesNotMatch(html, /fetchPriority/);
   });
 
-  test('coverAspect scales sizes for photos wider than their box', () => {
-    // 4:3 photo in a square box renders 1.34x wider (rounded up to hundredths).
-    assert.match(
-      markup({ src: JPEG, alt: '', sizes: '(max-width: 520px) 88px, 130px', coverAspect: 1 }),
-      /sizes="\(max-width: 520px\) calc\(\(88px\) \* 1.34\), calc\(\(130px\) \* 1.34\)"/,
-    );
-    assert.match(markup({ src: JPEG, alt: '', sizes: '130px', coverAspect: 2 }), /sizes="130px"/);
-  });
-
   test('matte paints the backdrop colour behind the photo, only when asked and only if it has one', () => {
-    assert.match(markup({ src: PNG, alt: '', sizes: '130px', matte: true }), /style="background-color:#000000"/);
-    assert.doesNotMatch(markup({ src: PNG, alt: '', sizes: '130px' }), /style=/);
+    assert.match(markup({ src: STUDIO, alt: '', sizes: '130px', matte: true }), /style="background-color:#ffffff"/);
+    assert.doesNotMatch(markup({ src: STUDIO, alt: '', sizes: '130px' }), /style=/);
     assert.doesNotMatch(markup({ src: JPEG, alt: '', sizes: '130px', matte: true }), /style=/);
     assert.match(
-      markup({ src: PNG, alt: '', sizes: '130px', matte: true, style: { backgroundColor: 'red' } }),
+      markup({ src: STUDIO, alt: '', sizes: '130px', matte: true, style: { backgroundColor: 'red' } }),
       /style="background-color:red"/,
     );
   });

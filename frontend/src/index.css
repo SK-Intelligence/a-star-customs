@@ -1616,10 +1616,11 @@ h3 {
 .product-card__media {
   position: relative;
   display: block;
-  /* The catalogue's dominant 3:4 photos fill it exactly; others sit whole on their own edge colour. */
+  /* The catalogue's dominant 3:4 photos fill it exactly; others sit whole on their own backdrop
+     colour, or, for a scene with no plain backdrop, on this softly lit stage. */
   aspect-ratio: 3 / 4;
   overflow: hidden;
-  background: #1a181c;
+  background: radial-gradient(ellipse 90% 60% at 50% 50%, #221f27 0%, #131116 72%);
 }
 
 .product-card__media img {
@@ -1829,11 +1830,13 @@ h3 {
   position: relative;
   display: block;
   width: 100%;
-  aspect-ratio: 1;
+  /* Set per photo by ProductPage (galleryRatioStyle). */
+  aspect-ratio: var(--gallery-ratio-wide, 1);
   overflow: hidden;
   padding: 0;
-  background: #18161b;
+  background: radial-gradient(ellipse 90% 60% at 50% 50%, #221f27 0%, #131116 72%);
   cursor: zoom-in;
+  transition: aspect-ratio 220ms ease;
 }
 
 .product-gallery__main img {
@@ -2097,7 +2100,8 @@ h3 {
   object-fit: contain;
 }
 
-.build-extra img {
+.build-extra img,
+.build-extra > svg {
   height: auto;
   aspect-ratio: 3 / 4;
 }
@@ -2158,77 +2162,6 @@ h3 {
 
 .build-extra > i svg {
   width: 0.9rem;
-}
-
-.build-upgrades {
-  display: grid;
-  gap: 0.7rem;
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--line);
-}
-
-.build-upgrades > div:last-child {
-  display: grid;
-  gap: 0.55rem;
-}
-
-.build-upgrade {
-  display: grid;
-  grid-template-columns: 62px minmax(0, 1fr) 1.25rem;
-  gap: 0.8rem;
-  align-items: center;
-  padding: 0.65rem;
-  border: 1px solid var(--line);
-  background: rgb(255 255 255 / 2%);
-  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
-}
-
-.build-upgrade:hover {
-  border-color: rgb(191 115 255 / 70%);
-  background: rgb(163 66 255 / 8%);
-  transform: translateY(-1px);
-}
-
-.build-upgrade > img {
-  width: 62px;
-  height: 62px;
-  object-fit: cover;
-}
-
-.build-upgrade > span {
-  display: grid;
-  min-width: 0;
-  gap: 0.16rem;
-}
-
-.build-upgrade small {
-  color: #8d8792;
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.build-upgrade strong {
-  font-size: 0.75rem;
-  line-height: 1.3;
-}
-
-.build-upgrade em {
-  color: var(--purple-bright);
-  font-size: 0.72rem;
-  font-style: normal;
-  font-weight: 800;
-}
-
-.build-upgrade > svg {
-  width: 1rem;
-  color: var(--purple-bright);
-  transition: transform 160ms ease;
-}
-
-.build-upgrade:hover > svg {
-  transform: translateX(0.2rem);
 }
 
 .build-total {
@@ -4202,12 +4135,13 @@ h3 {
     height: 52px;
   }
 
-  .build-extra img {
+  .build-extra img,
+  .build-extra > svg {
     height: auto;
   }
 
   .product-gallery__main {
-    aspect-ratio: 3 / 4;
+    aspect-ratio: var(--gallery-ratio, 3 / 4);
   }
 
   .product-thumbnails {

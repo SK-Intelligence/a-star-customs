@@ -82,39 +82,61 @@ export async function findReferences(roots: readonly string[]): Promise<Set<stri
   return references;
 }
 
-const EDGE_GRID = 24;
-/** A ring pixel counts as the background when every channel is this close to the median. */
+// Sampled on a 64 x 64 downscale: the outer ring is the outermost ~1.5% of the photo, the inner
+// ring ~3% in, past a thin border or scanner edge.
+const EDGE_GRID = 64;
+const INNER_RING = 2;
+/** A ring pixel counts as the backdrop when every channel is this close to the ring's median. */
 const EDGE_TOLERANCE = 24;
-/** Share of the ring that must match: a studio backdrop (a product may touch an edge or two), not a scene. */
+/** Share of a ring that must match: a studio backdrop (a product may touch an edge or two), not a scene. */
 const EDGE_UNIFORM_SHARE = 0.6;
+/** Alpha below this (about 10%) counts as transparent. */
+const TRANSPARENT_ALPHA = 26;
 
-/**
- * The photo's backdrop colour as #rrggbb, or '' when it has none. Takes the per-channel median of
- * the outermost pixels of a downscaled copy; a product shot on white comes out white and a
- * starlight kit on black near-black, so the photo contained on that colour reads as one surface.
- * A scene that runs off the edge (sky above, dashboard below) has no single backdrop: a flat average
- * of it would look like a coloured frame, so it gets '' and sits on the page's dark surface.
- * Transparency is flattened onto black, the ink.
- */
-export async function edgeColour(file: string): Promise<string> {
-  const { data } = await sharp(file, { autoOrient: true })
-    .flatten({ background: '#000000' })
-    .resize(EDGE_GRID, EDGE_GRID, { fit: 'fill' })
-    .removeAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  const ring: [number, number, number][] = [];
-  for (let y = 0; y < EDGE_GRID; y += 1) {
-    for (let x = 0; x < EDGE_GRID; x += 1) {
-      if (x !== 0 && y !== 0 && x !== EDGE_GRID - 1 && y !== EDGE_GRID - 1) continue;
-      const offset = (y * EDGE_GRID + x) * 3;
-      ring.push([data[offset]!, data[offset + 1]!, data[offset + 2]!]);
+type Rgba = readonly [number, number, number, number];
+
+/** The pixels of the square ring `inset` pixels in from the edge of a size x size RGBA buffer. */
+function ringPixels(data: Buffer, size: number, inset: number): Rgba[] {
+  const pixels: Rgba[] = [];
+  const last = size - 1 - inset;
+  for (let y = inset; y <= last; y += 1) {
+    for (let x = inset; x <= last; x += 1) {
+      if (x !== inset && y !== inset && x !== last && y !== last) continue;
+      const offset = (y * size + x) * 4;
+      pixels.push([data[offset]!, data[offset + 1]!, data[offset + 2]!, data[offset + 3]!]);
     }
   }
+  return pixels;
+}
+
+/** The ring's per-channel median as #rrggbb when the ring is one plain colour, else undefined. */
+function plainColour(ring: readonly Rgba[]): string | undefined {
   const median = [0, 1, 2].map((channel) => ring.map((pixel) => pixel[channel]!).sort((a, b) => a - b)[ring.length >> 1]!);
-  const matching = ring.filter((pixel) => pixel.every((value, channel) => Math.abs(value - median[channel]!) <= EDGE_TOLERANCE));
-  if (matching.length < ring.length * EDGE_UNIFORM_SHARE) return '';
+  const matching = ring.filter((pixel) => median.every((value, channel) => Math.abs(pixel[channel]! - value) <= EDGE_TOLERANCE));
+  if (matching.length < ring.length * EDGE_UNIFORM_SHARE) return undefined;
   return `#${median.map((value) => value.toString(16).padStart(2, '0')).join('')}`;
+}
+
+/**
+ * The photo's backdrop colour as #rrggbb, or '' when it has none. A product shot on white comes out
+ * white and a starlight kit on black near-black, so the photo contained on that colour reads as one
+ * surface. The ring ~3% in wins when it is plain, so a thin grey border or darkened edge does not
+ * tint the backdrop; the outer ring is the fallback for a product that reaches inside it. A scene
+ * that runs off the edge (sky above, dashboard below) has no single backdrop: a flat average would
+ * look like a coloured frame, so it gets ''. So does a transparent surround (a logo or cut-out),
+ * which shows the page through it.
+ */
+export async function edgeColour(file: string): Promise<string> {
+  const data = await sharp(file, { autoOrient: true })
+    .ensureAlpha()
+    // Linear has no negative lobes, so a flat backdrop stays exactly its colour next to an edge.
+    .resize(EDGE_GRID, EDGE_GRID, { fit: 'fill', kernel: 'linear' })
+    .raw()
+    .toBuffer();
+  const outer = ringPixels(data, EDGE_GRID, 0);
+  const transparent = outer.filter((pixel) => pixel[3] < TRANSPARENT_ALPHA).length;
+  if (transparent > outer.length / 2) return '';
+  return plainColour(ringPixels(data, EDGE_GRID, INNER_RING)) ?? plainColour(outer) ?? '';
 }
 
 export async function scanImages(publicDir: string, references: ReadonlySet<string>): Promise<ImageScan> {
