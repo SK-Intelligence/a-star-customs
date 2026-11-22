@@ -1256,8 +1256,8 @@
     },
     "images": [
       {
-        "path": "/images/products/mercedes-c-class-glc-w205-digital-dashboard-cluster-2015-2018-01.jpg",
-        "sha256": "e1fd1fa914239e2250dc46ae6eaff3fd6ef37148458b5b313a092226675e37f1"
+        "path": "/images/products/mercedes-c-class-glc-w205-digital-dashboard-cluster-2015-2018-square-01.jpg",
+        "sha256": "fe6e3dc4b606ebdbc67f396433bf6825321104b843083121f901b3a5951adcd3"
       }
     ]
   },
@@ -1280,8 +1280,8 @@
     },
     "images": [
       {
-        "path": "/images/products/mercedes-c-class-w204-digital-dashboard-cluster-2008-2011-01.jpg",
-        "sha256": "ce6d227d457b4a886f91bf7ed48a4d100b6b779138447ee4ef3128f3cee099c0"
+        "path": "/images/products/mercedes-c-class-w204-digital-dashboard-cluster-2008-2011-square-01.jpg",
+        "sha256": "71c2525ffb77bb48bab7c773d0d0bd135f5690a5f8a0f8df54e13ceacfe6d314"
       }
     ]
   },
@@ -1308,8 +1308,8 @@
     },
     "images": [
       {
-        "path": "/images/products/bmw-3-series-gt-4-series-nbt-digital-dashboard-cluster-2013-2019-01.jpg",
-        "sha256": "4aba621511384557258c87104cefe53d0bb2d589e30e5385521f6ef69d416182"
+        "path": "/images/products/bmw-3-series-gt-4-series-nbt-digital-dashboard-cluster-2013-2019-square-01.jpg",
+        "sha256": "bb4ec31510e4820d7863970e8139c66e168a9beb3b1d725a27a680ae6ea810c6"
       }
     ]
   },
@@ -1351,8 +1351,8 @@
     },
     "images": [
       {
-        "path": "/images/products/bmw-5-6-7-series-x3-x4-x5-x6-cic-nbt-digital-dashboard-cluster-without-hud-2010-2017-01.jpg",
-        "sha256": "f07f01bfecc582670cd2ef7545e9cebf7f091ef0a4dffd5d71f10ff118e2f9c7"
+        "path": "/images/products/bmw-5-6-7-series-x3-x4-x5-x6-cic-nbt-digital-dashboard-cluster-without-hud-2010-2017-square-01.jpg",
+        "sha256": "dd61093f94642e2c465b45471fe0d505ff173f6ed191443c83dcb2d59c58942e"
       }
     ]
   },
@@ -1375,8 +1375,8 @@
     },
     "images": [
       {
-        "path": "/images/products/audi-a3-digital-dashboard-cluster-2014-2020-01.jpg",
-        "sha256": "74980921193f065edb578665f154a35a775dd80e1c7a4de5f553e051cf320ede"
+        "path": "/images/products/audi-a3-digital-dashboard-cluster-2014-2020-square-01.jpg",
+        "sha256": "fedab448ecac4c97e64a7f638650edcd3253d543e435e3eb2899b4903f850acd"
       }
     ]
   },
@@ -1399,8 +1399,8 @@
     },
     "images": [
       {
-        "path": "/images/products/volkswagen-golf-mk6-digital-dashboard-cluster-2008-2014-01.jpg",
-        "sha256": "0c6bcf277835bb57921cecbb2b757fa01e78a2fa2acf5e58275cda0f8a5d8b54"
+        "path": "/images/products/volkswagen-golf-mk6-digital-dashboard-cluster-2008-2014-square-01.jpg",
+        "sha256": "6f0d78988c7d9e98a308ec99121e218e18f1375acf475e429f1633bf8658bdd7"
       }
     ]
   },
@@ -1424,8 +1424,8 @@
     },
     "images": [
       {
-        "path": "/images/products/volkswagen-golf-mk7-mk75-digital-dashboard-cluster-2013-2020-01.jpg",
-        "sha256": "878377a4ce2801387ebcd80ea2c6611a5aa0333e066b3b57c77c7bf33a55d967"
+        "path": "/images/products/volkswagen-golf-mk7-mk75-digital-dashboard-cluster-2013-2020-square-01.jpg",
+        "sha256": "8f381115987f785e857111acb40cc20b17a39b2dfd1230955e71bd6629805d9e"
       }
     ]
   }
