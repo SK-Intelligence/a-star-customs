@@ -34,6 +34,7 @@ PRODUCT_FAMILIES = {
     "dashcams",
     "steering-wheels",
     "rims-calipers",
+    "digital-dashboards",
     "general",
 }
 

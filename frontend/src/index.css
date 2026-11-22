@@ -2322,6 +2322,29 @@ h3 {
   grid-column: 1 / -1;
 }
 
+.add-on-bases {
+  grid-column: 1 / -1;
+}
+
+.add-on-bases p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.add-on-bases ul {
+  margin: 0.3rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.add-on-bases .text-link {
+  min-height: 2.75rem;
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
 .buybox-trust {
   display: grid;
   gap: 0.7rem;
@@ -2386,6 +2409,26 @@ h3 {
 .rich-text a {
   color: var(--purple-bright);
   text-decoration: underline;
+}
+
+.rich-text table {
+  width: 100%;
+  max-width: 36rem;
+  border-collapse: collapse;
+}
+
+.rich-text th,
+.rich-text td {
+  padding: 0.6rem 0.8rem 0.6rem 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.rich-text th {
+  width: 45%;
+  color: #fff;
+  font-weight: 700;
 }
 
 .related-products {

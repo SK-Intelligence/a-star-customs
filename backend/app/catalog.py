@@ -35,6 +35,7 @@ class CatalogProduct(BaseModel):
         "dashcams",
         "steering-wheels",
         "rims-calipers",
+        "digital-dashboards",
         "general",
     ]
     purchasable: bool

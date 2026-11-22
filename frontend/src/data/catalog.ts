@@ -65,6 +65,7 @@ export type ProductFamily =
   | "dashcams"
   | "steering-wheels"
   | "rims-calipers"
+  | "digital-dashboards"
   | "general";
 
 export const productFamilyLabels: Readonly<Record<ProductFamily, string>> = {
@@ -74,6 +75,7 @@ export const productFamilyLabels: Readonly<Record<ProductFamily, string>> = {
   dashcams: "Dashcams",
   "steering-wheels": "Steering wheels",
   "rims-calipers": "Wheels & calipers",
+  "digital-dashboards": "Digital dash",
   general: "A Star Customs",
 };
 
@@ -263,6 +265,21 @@ export function getProductAddOns(product: Product): readonly Product[] {
   );
 }
 
+/**
+ * The purchasable base listings whose product page offers this add-on, derived from
+ * `getProductAddOns` so the add-on page never points at a package that will not show it.
+ */
+export function getAddOnBaseProducts(addOn: Product): readonly Product[] {
+  if (addOn.kind !== "addon") return [];
+  return products.filter(
+    (candidate) =>
+      candidate.kind !== "addon" &&
+      candidate.purchasable &&
+      candidate.available &&
+      getProductAddOns(candidate).some((offered) => offered.id === addOn.id),
+  );
+}
+
 export const shopCategories: readonly ShopCategory[] = [
   { label: "Ambient lighting", matches: (product) => getProductFamily(product) === "ambient-lighting" },
   { label: "Starlights", matches: (product) => getProductFamily(product) === "starlights" },
@@ -270,6 +287,7 @@ export const shopCategories: readonly ShopCategory[] = [
   { label: "Dashcams", matches: (product) => getProductFamily(product) === "dashcams" },
   { label: "Steering wheels", matches: (product) => getProductFamily(product) === "steering-wheels" },
   { label: "Wheels & calipers", matches: (product) => getProductFamily(product) === "rims-calipers" },
+  { label: "Digital dash", matches: (product) => getProductFamily(product) === "digital-dashboards" },
   { label: "DIY kits", matches: (product) => product.collections.includes("DIY") },
 ] as const;
 

@@ -937,3 +937,61 @@ def test_checkout_accepts_the_800_piece_shooting_stars_package(
     assert response.status_code == 200
     line_items = captured["line_items"]  # type: ignore[assignment]
     assert [item["price_data"]["unit_amount"] for item in line_items] == [97499]
+
+
+DIGITAL_DASH_W205 = "prod_01M81KB3PFM685YD9B3FK4DAYW"
+DIGITAL_DASH_W205_INSTALLED = "variant_01M81KB3PH64NSFD2X92CGS86H"
+DIGITAL_DASH_AUDI_A3 = "prod_01M81KB3PVZFNE6BK8GN2CDFQT"
+DIGITAL_DASH_AUDI_A3_SUPPLY_ONLY = "variant_01M81KB3PW0SMZQJQKSKSH8Z4J"
+
+
+def test_digital_dashboards_load_with_supply_and_installed_prices() -> None:
+    dashboards = [
+        product
+        for product in load_catalog().values()
+        if product.family == "digital-dashboards"
+    ]
+
+    assert len(dashboards) == 7
+    for product in dashboards:
+        assert product.kind == "main"
+        assert product.purchasable and product.available
+        assert [(variant.title, variant.price) for variant in product.variants] == [
+            ("Supply only", 32499),
+            ("Supply + professional installation", 42499),
+        ]
+
+
+def test_checkout_charges_catalog_prices_for_digital_dashboards(
+    monkeypatch, tmp_path: Path
+) -> None:
+    captured: dict[str, object] = {}
+    stripe_settings(monkeypatch, tmp_path, captured)
+
+    response = client.post(
+        "/api/checkout/session",
+        json={
+            "items": [
+                {
+                    "productId": DIGITAL_DASH_W205,
+                    "variantId": DIGITAL_DASH_W205_INSTALLED,
+                    "quantity": 1,
+                },
+                {
+                    "productId": DIGITAL_DASH_AUDI_A3,
+                    "variantId": DIGITAL_DASH_AUDI_A3_SUPPLY_ONLY,
+                    "quantity": 1,
+                },
+            ]
+        },
+    )
+
+    assert response.status_code == 200
+    line_items = captured["line_items"]  # type: ignore[assignment]
+    assert [item["price_data"]["unit_amount"] for item in line_items] == [42499, 32499]
+    assert [
+        item["price_data"]["product_data"]["description"] for item in line_items
+    ] == [
+        "Supply + professional installation",
+        "Supply only",
+    ]

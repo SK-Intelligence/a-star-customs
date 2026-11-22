@@ -7,7 +7,7 @@ import { QuantityControl } from '../components/QuantityControl';
 import { ResponsiveImage } from '../components/ResponsiveImage';
 import { ReviewPanel } from '../components/ReviewPanel';
 import { Seo } from '../components/Seo';
-import { exclusiveSiblingDefinitions, formatPrice, getDiscoveryProducts, getProductAddOnOptions, getProductFamilyLabel, isAddOnProduct, productBySlug, type AddOnDefinition, type AvailableProductAddOnOption } from '../data/catalog';
+import { exclusiveSiblingDefinitions, formatPrice, getAddOnBaseProducts, getDiscoveryProducts, getProductAddOnOptions, getProductFamilyLabel, isAddOnProduct, productBySlug, shopCategories, type AddOnDefinition, type AvailableProductAddOnOption } from '../data/catalog';
 import { whatsappUrl } from '../data/site';
 import { useCartStore } from '../store/cart';
 import { NotFoundPage } from './NotFoundPage';
@@ -74,6 +74,10 @@ export function ProductPage() {
     () => (product ? getDiscoveryProducts(product) : []),
     [product],
   );
+  const addOnBaseProducts = useMemo(
+    () => (product ? getAddOnBaseProducts(product) : []),
+    [product],
+  );
 
   if (!product || !selectedVariant) return <NotFoundPage />;
 
@@ -87,6 +91,10 @@ export function ProductPage() {
     ? navigationState.returnLabel
     : 'shop';
   const discoveryNavigationState = { returnTo, returnLabel };
+  const familyCategory = shopCategories.find(({ label }) => label === getProductFamilyLabel(product));
+  const addOnFallbackHref = familyCategory
+    ? `/shop?category=${encodeURIComponent(familyCategory.label)}`
+    : '/shop';
 
   const activeImage = product.images[imageIndex] ?? product.images[0] ?? '/images/site/hero.jpg';
   const canBuy =
@@ -332,11 +340,37 @@ export function ProductPage() {
                   <Plus aria-hidden="true" />
                   <div>
                     <h2>Add this to a base package.</h2>
-                    <p>Choose any product not labelled “Add-On”, then select this extra from its product page.</p>
+                    {addOnBaseProducts.length === 1 ? (
+                      <p>This extra is bought with the {addOnBaseProducts[0]!.title}. Open the package, then select this extra under “Optional add-ons”.</p>
+                    ) : addOnBaseProducts.length > 1 ? (
+                      <p>This extra is bought with one of the packages below. Open a package, then select this extra under “Optional add-ons”.</p>
+                    ) : (
+                      <p>This extra is bought with a base package. Choose a package in this category, then select this extra under “Optional add-ons”.</p>
+                    )}
                   </div>
-                  <Link className="button button--primary" to="/shop">
-                    Browse base packages
-                  </Link>
+                  {addOnBaseProducts[0] ? (
+                    <Link className="button button--primary" to={`/${addOnBaseProducts[0].slug}`} state={discoveryNavigationState}>
+                      View {addOnBaseProducts[0].title} <ArrowRight aria-hidden="true" />
+                    </Link>
+                  ) : (
+                    <Link className="button button--primary" to={addOnFallbackHref}>
+                      Browse base packages
+                    </Link>
+                  )}
+                  {addOnBaseProducts.length > 1 ? (
+                    <div className="add-on-bases">
+                      <p>Also offered with</p>
+                      <ul>
+                        {addOnBaseProducts.slice(1).map((base) => (
+                          <li key={base.id}>
+                            <Link className="text-link" to={`/${base.slug}`} state={discoveryNavigationState}>
+                              {base.title} <ArrowRight aria-hidden="true" />
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
                 </div>
               ) : (
                 <div className="custom-quote-box">

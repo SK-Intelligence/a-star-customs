@@ -1234,5 +1234,199 @@
         "sha256": "305ac03d7c7fc33722f1ce174cfec0f52f995c739f3737b2925a9a4b5ff1f3d4"
       }
     ]
+  },
+  {
+    "productId": "prod_01M81KB3PFM685YD9B3FK4DAYW",
+    "mediaKey": "mercedes-c-class-glc-w205-digital-dashboard-cluster-2015-2018",
+    "reviewBasis": "Supplier photo of this vehicle's cluster from the client's digital dashboard listing document (2026-11)",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes-Benz C-Class W205 and GLC (2015–2018) with NTG5.0/5.1, right-hand drive; confirm your car's system before ordering.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class",
+        "GLC"
+      ],
+      "chassisCodes": [
+        "W205",
+        "X253"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/mercedes-c-class-glc-w205-digital-dashboard-cluster-2015-2018-01.jpg",
+        "sha256": "e1fd1fa914239e2250dc46ae6eaff3fd6ef37148458b5b313a092226675e37f1"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M81KB3PJW0EC5DHXBCAZ1CDS",
+    "mediaKey": "mercedes-c-class-w204-digital-dashboard-cluster-2008-2011",
+    "reviewBasis": "Supplier photo of this vehicle's cluster from the client's digital dashboard listing document (2026-11)",
+    "fitment": {
+      "mode": "specific",
+      "label": "Mercedes-Benz C-Class W204 (2008–2011) with NTG4.0, right-hand drive; confirm your car's system before ordering.",
+      "makes": [
+        "Mercedes-Benz"
+      ],
+      "models": [
+        "C-Class"
+      ],
+      "chassisCodes": [
+        "W204"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/mercedes-c-class-w204-digital-dashboard-cluster-2008-2011-01.jpg",
+        "sha256": "ce6d227d457b4a886f91bf7ed48a4d100b6b779138447ee4ef3128f3cee099c0"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M81KB3PN8SA0WH752FTPG1RS",
+    "mediaKey": "bmw-3-series-gt-4-series-nbt-digital-dashboard-cluster-2013-2019",
+    "reviewBasis": "Supplier photo of this vehicle's cluster from the client's digital dashboard listing document (2026-11)",
+    "fitment": {
+      "mode": "specific",
+      "label": "BMW 3 Series GT and 4 Series with NBT (2013–2019), right-hand drive, without head-up display; confirm your car's system before ordering.",
+      "makes": [
+        "BMW"
+      ],
+      "models": [
+        "3-Series",
+        "4-Series"
+      ],
+      "chassisCodes": [
+        "F34",
+        "F32",
+        "F33",
+        "F36"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/bmw-3-series-gt-4-series-nbt-digital-dashboard-cluster-2013-2019-01.jpg",
+        "sha256": "4aba621511384557258c87104cefe53d0bb2d589e30e5385521f6ef69d416182"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M81KB3PRV1GVEH729F9VAA3X",
+    "mediaKey": "bmw-5-6-7-series-x3-x4-x5-x6-cic-nbt-digital-dashboard-cluster-without-hud-2010-2017",
+    "reviewBasis": "Supplier photo of this vehicle's cluster from the client's digital dashboard listing document (2026-11)",
+    "fitment": {
+      "mode": "specific",
+      "label": "BMW 5, 6 and 7 Series, X3, X4, X5 and X6 with CIC/NBT (2010–2017), right-hand drive, without head-up display; check the chassis codes below before ordering.",
+      "makes": [
+        "BMW"
+      ],
+      "models": [
+        "5-Series",
+        "6-Series",
+        "7-Series",
+        "X3",
+        "X4",
+        "X5",
+        "X6"
+      ],
+      "chassisCodes": [
+        "F10",
+        "F11",
+        "F18",
+        "F07",
+        "F12",
+        "F13",
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F25",
+        "F26",
+        "F15",
+        "F16"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/bmw-5-6-7-series-x3-x4-x5-x6-cic-nbt-digital-dashboard-cluster-without-hud-2010-2017-01.jpg",
+        "sha256": "f07f01bfecc582670cd2ef7545e9cebf7f091ef0a4dffd5d71f10ff118e2f9c7"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M81KB3PVZFNE6BK8GN2CDFQT",
+    "mediaKey": "audi-a3-digital-dashboard-cluster-2014-2020",
+    "reviewBasis": "Supplier photo of this vehicle's cluster from the client's digital dashboard listing document (2026-11); shows the cluster fitted in a car",
+    "fitment": {
+      "mode": "specific",
+      "label": "Audi A3 8V (2014–2020), right-hand drive; confirm model year and trim before ordering.",
+      "makes": [
+        "Audi"
+      ],
+      "models": [
+        "A3"
+      ],
+      "chassisCodes": [
+        "8V"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/audi-a3-digital-dashboard-cluster-2014-2020-01.jpg",
+        "sha256": "74980921193f065edb578665f154a35a775dd80e1c7a4de5f553e051cf320ede"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M81KB3PY5YSCC7HWEK882GDX",
+    "mediaKey": "volkswagen-golf-mk6-digital-dashboard-cluster-2008-2014",
+    "reviewBasis": "Supplier photo of this vehicle's cluster from the client's digital dashboard listing document (2026-11)",
+    "fitment": {
+      "mode": "specific",
+      "label": "Volkswagen Golf Mk6 (2008–2014), right-hand drive; confirm trim before ordering.",
+      "makes": [
+        "Volkswagen"
+      ],
+      "models": [
+        "Golf"
+      ],
+      "chassisCodes": [
+        "Mk6"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/volkswagen-golf-mk6-digital-dashboard-cluster-2008-2014-01.jpg",
+        "sha256": "0c6bcf277835bb57921cecbb2b757fa01e78a2fa2acf5e58275cda0f8a5d8b54"
+      }
+    ]
+  },
+  {
+    "productId": "prod_01M81KB3Q1NQN1ZGXEMK262Q9R",
+    "mediaKey": "volkswagen-golf-mk7-mk75-digital-dashboard-cluster-2013-2020",
+    "reviewBasis": "Supplier photo of this vehicle's cluster from the client's digital dashboard listing document (2026-11)",
+    "fitment": {
+      "mode": "specific",
+      "label": "Volkswagen Golf Mk7/Mk7.5 (2013–2020), right-hand drive; confirm trim before ordering.",
+      "makes": [
+        "Volkswagen"
+      ],
+      "models": [
+        "Golf"
+      ],
+      "chassisCodes": [
+        "Mk7",
+        "Mk7.5"
+      ]
+    },
+    "images": [
+      {
+        "path": "/images/products/volkswagen-golf-mk7-mk75-digital-dashboard-cluster-2013-2020-01.jpg",
+        "sha256": "878377a4ce2801387ebcd80ea2c6611a5aa0333e066b3b57c77c7bf33a55d967"
+      }
+    ]
   }
 ]

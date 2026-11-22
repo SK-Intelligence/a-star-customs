@@ -415,7 +415,16 @@ test('products labelled add-on can only be bought through a base package', async
     page.getByRole('heading', { name: 'Add this to a base package.' }),
   ).toBeVisible();
   await expect(page.getByRole('button', { name: /Add to bag/ })).toHaveCount(0);
-  await expect(page.getByRole('link', { name: 'Browse base packages' })).toBeVisible();
+  // Offered on four packages, in shop order: the first is the main link, the rest are listed under it.
+  await expect(
+    page.getByRole('link', { name: 'View Ambient Lighting (Universal)' }),
+  ).toHaveAttribute('href', '/luxury-car-interior');
+  const otherBases = page.locator('.add-on-bases').getByRole('link');
+  await expect(otherBases).toHaveText([
+    'BMW 4 Series F32/F33 & 3 Series GT F34 OEM Ambient Package',
+    'Ambient Lighting Package VW GOLF Mk7/Mk7.5',
+    'Ambient Lighting Upgrade Audi 2020+',
+  ]);
   await expect(page.getByText('If you’re interested')).toHaveCount(0);
 
   await page.goto('/shop');
@@ -423,6 +432,35 @@ test('products labelled add-on can only be bought through a base package', async
   const productCard = page.getByRole('article').filter({ hasText: '4x Speaker Lights' });
   await expect(productCard.getByRole('button', { name: /Add .* to bag/ })).toHaveCount(0);
   await expect(productCard.getByRole('link', { name: /View add-on details/ })).toBeVisible();
+});
+
+test('a vehicle-specific add-on links straight to the package that offers it', async ({ page }) => {
+  await page.goto('/mercedes-c-class-w205-c205-oem-lighting-dashboard-add-on');
+
+  await expect(page.getByText('This extra is bought with the Mercedes C-Class W205/C205 OEM Ambient Lighting.')).toBeVisible();
+  await expect(page.locator('.add-on-bases')).toHaveCount(0);
+  await page.getByRole('link', { name: 'View Mercedes C-Class W205/C205 OEM Ambient Lighting' }).click();
+
+  await expect(page).toHaveURL(/\/mercedes-c-class-oem-ambient-lighting$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Mercedes C-Class W205/C205 OEM Ambient Lighting');
+  await expect(page.getByRole('button', { name: /Dashboard/ }).first()).toBeVisible();
+});
+
+test('digital dash category lists the seven clusters, each with supply and fitted prices', async ({ page }) => {
+  await page.goto('/shop?category=Digital%20dash');
+
+  await expect(page.getByRole('heading', { name: '7 products' })).toBeVisible();
+  await page.getByRole('link', { name: 'Audi A3 2014–2020 Digital Dashboard Cluster', exact: true }).click();
+
+  const buybox = page.locator('.product-buybox');
+  await expect(buybox.locator('.product-buybox__price')).toHaveText('£324.99');
+  await buybox.getByRole('button', { name: 'Supply + professional installation £424.99' }).click();
+  await expect(buybox.locator('.product-buybox__price')).toHaveText('£424.99');
+  await buybox.locator('.buy-actions').getByRole('button', { name: 'Add to bag' }).click();
+
+  const drawer = page.getByRole('dialog', { name: 'Shopping bag' });
+  await expect(drawer.getByText('Supply + professional installation')).toBeVisible();
+  await expect(drawer.getByText('£424.99').first()).toBeVisible();
 });
 
 test('panoramic lights do not offer ambient-lighting-only extras', async ({ page }) => {
