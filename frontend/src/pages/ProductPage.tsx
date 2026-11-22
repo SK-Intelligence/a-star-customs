@@ -1,6 +1,7 @@
 import { ArrowLeft, ArrowRight, Check, MessageCircle, Plus, ShieldCheck, ShoppingBag, Sparkles, Wrench } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
+import { images } from 'virtual:responsive-images';
 import { ImageLightbox } from '../components/ImageLightbox';
 import { QuantityControl } from '../components/QuantityControl';
 import { ResponsiveImage } from '../components/ResponsiveImage';
@@ -10,6 +11,23 @@ import { exclusiveSiblingDefinitions, formatPrice, getAddOnBaseProducts, getDisc
 import { whatsappUrl } from '../data/site';
 import { useCartStore } from '../store/cart';
 import { NotFoundPage } from './NotFoundPage';
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+/**
+ * The main gallery box takes the active photo's own shape, within bounds: no narrower than 3:4 on
+ * phones (square above 520px, so a portrait photo does not push the buy box far down) and no wider
+ * than 16:9. A wide dashboard photo then gets a wide box instead of thin bands in a tall one. The
+ * ratio comes from the build-time image data, so the box is sized before the photo loads.
+ */
+function galleryRatioStyle(src: string): CSSProperties {
+  const [width = 3, height = 4] = Object.hasOwn(images, src) ? images[src]! : [];
+  const ratio = width / height;
+  return {
+    '--gallery-ratio': clamp(ratio, 3 / 4, 16 / 9).toFixed(4),
+    '--gallery-ratio-wide': clamp(ratio, 1, 16 / 9).toFixed(4),
+  } as CSSProperties;
+}
 
 /** Discovery tiles: the whole photo, contained in a 3:4 box as wide as the 76px column (96px at 520px and below). */
 const DISCOVERY_SIZES = '(max-width: 520px) 96px, 76px';
@@ -136,7 +154,12 @@ export function ProductPage() {
           <Link className="back-link" to={returnTo}><ArrowLeft aria-hidden="true" /> Back to {returnLabel}</Link>
           <div className="product-detail">
             <div className="product-gallery">
-              <button className="product-gallery__main" type="button" onClick={() => setLightboxIndex(imageIndex)}>
+              <button
+                className="product-gallery__main"
+                type="button"
+                style={galleryRatioStyle(activeImage)}
+                onClick={() => setLightboxIndex(imageIndex)}
+              >
                 {product.ribbonText ? <span className="product-ribbon">{product.ribbonText}</span> : null}
                 <ResponsiveImage
                   src={activeImage}
