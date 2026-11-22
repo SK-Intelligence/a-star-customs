@@ -65,6 +65,7 @@ export type ProductFamily =
   | "dashcams"
   | "steering-wheels"
   | "rims-calipers"
+  | "digital-dashboards"
   | "general";
 
 export const productFamilyLabels: Readonly<Record<ProductFamily, string>> = {
@@ -74,6 +75,7 @@ export const productFamilyLabels: Readonly<Record<ProductFamily, string>> = {
   dashcams: "Dashcams",
   "steering-wheels": "Steering wheels",
   "rims-calipers": "Wheels & calipers",
+  "digital-dashboards": "Digital dash",
   general: "A Star Customs",
 };
 
@@ -270,6 +272,7 @@ export const shopCategories: readonly ShopCategory[] = [
   { label: "Dashcams", matches: (product) => getProductFamily(product) === "dashcams" },
   { label: "Steering wheels", matches: (product) => getProductFamily(product) === "steering-wheels" },
   { label: "Wheels & calipers", matches: (product) => getProductFamily(product) === "rims-calipers" },
+  { label: "Digital dash", matches: (product) => getProductFamily(product) === "digital-dashboards" },
   { label: "DIY kits", matches: (product) => product.collections.includes("DIY") },
 ] as const;
 

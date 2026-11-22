@@ -20,6 +20,7 @@ ProductFamily = Literal[
     "dashcams",
     "steering-wheels",
     "rims-calipers",
+    "digital-dashboards",
     "general",
 ]
 

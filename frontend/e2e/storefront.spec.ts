@@ -425,6 +425,23 @@ test('products labelled add-on can only be bought through a base package', async
   await expect(productCard.getByRole('link', { name: /View add-on details/ })).toBeVisible();
 });
 
+test('digital dash category lists the seven clusters, each with supply and fitted prices', async ({ page }) => {
+  await page.goto('/shop?category=Digital%20dash');
+
+  await expect(page.getByRole('heading', { name: '7 products' })).toBeVisible();
+  await page.getByRole('link', { name: 'Audi A3 2014–2020 Digital Dashboard Cluster', exact: true }).click();
+
+  const buybox = page.locator('.product-buybox');
+  await expect(buybox.locator('.product-buybox__price')).toHaveText('£324.99');
+  await buybox.getByRole('button', { name: 'Supply + professional installation £424.99' }).click();
+  await expect(buybox.locator('.product-buybox__price')).toHaveText('£424.99');
+  await buybox.locator('.buy-actions').getByRole('button', { name: 'Add to bag' }).click();
+
+  const drawer = page.getByRole('dialog', { name: 'Shopping bag' });
+  await expect(drawer.getByText('Supply + professional installation')).toBeVisible();
+  await expect(drawer.getByText('£424.99').first()).toBeVisible();
+});
+
 test('panoramic lights do not offer ambient-lighting-only extras', async ({ page }) => {
   await page.goto('/panoramic-lights-');
 
