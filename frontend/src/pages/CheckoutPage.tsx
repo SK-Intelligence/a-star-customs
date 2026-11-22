@@ -144,8 +144,8 @@ export function CheckoutPage() {
                     <ResponsiveImage
                       src={product.images[0] ?? '/images/site/hero.jpg'}
                       alt={product.title}
-                      sizes="(max-width: 520px) 88px, 130px"
-                      coverAspect={88 / 100}
+                      sizes="(max-width: 520px) 88px, 120px"
+                      matte
                       loading="eager"
                     />
                     <div>

@@ -41,7 +41,7 @@ export function ProductCard({ product, returnTo, returnLabel, fullWidth = false 
           src={product.images[0] ?? '/images/site/hero.jpg'}
           alt={product.title}
           sizes={fullWidth ? FULL_WIDTH_CARD_SIZES : CARD_SIZES}
-          coverAspect={1 / 1.05}
+          matte
         />
         <span className="product-card__view">
           View details <ArrowRight aria-hidden="true" />

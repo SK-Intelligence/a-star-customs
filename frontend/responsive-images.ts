@@ -42,6 +42,8 @@ export interface SourceImage {
   file: string;
   width: number;
   height: number;
+  /** The photo's backdrop colour as #rrggbb, or '' when its edges are a scene, not a backdrop (see edgeColour). */
+  matte: string;
 }
 
 export interface ImageScan {
@@ -80,6 +82,41 @@ export async function findReferences(roots: readonly string[]): Promise<Set<stri
   return references;
 }
 
+const EDGE_GRID = 24;
+/** A ring pixel counts as the background when every channel is this close to the median. */
+const EDGE_TOLERANCE = 24;
+/** Share of the ring that must match: a studio backdrop (a product may touch an edge or two), not a scene. */
+const EDGE_UNIFORM_SHARE = 0.6;
+
+/**
+ * The photo's backdrop colour as #rrggbb, or '' when it has none. Takes the per-channel median of
+ * the outermost pixels of a downscaled copy; a product shot on white comes out white and a
+ * starlight kit on black near-black, so the photo contained on that colour reads as one surface.
+ * A scene that runs off the edge (sky above, dashboard below) has no single backdrop: a flat average
+ * of it would look like a coloured frame, so it gets '' and sits on the page's dark surface.
+ * Transparency is flattened onto black, the ink.
+ */
+export async function edgeColour(file: string): Promise<string> {
+  const { data } = await sharp(file, { autoOrient: true })
+    .flatten({ background: '#000000' })
+    .resize(EDGE_GRID, EDGE_GRID, { fit: 'fill' })
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const ring: [number, number, number][] = [];
+  for (let y = 0; y < EDGE_GRID; y += 1) {
+    for (let x = 0; x < EDGE_GRID; x += 1) {
+      if (x !== 0 && y !== 0 && x !== EDGE_GRID - 1 && y !== EDGE_GRID - 1) continue;
+      const offset = (y * EDGE_GRID + x) * 3;
+      ring.push([data[offset]!, data[offset + 1]!, data[offset + 2]!]);
+    }
+  }
+  const median = [0, 1, 2].map((channel) => ring.map((pixel) => pixel[channel]!).sort((a, b) => a - b)[ring.length >> 1]!);
+  const matching = ring.filter((pixel) => pixel.every((value, channel) => Math.abs(value - median[channel]!) <= EDGE_TOLERANCE));
+  if (matching.length < ring.length * EDGE_UNIFORM_SHARE) return '';
+  return `#${median.map((value) => value.toString(16).padStart(2, '0')).join('')}`;
+}
+
 export async function scanImages(publicDir: string, references: ReadonlySet<string>): Promise<ImageScan> {
   const files = (await listFiles(path.join(publicDir, 'images'))).filter((file) => SOURCE_PATTERN.test(file));
   const images = new Map<string, SourceImage>();
@@ -95,7 +132,7 @@ export async function scanImages(publicDir: string, references: ReadonlySet<stri
     }
     try {
       const { width, height } = (await sharp(file).metadata()).autoOrient;
-      images.set(src, { src, file, width, height });
+      images.set(src, { src, file, width, height, matte: await edgeColour(file) });
     } catch (error) {
       throw withPath(file, error);
     }
@@ -216,7 +253,7 @@ export function createVariantMiddleware(getImages: () => Promise<Map<string, Sou
 /** Source of `virtual:responsive-images`. */
 export function virtualModuleSource(images: Iterable<SourceImage>, namesModule: string): string {
   const entries: Record<string, ImageEntry> = {};
-  for (const image of images) entries[image.src] = [image.width, image.height, widthsFor(image.width)];
+  for (const image of images) entries[image.src] = [image.width, image.height, widthsFor(image.width), image.matte];
   return [
     `export { srcSetFor } from ${JSON.stringify(namesModule)};`,
     `export const images = ${JSON.stringify(entries)};`,
